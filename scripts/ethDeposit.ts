@@ -13,7 +13,6 @@ if (!privateKey || !L2_RPC_URL || !L3_RPC_URL) {
 
 // Generating providers from RPCs
 const l2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL);
-const l3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL);
 
 // Creating the wallet and signer
 const l2Signer = new ethers.Wallet(privateKey).connect(l2Provider);
@@ -25,8 +24,6 @@ const inboxAddress = config.inboxAddress;
 const depositEthInterface = new ethers.utils.Interface([
   "function depositEth() public payable"
 ]);
-// Set the amount to be deposited in L2 (in wei)
-const ethToL2DepositAmount = ethers.utils.parseEther('0.01');
 
 async function main() {
   // create contract instance
