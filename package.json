@@ -6,6 +6,7 @@
     "@types/dotenv": "^8.2.0",
     "ethers": "^5.7.2",
     "hardhat": "^2.14.1",
-    "hardhat-ethers": "^1.0.1"
+    "hardhat-ethers": "^1.0.1",
+    "typescript": "^5.1.3"
   }
 }
