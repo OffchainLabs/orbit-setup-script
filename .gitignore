@@ -3,3 +3,4 @@ node_modules
 config.json
 cache
 artifacts
+config/l3Config.json
