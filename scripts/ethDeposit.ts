@@ -31,7 +31,7 @@ async function main() {
 
   // deposit 0.01 ETH
   const tx = await contract.depositEth({
-      value: ethers.utils.parseEther('0.01')
+      value: ethers.utils.parseEther('1')
   });
 
   console.log('Transaction hash: ', tx.hash);

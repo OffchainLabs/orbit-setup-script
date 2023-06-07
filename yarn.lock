@@ -5735,7 +5735,7 @@
   "resolved" "https://registry.npmjs.org/ts-essentials/-/ts-essentials-7.0.3.tgz"
   "version" "7.0.3"
 
-"ts-node@*", "ts-node@>=8.0.0":
+"ts-node@*", "ts-node@^10.9.1", "ts-node@>=8.0.0":
   "integrity" "sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw=="
   "resolved" "https://registry.npmjs.org/ts-node/-/ts-node-10.9.1.tgz"
   "version" "10.9.1"

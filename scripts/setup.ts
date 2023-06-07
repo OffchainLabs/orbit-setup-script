@@ -6,6 +6,11 @@ import { execSync } from 'child_process';
 dotenv.config();
 import fs from 'fs';
 
+// Delay function
+function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
 async function main() {
     // Read the environment variables
     const privateKey = process.env.PRIVATE_KEY;
@@ -56,19 +61,21 @@ async function main() {
     ////////////////////////////////
     /// ETH deposit to L3 /////////
     //////////////////////////////        
-        console.log("Running ethDeposit.ts...");
+        console.log("Running ethDeposit.ts... 💰💰💰💰💰💰");
         execSync('ts-node scripts/ethDeposit.ts', { stdio: 'inherit' });
-    
+        // Waiting for 10 minutest to be sure that ETH deposited is received on L3
+        console.log("Waiting for 1 minutest to be sure that ETH deposited is received on L3 ⏰⏰⏰⏰⏰⏰");
+        await delay(60 * 1000);
     ////////////////////////////////
     /// Token Bridge Deployment ///
     //////////////////////////////
-        console.log("Running tokenBridgeDeployment.ts...");
+        console.log("Running tokenBridgeDeployment.ts...🌉🌉🌉🌉🌉");
         execSync('ts-node scripts/tokenBridgeDeployment.ts', { stdio: 'inherit' });
     
     ////////////////////////////////
     /// L3 Chain Configuration ///
     //////////////////////////////
-        console.log("Running l3Configuration.ts...");
+        console.log("Running l3Configuration.ts...📝📝📝📝📝");
         execSync('ts-node scripts/l3Configuration.ts', { stdio: 'inherit' });
     } catch (error) {
         console.error('Error occurred:', error);
