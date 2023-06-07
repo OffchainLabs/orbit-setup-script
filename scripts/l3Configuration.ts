@@ -17,7 +17,6 @@ async function main() {
     }
 
     // Generating providers from RPCs
-   const L2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL);
    const L3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL);
 
    // Creating the wallet and signer

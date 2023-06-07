@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import { L3Config } from "./l3ConfigType";
 import dotenv from 'dotenv';
+import { execSync } from 'child_process';
 
 dotenv.config();
 import fs from 'fs';
@@ -26,8 +27,10 @@ async function main() {
     // Creating the signer
     const signer = new ethers.Wallet(privateKey).connect(L2Provider);
     
-    // Funding staker and batch-poster wallets:
-    // Transfer 1 Ether to the batchPoster address
+    ////////////////////////////////////////////////
+    /// Funding batch-poster and staker address ///
+    //////////////////////////////////////////////
+
     const tx1 = await signer.sendTransaction({
         to: config.batchPoster,
         value: ethers.utils.parseEther("0.01")
@@ -47,15 +50,29 @@ async function main() {
     const receipt2 = await tx2.wait();
     console.log(`Transaction was mined in block ${receipt2.blockNumber}`);
 
+
+    try {
+
+    ////////////////////////////////
+    /// ETH deposit to L3 /////////
+    //////////////////////////////        
+        console.log("Running ethDeposit.ts...");
+        execSync('ts-node scripts/ethDeposit.ts', { stdio: 'inherit' });
+    
     ////////////////////////////////
     /// Token Bridge Deployment ///
     //////////////////////////////
-
-
+        console.log("Running tokenBridgeDeployment.ts...");
+        execSync('ts-node scripts/tokenBridgeDeployment.ts', { stdio: 'inherit' });
+    
     ////////////////////////////////
     /// L3 Chain Configuration ///
     //////////////////////////////
-
+        console.log("Running l3Configuration.ts...");
+        execSync('ts-node scripts/l3Configuration.ts', { stdio: 'inherit' });
+    } catch (error) {
+        console.error('Error occurred:', error);
+    }
     }
 
 // Run the script
