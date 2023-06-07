@@ -22,29 +22,25 @@ const l2Signer = new ethers.Wallet(privateKey).connect(l2Provider);
 const configRaw = fs.readFileSync('./config/config.json', 'utf-8');
 const config = JSON.parse(configRaw);
 const inboxAddress = config.inboxAddress;
-const inboxABI = require('../contracts/factories/Inbox__factory').Inbox__factory.abi;
-
+const depositEthInterface = new ethers.utils.Interface([
+  "function depositEth() public payable"
+]);
 // Set the amount to be deposited in L2 (in wei)
 const ethToL2DepositAmount = ethers.utils.parseEther('0.01');
 
-const main = async () => {
-    // Create instance of the Inbox contract
-    const inboxContract = new ethers.Contract("0x350781eD2997583e6E298F4630D8d975bB46Ea2B", inboxABI, l2Signer);
+async function main() {
+  // create contract instance
+  const contract = new ethers.Contract(inboxAddress, depositEthInterface, l2Signer);
 
-    // Define transaction options
-    const txOptions = {
-      value: ethToL2DepositAmount, // Include the deposit amount in the transaction
-    };
-    console.log(inboxContract.depositEth);
-    // Call the depositEth function
-    const depositTx = await inboxContract.functions.depositEth(txOptions);
+  // deposit 0.01 ETH
+  const tx = await contract.depositEth({
+      value: ethers.utils.parseEther('0.01')
+  });
 
-    // Wait for the transaction to be mined
-    const receipt = await depositTx.wait();
-
-    // Log the transaction receipt
-    console.log(`Transaction mined! ${receipt.transactionHash}`);
-};
+  console.log('Transaction hash: ', tx.hash);
+  await tx.wait();
+  console.log('Transaction has been mined');
+}
 
 main()
   .then(() => process.exit(0))
