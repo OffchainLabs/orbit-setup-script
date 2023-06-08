@@ -57,23 +57,35 @@ async function main() {
 
     try {
 
-    ////////////////////////////////
-    /// ETH deposit to L3 /////////
-    //////////////////////////////        
+        ////////////////////////////////
+        /// ETH deposit to L3 /////////
+        //////////////////////////////        
         console.log("Running ethDeposit.ts... 💰💰💰💰💰💰");
+        let oldBalance = await L3Provider.getBalance(config.chainOwner);
+        console.log(oldBalance)
         execSync('ts-node scripts/ethDeposit.ts', { stdio: 'inherit' });
         // Waiting for 1 minute to be sure that ETH deposited is received on L3
-        console.log("Waiting for 1 minute to be sure that ETH deposited is received on L3 ⏰⏰⏰⏰⏰⏰");
-        await delay(60 * 1000);
-    ////////////////////////////////
-    /// Token Bridge Deployment ///
-    //////////////////////////////
+        // Repeatedly check the balance until it changes by 1 Ether
+        while (true) {
+            let newBalance = await L3Provider.getBalance(config.chainOwner);
+            console.log(newBalance)
+            if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther("1"))) {
+                console.log("Balance increased by 1 Ether.");
+                break;
+            }
+            console.log("Balance not changed yet. Waiting for another 30 seconds ⏰⏰⏰⏰⏰⏰");
+            await delay(30 * 1000);
+        }
+
+        ////////////////////////////////
+        /// Token Bridge Deployment ///
+        //////////////////////////////
         console.log("Running tokenBridgeDeployment.ts...🌉🌉🌉🌉🌉");
         execSync('ts-node scripts/tokenBridgeDeployment.ts', { stdio: 'inherit' });
     
-    ////////////////////////////////
-    /// L3 Chain Configuration ///
-    //////////////////////////////
+        ////////////////////////////////
+        /// L3 Chain Configuration ///
+        //////////////////////////////
         console.log("Running l3Configuration.ts...📝📝📝📝📝");
         execSync('ts-node scripts/l3Configuration.ts', { stdio: 'inherit' });
     } catch (error) {
