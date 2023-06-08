@@ -35,7 +35,7 @@ async function main() {
     ////////////////////////////////////////////////
     /// Funding batch-poster and staker address ///
     //////////////////////////////////////////////
-
+    console.log("Funding batch-poster and staker addresses")
     const tx1 = await signer.sendTransaction({
         to: config.batchPoster,
         value: ethers.utils.parseEther("0.01")
@@ -45,7 +45,6 @@ async function main() {
     const receipt1 = await tx1.wait();
     console.log(`Transaction was mined in block ${receipt1.blockNumber}`);
 
-    // Transfer 1 Ether to the staker address
     const tx2 = await signer.sendTransaction({
         to: config.staker,
         value: ethers.utils.parseEther("0.01")
