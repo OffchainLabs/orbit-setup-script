@@ -62,8 +62,8 @@ async function main() {
     //////////////////////////////        
         console.log("Running ethDeposit.ts... 💰💰💰💰💰💰");
         execSync('ts-node scripts/ethDeposit.ts', { stdio: 'inherit' });
-        // Waiting for 10 minutest to be sure that ETH deposited is received on L3
-        console.log("Waiting for 1 minutest to be sure that ETH deposited is received on L3 ⏰⏰⏰⏰⏰⏰");
+        // Waiting for 1 minute to be sure that ETH deposited is received on L3
+        console.log("Waiting for 1 minute to be sure that ETH deposited is received on L3 ⏰⏰⏰⏰⏰⏰");
         await delay(60 * 1000);
     ////////////////////////////////
     /// Token Bridge Deployment ///
