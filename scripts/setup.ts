@@ -38,7 +38,7 @@ async function main() {
     console.log("Funding batch-poster and staker addresses")
     const tx1 = await signer.sendTransaction({
         to: config.batchPoster,
-        value: ethers.utils.parseEther("0.01")
+        value: ethers.utils.parseEther("0.5")
     });
 
     console.log(`Transaction hash: ${tx1.hash}`);
@@ -47,7 +47,7 @@ async function main() {
 
     const tx2 = await signer.sendTransaction({
         to: config.staker,
-        value: ethers.utils.parseEther("0.01")
+        value: ethers.utils.parseEther("0.5")
     });
 
     console.log(`Transaction hash: ${tx2.hash}`);

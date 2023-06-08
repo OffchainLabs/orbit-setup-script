@@ -5,3 +5,6 @@ cache
 artifacts
 config/l3Config.json
 config/.DS_Store
+config/orbitSetupScriptConfig.json
+.DS_Store
+tokenAddresses.json

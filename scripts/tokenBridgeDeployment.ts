@@ -39,15 +39,12 @@ const deployBehindProxy = async <
     .connect(deployer)
     .deploy(instance.address, admin.address, dataToCallProxy)
   await proxy.deployed()
-  console.log(factory['contractName'], proxy.address)
-
   return instance.attach(proxy.address) as ReturnType<T['deploy']>;
 }
 
 export const deployErc20l2 = async (deployer: Signer) => {
   const proxyAdmin = await new ProxyAdmin__factory().connect(deployer).deploy()
   await proxyAdmin.deployed()
-  console.log('proxyAdmin', proxyAdmin.address)
 
   const router = await deployBehindProxy(
     deployer,
@@ -81,11 +78,8 @@ export const deployErc20l2 = async (deployer: Signer) => {
     .connect(deployer)
     .deploy('WETH', 'WETH')
   await weth.deployed()
-  console.log('weth', weth.address)
-
   const multicall = await new Multicall2__factory().connect(deployer).deploy()
   await multicall.deployed()
-  console.log('multicall', weth.address)
 
   return {
     proxyAdmin,
@@ -101,8 +95,6 @@ export const deployErc20l2 = async (deployer: Signer) => {
 export const deployErc20L3 = async (deployer: Signer) => {
   const proxyAdmin = await new ProxyAdmin__factory().connect(deployer).deploy()
   await proxyAdmin.deployed()
-  console.log('proxyAdmin', proxyAdmin.address)
-
   const router = await deployBehindProxy(
     deployer,
     new L2GatewayRouter__factory(),
@@ -151,14 +143,10 @@ export const deployErc20L3 = async (deployer: Signer) => {
     new AeWETH__factory(),
     proxyAdmin
   )
-  console.log('weth', weth.address)
-
   const multicall = await new ArbMulticall2__factory()
     .connect(deployer)
     .deploy()
   await multicall.deployed()
-  console.log('multicall', multicall.address)
-
   return {
     proxyAdmin,
     router,
@@ -178,6 +166,7 @@ export const deployErc20AndInit = async (
   inboxAddress: string
 ) => {
   console.log('deploying l2')
+  console.log("it may take a minute ⏰")
   const l2 = await deployErc20l2(l2Signer)
 
   console.log('deploying L3')
@@ -218,7 +207,6 @@ export const deployErc20AndInit = async (
   ).wait()
 
   console.log('initialising l2')
-  console.log(inboxAddress);
   await (
     await l2.router.initialize(
       await l2Signer.getAddress(),
@@ -303,6 +291,30 @@ async function main() {
     console.log("L3 standardGateway address: ",l3.standardGateway.address)
     console.log("L3 weth address: ",l3.weth.address)
     console.log("L3 wethGateway address: ",l3.wethGateway.address)
+
+    let contractAddresses = {
+      l2Contracts: {
+        customGateway: l2.customGateway.address,
+        multicall: l2.multicall.address,
+        proxyAdmin: l2.proxyAdmin.address,
+        router: l2.router.address,
+        standardGateway: l2.standardGateway.address,
+        weth: l2.weth.address,
+        wethGateway: l2.wethGateway.address
+      },
+      l3Contracts: {
+        customGateway: l3.customGateway.address,
+        multicall: l3.multicall.address,
+        proxyAdmin: l3.proxyAdmin.address,
+        router: l3.router.address,
+        standardGateway: l3.standardGateway.address,
+        weth: l3.weth.address,
+        wethGateway: l3.wethGateway.address
+      }
+    };
+    
+    fs.writeFileSync('tokenAddresses.json', JSON.stringify(contractAddresses, null, 2));
+    
     console.log("Congrats 🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉");
   }
   
