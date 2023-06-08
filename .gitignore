@@ -4,3 +4,4 @@ config.json
 cache
 artifacts
 config/l3Config.json
+config/.DS_Store

@@ -18,7 +18,7 @@ const l2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL);
 const l2Signer = new ethers.Wallet(privateKey).connect(l2Provider);
 
 // Read the JSON configuration
-const configRaw = fs.readFileSync('./config/l3Config.json', 'utf-8');
+const configRaw = fs.readFileSync('./config/orbitSetupScriptConfig.json', 'utf-8');
 const config = JSON.parse(configRaw);
 const inboxAddress = config.inboxAddress;
 const depositEthInterface = new ethers.utils.Interface([

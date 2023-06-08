@@ -22,7 +22,7 @@ async function main() {
     }
 
     // Read the JSON configuration
-    const configRaw = fs.readFileSync('./config/l3Config.json', 'utf-8');
+    const configRaw = fs.readFileSync('./config/orbitSetupScriptConfig.json', 'utf-8');
     const config: L3Config = JSON.parse(configRaw);
 
     // Generating providers from RPCs
