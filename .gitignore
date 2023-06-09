@@ -1,10 +1,8 @@
 node_modules
 .env
-config.json
 cache
 artifacts
-config/l3Config.json
-config/.DS_Store
-config/orbitSetupScriptConfig.json
+config/*
 .DS_Store
 tokenAddresses.json
+/chain/*
