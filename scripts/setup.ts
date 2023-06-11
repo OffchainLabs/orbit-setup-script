@@ -1,9 +1,6 @@
 import { ethers } from "ethers";
 import { L3Config } from "./l3ConfigType";
-import dotenv from 'dotenv';
 import { execSync } from 'child_process';
-
-dotenv.config();
 import fs from 'fs';
 
 // Delay function
@@ -63,7 +60,7 @@ async function main() {
         console.log("Running ethDeposit.ts... 💰💰💰💰💰💰");
         let oldBalance = await L3Provider.getBalance(config.chainOwner);
         console.log(oldBalance)
-        execSync('ts-node scripts/ethDeposit.ts', { stdio: 'inherit' });
+        execSync(`ts-node scripts/ethDeposit.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
         // Waiting for 1 minute to be sure that ETH deposited is received on L3
         // Repeatedly check the balance until it changes by 1 Ether
         while (true) {
@@ -81,13 +78,13 @@ async function main() {
         /// Token Bridge Deployment ///
         //////////////////////////////
         console.log("Running tokenBridgeDeployment.ts...🌉🌉🌉🌉🌉");
-        execSync('ts-node scripts/tokenBridgeDeployment.ts', { stdio: 'inherit' });
+        execSync(`ts-node scripts/tokenBridgeDeployment.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
     
         ////////////////////////////////
         /// L3 Chain Configuration ///
         //////////////////////////////
         console.log("Running l3Configuration.ts...📝📝📝📝📝");
-        execSync('ts-node scripts/l3Configuration.ts', { stdio: 'inherit' });
+        execSync(`ts-node scripts/l3Configuration.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
     } catch (error) {
         console.error('Error occurred:', error);
     }

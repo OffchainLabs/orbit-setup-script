@@ -20,8 +20,6 @@ import { Multicall2__factory } from '../contracts/factories/Multicall2__factory'
 import { ArbMulticall2__factory } from '../contracts/factories/ArbMulticall2__factory'
 
 import { L3Config } from "./l3ConfigType";
-import dotenv from 'dotenv';
-dotenv.config();
 import fs from 'fs';
 
 const deployBehindProxy = async <
@@ -249,9 +247,9 @@ export const deployErc20AndInit = async (
 
 async function main() {
     // Read the environment variables
-    const privateKey = process.env.PRIVATE_KEY;
-    const L2_RPC_URL = process.env.L2_RPC_URL;
-    const L3_RPC_URL = process.env.L3_RPC_URL;
+    const privateKey = process.argv[2];
+    const L2_RPC_URL = process.argv[3];
+    const L3_RPC_URL = process.argv[4];
 
     if (!privateKey || !L2_RPC_URL || !L3_RPC_URL) {
         throw new Error('Required environment variable not found');

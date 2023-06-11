@@ -1,16 +1,14 @@
 import { ArbOwner__factory} from '../contracts/factories/ArbOwner__factory'
 import {ethers} from 'ethers'
-import dotenv from 'dotenv';
 import { L3Config } from "./l3ConfigType";
 
-dotenv.config();
 import fs from 'fs';
 
 async function main() {
     // Read the environment variables
-    const privateKey = process.env.PRIVATE_KEY;
-    const L2_RPC_URL = process.env.L2_RPC_URL;
-    const L3_RPC_URL = process.env.L3_RPC_URL;
+    const privateKey = process.argv[2];
+    const L2_RPC_URL = process.argv[3];
+    const L3_RPC_URL = process.argv[4];
 
     if (!privateKey || !L2_RPC_URL || !L3_RPC_URL) {
         throw new Error('Required environment variable not found');
