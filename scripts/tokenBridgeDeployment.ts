@@ -259,6 +259,9 @@ async function main() {
     const L2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL);
     const L3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL);
    
+    // To speed up the token bridge deployment
+    L2Provider.pollingInterval = 100;
+    L3Provider.pollingInterval = 100;
     // Creating the signer
     const l2Signer = new ethers.Wallet(privateKey).connect(L2Provider);
     const l3Signer = new ethers.Wallet(privateKey).connect(L3Provider);

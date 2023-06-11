@@ -65,7 +65,6 @@ async function main() {
         // Repeatedly check the balance until it changes by 1 Ether
         while (true) {
             let newBalance = await L3Provider.getBalance(config.chainOwner);
-            console.log(newBalance)
             if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther("1"))) {
                 console.log("Balance increased by 1 Ether.");
                 break;
