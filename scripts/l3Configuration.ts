@@ -37,6 +37,8 @@ async function main() {
 
     // ArbOwner precompile setup 
     const arbOwnerABI = ArbOwner__factory.abi
+
+    // Arb Owner precompile address
     const arbOwnerAddress = "0x0000000000000000000000000000000000000070"
     const ArbOwner = new ethers.Contract(arbOwnerAddress, arbOwnerABI, signer);
 
@@ -47,11 +49,12 @@ async function main() {
     }
     
         // Set the network fee receiver
-    console.log("Going to set the Minimum Base Fee for L3 chain")
+    console.log("Setting the Minimum Base Fee for the appchain")
     const tx = await ArbOwner.setMinimumL2BaseFee(minL2BaseFee);
 
     // Wait for the transaction to be mined
     const receipt = await tx.wait();
+    console.log(`Minimum Base Fee is set on the block number ${await receipt.blockNumber} on the appchain`)
 
     // Check the status of the transaction: 1 is successful, 0 is failure
     if (receipt.status === 0) {
@@ -59,28 +62,31 @@ async function main() {
     }
 
     // Set the network fee receiver
-    console.log("Going to set the  network fee receiver for L3 chain")
+    console.log("Setting the  network fee receiver for the appchain")
     const tx2 = await ArbOwner.setNetworkFeeAccount(networkFeeReceiver);
 
     // Wait for the transaction to be mined
     const receipt2 = await tx2.wait();
+    console.log(` is set on the block number ${await receipt2.blockNumber} on the appchain`)
 
     // Check the status of the transaction: 1 is successful, 0 is failure
     if (receipt2.status === 0) {
-        throw new Error('Setting network fee receiver transaction failed');
+        throw new Error('network fee receiver Setting network fee receiver transaction failed');
     }
 
         // Set the infrastructure fee collector
-        console.log("Going to set the  Set the infrastructure fee collector address for L3 chain")
+        console.log("Setting the infrastructure fee collector address for the appchain")
         const tx3 = await ArbOwner.setInfraFeeAccount(infrastructureFeeCollector);
     
         // Wait for the transaction to be mined
         const receipt3 = await tx3.wait();
-    
+        console.log(`infrastructure fee collector address is set on the block number ${await receipt3.blockNumber} on the appchain`)
+
         // Check the status of the transaction: 1 is successful, 0 is failure
         if (receipt3.status === 0) {
             throw new Error('Setting Set the infrastructure fee collector transaction failed');
         }
+        console.log("All things done! Enjoy your appchain. LFG 🚀🚀🚀🚀")
   }
 
   

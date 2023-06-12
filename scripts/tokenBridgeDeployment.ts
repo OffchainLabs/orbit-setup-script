@@ -163,14 +163,14 @@ export const deployErc20AndInit = async (
   L3Signer: Signer,
   inboxAddress: string
 ) => {
-  console.log('deploying l2')
+  console.log('deploying token bridge contracts on Arbitrum Goerli chain')
   console.log("it may take a minute ⏰")
   const l2 = await deployErc20l2(l2Signer)
 
-  console.log('deploying L3')
+  console.log('deploying token bridge contracts on appchain')
   const l3 = await deployErc20L3(L3Signer)
 
-  console.log('initialising L3')
+  console.log('initialising token bridge contracts on the appchain')
   await l3.router.initialize(l2.router.address, l3.standardGateway.address)
   await l3.beaconProxyFactory.initialize(l3.beacon.address)
   await (
@@ -204,7 +204,7 @@ export const deployErc20AndInit = async (
     )
   ).wait()
 
-  console.log('initialising l2')
+  console.log('initialising token bridge contracts on Arbitrum Goerli chain')
   await (
     await l2.router.initialize(
       await l2Signer.getAddress(),
@@ -275,7 +275,7 @@ async function main() {
     const { l2, l3 } = await deployErc20AndInit(l2Signer, l3Signer, inboxAddress);
   
     console.log("ERC20 contracts deployed and initialized!");
-    console.log("L2 contracts:");
+    console.log("Token bridge contracts on Arbitrum Goerli 📇📇📇:");
     console.log("L2 customGateway address: ",l2.customGateway.address)
     console.log("L2 multicall address: ",l2.multicall.address)
     console.log("L2 proxyAdmin address: ",l2.proxyAdmin.address)
@@ -284,14 +284,14 @@ async function main() {
     console.log("L2 weth address: ",l2.weth.address)
     console.log("L2 wethGateway address: ",l2.wethGateway.address)
 
-    console.log("L3 contracts:");
-    console.log("L3 customGateway address: ",l3.customGateway.address)
-    console.log("L3 multicall address: ",l3.multicall.address)
-    console.log("L3 proxyAdmin address: ",l3.proxyAdmin.address)
-    console.log("L3 router address: ",l3.router.address)
-    console.log("L3 standardGateway address: ",l3.standardGateway.address)
-    console.log("L3 weth address: ",l3.weth.address)
-    console.log("L3 wethGateway address: ",l3.wethGateway.address)
+    console.log("Token bridge contracts on appchain 📇📇📇:");
+    console.log("appchain customGateway address: ",l3.customGateway.address)
+    console.log("appchain multicall address: ",l3.multicall.address)
+    console.log("appchain proxyAdmin address: ",l3.proxyAdmin.address)
+    console.log("appchain router address: ",l3.router.address)
+    console.log("appchain standardGateway address: ",l3.standardGateway.address)
+    console.log("appchain weth address: ",l3.weth.address)
+    console.log("appchain wethGateway address: ",l3.wethGateway.address)
 
     let contractAddresses = {
       l2Contracts: {
@@ -316,7 +316,7 @@ async function main() {
     
     fs.writeFileSync('tokenAddresses.json', JSON.stringify(contractAddresses, null, 2));
     
-    console.log("Congrats 🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉");
+    console.log("Congrats. Contracts are deployed and initialized! 🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉");
   }
   
   main()

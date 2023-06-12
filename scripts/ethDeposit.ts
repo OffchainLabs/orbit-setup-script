@@ -34,7 +34,7 @@ async function main() {
       value: ethers.utils.parseEther('1')
   });
 
-  console.log('Transaction hash: ', tx.hash);
+  console.log('Transaction hash on Arbitrum Goerli: ', tx.hash);
   await tx.wait();
   console.log('Transaction has been mined');
 }

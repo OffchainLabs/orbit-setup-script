@@ -32,24 +32,24 @@ async function main() {
     ////////////////////////////////////////////////
     /// Funding batch-poster and staker address ///
     //////////////////////////////////////////////
-    console.log("Funding batch-poster and staker addresses")
+    console.log("Funding batch-poster and staker accounts on Arbitrum Goerli")
     const tx1 = await signer.sendTransaction({
         to: config.batchPoster,
         value: ethers.utils.parseEther("0.5")
     });
 
-    console.log(`Transaction hash: ${tx1.hash}`);
+    console.log(`Transaction hash on Arbitrum Goerli: ${tx1.hash}`);
     const receipt1 = await tx1.wait();
-    console.log(`Transaction was mined in block ${receipt1.blockNumber}`);
+    console.log(`Transaction was mined in block ${receipt1.blockNumber} on Arbitrum Goerli`);
 
     const tx2 = await signer.sendTransaction({
         to: config.staker,
         value: ethers.utils.parseEther("0.5")
     });
 
-    console.log(`Transaction hash: ${tx2.hash}`);
+    console.log(`Transaction hash on Arbitrum Goerli: ${tx2.hash}`);
     const receipt2 = await tx2.wait();
-    console.log(`Transaction was mined in block ${receipt2.blockNumber}`);
+    console.log(`Transaction was mined in block ${receipt2.blockNumber} on Arbitrum Goerli`);
 
 
     try {
@@ -57,7 +57,7 @@ async function main() {
         ////////////////////////////////
         /// ETH deposit to L3 /////////
         //////////////////////////////        
-        console.log("Running ethDeposit.ts... 💰💰💰💰💰💰");
+        console.log("Running ethDeposit Script to Deposit ETH from Arbitrum Goerli to your account on appchain ... 💰💰💰💰💰💰");
         let oldBalance = await L3Provider.getBalance(config.chainOwner);
         console.log(oldBalance)
         execSync(`ts-node scripts/ethDeposit.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
@@ -66,7 +66,7 @@ async function main() {
         while (true) {
             let newBalance = await L3Provider.getBalance(config.chainOwner);
             if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther("1"))) {
-                console.log("Balance increased by 1 Ether.");
+                console.log("Balance of your account on appchain increased by 1 Ether.");
                 break;
             }
             console.log("Balance not changed yet. Waiting for another 30 seconds ⏰⏰⏰⏰⏰⏰");
@@ -76,13 +76,13 @@ async function main() {
         ////////////////////////////////
         /// Token Bridge Deployment ///
         //////////////////////////////
-        console.log("Running tokenBridgeDeployment.ts...🌉🌉🌉🌉🌉");
+        console.log("Running tokenBridgeDeployment script to deploy token bridge contracts on Arbitrum Goerli and your appchain 🌉🌉🌉🌉🌉");
         execSync(`ts-node scripts/tokenBridgeDeployment.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
     
         ////////////////////////////////
         /// L3 Chain Configuration ///
         //////////////////////////////
-        console.log("Running l3Configuration.ts...📝📝📝📝📝");
+        console.log("Running l3Configuration script to configure your appchain 📝📝📝📝📝");
         execSync(`ts-node scripts/l3Configuration.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
     } catch (error) {
         console.error('Error occurred:', error);
