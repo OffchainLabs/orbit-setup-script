@@ -31,7 +31,7 @@ async function main() {
 
   // deposit 0.01 ETH
   const tx = await contract.depositEth({
-      value: ethers.utils.parseEther('1')
+      value: ethers.utils.parseEther('0.4')
   });
 
   console.log('Transaction hash on Arbitrum Goerli: ', tx.hash);

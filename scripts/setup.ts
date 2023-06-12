@@ -32,10 +32,10 @@ async function main() {
     ////////////////////////////////////////////////
     /// Funding batch-poster and staker address ///
     //////////////////////////////////////////////
-    console.log("Funding batch-poster and staker accounts on Arbitrum Goerli")
+    console.log("Funding batch-poster and staker accounts on Arbitrum Goerli each with 0.3 ETH")
     const tx1 = await signer.sendTransaction({
         to: config.batchPoster,
-        value: ethers.utils.parseEther("0.5")
+        value: ethers.utils.parseEther("0.3")
     });
 
     console.log(`Transaction hash on Arbitrum Goerli: ${tx1.hash}`);
@@ -44,7 +44,7 @@ async function main() {
 
     const tx2 = await signer.sendTransaction({
         to: config.staker,
-        value: ethers.utils.parseEther("0.5")
+        value: ethers.utils.parseEther("0.3")
     });
 
     console.log(`Transaction hash on Arbitrum Goerli: ${tx2.hash}`);
@@ -59,14 +59,13 @@ async function main() {
         //////////////////////////////        
         console.log("Running ethDeposit Script to Deposit ETH from Arbitrum Goerli to your account on appchain ... 💰💰💰💰💰💰");
         let oldBalance = await L3Provider.getBalance(config.chainOwner);
-        console.log(oldBalance)
         execSync(`ts-node scripts/ethDeposit.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
         // Waiting for 1 minute to be sure that ETH deposited is received on L3
         // Repeatedly check the balance until it changes by 1 Ether
         while (true) {
             let newBalance = await L3Provider.getBalance(config.chainOwner);
-            if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther("1"))) {
-                console.log("Balance of your account on appchain increased by 1 Ether.");
+            if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther("0.4"))) {
+                console.log("Balance of your account on appchain increased by 0.4 Ether.");
                 break;
             }
             console.log("Balance not changed yet. Waiting for another 30 seconds ⏰⏰⏰⏰⏰⏰");
