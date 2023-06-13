@@ -37,7 +37,7 @@ services:
         POSTGRES_HOST_AUTH_METHOD: 'trust'
 
   nitro:
-    image: offchainlabs/nitro-node:v2.1.0-beta.2-58a23c8
+    image: offchainlabs/nitro-node:v2.1.0-beta.3-278bcab
     ports:
       - "127.0.0.1:8449:8449"
     volumes:
