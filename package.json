@@ -9,6 +9,7 @@
     "typescript": "^5.1.3"
   },
   "scripts": {
-    "setup": "ts-node scripts/setup.ts"
+    "setup": "ts-node scripts/setup.ts",
+    "deposit": "ts-node scripts/chargeEth.ts"
   }
 }

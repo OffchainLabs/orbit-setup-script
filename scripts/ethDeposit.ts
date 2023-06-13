@@ -29,7 +29,7 @@ async function main() {
   // create contract instance
   const contract = new ethers.Contract(inboxAddress, depositEthInterface, l2Signer);
 
-  // deposit 0.01 ETH
+  // deposit 0.4 ETH
   const tx = await contract.depositEth({
       value: ethers.utils.parseEther('0.4')
   });
