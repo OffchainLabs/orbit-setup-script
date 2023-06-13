@@ -292,8 +292,33 @@ async function main() {
     console.log("appchain standardGateway address: ",l3.standardGateway.address)
     console.log("appchain weth address: ",l3.weth.address)
     console.log("appchain wethGateway address: ",l3.wethGateway.address)
+    {
 
-    let contractAddresses = {
+
+    }
+    let outputInfo = {
+      chainInfo:{
+        minL2BaseFee: config.minL2BaseFee,
+        networkFeeReceiver: config.networkFeeReceiver,
+        infrastructureFeeCollector: config.infrastructureFeeCollector,
+        batchPoster: config.batchPoster,
+        staker: config.staker,
+        chainOwner: config.chainOwner,
+        chainName:config.chainName,
+        chainId: config.chainId
+      },
+      coreContracts:{
+        rollup:config.rollup,
+        inbox:config.inbox,
+        outbox:config.outbox,
+        adminProxy:config.adminProxy,
+        sequencerInbox:config.sequencerInbox,
+        bridge:config.bridge,
+        utils:config.utils,
+        validatorWalletCreator: config.validatorWalletCreator
+      },
+
+      tokenBridgeContracts:{
       l2Contracts: {
         customGateway: l2.customGateway.address,
         multicall: l2.multicall.address,
@@ -312,9 +337,10 @@ async function main() {
         weth: l3.weth.address,
         wethGateway: l3.wethGateway.address
       }
+    }
     };
     
-    fs.writeFileSync('tokenAddresses.json', JSON.stringify(contractAddresses, null, 2));
+    fs.writeFileSync('outputInfo.json', JSON.stringify(outputInfo, null, 2));
     
     console.log("Congrats. Contracts are deployed and initialized! 🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉");
   }

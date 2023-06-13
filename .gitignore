@@ -5,3 +5,4 @@ config/*
 .DS_Store
 tokenAddresses.json
 /chain/*
+outputInfo.json
