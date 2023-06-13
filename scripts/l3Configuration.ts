@@ -67,7 +67,7 @@ async function main() {
 
     // Wait for the transaction to be mined
     const receipt2 = await tx2.wait();
-    console.log(` is set on the block number ${await receipt2.blockNumber} on the appchain`)
+    console.log(`network fee receiver is set on the block number ${await receipt2.blockNumber} on the appchain`)
 
     // Check the status of the transaction: 1 is successful, 0 is failure
     if (receipt2.status === 0) {

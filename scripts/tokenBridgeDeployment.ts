@@ -270,7 +270,7 @@ async function main() {
     const configRaw = fs.readFileSync('./config/orbitSetupScriptConfig.json', 'utf-8');
     const config: L3Config = JSON.parse(configRaw);
       
-    const inboxAddress = config.inboxAddress;
+    const inboxAddress = config.inbox;
   
     const { l2, l3 } = await deployErc20AndInit(l2Signer, l3Signer, inboxAddress);
   

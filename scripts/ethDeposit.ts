@@ -20,7 +20,7 @@ const l2Signer = new ethers.Wallet(privateKey).connect(l2Provider);
 // Read the JSON configuration
 const configRaw = fs.readFileSync('./config/orbitSetupScriptConfig.json', 'utf-8');
 const config = JSON.parse(configRaw);
-const inboxAddress = config.inboxAddress;
+const inboxAddress = config.inbox;
 const depositEthInterface = new ethers.utils.Interface([
   "function depositEth() public payable"
 ]);
