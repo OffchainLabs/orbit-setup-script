@@ -1,2 +1,2 @@
 # orbit-setup-script
- This scripts will help users to fund their newly generated batch-poster and validator addresses, configure l3 chain, and deploy bridge contracts on both L2 and L3 chain.
+ This script will help users fund their newly generated Batch Poster and Validator Addresses, configure an Orbit chain, and deploy bridge contracts on both L2 and L3 chains.
