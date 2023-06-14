@@ -26,6 +26,11 @@ async function main() {
     const L2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL);
     const L3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL);
    
+    // Checking if the L2 network is Arb Goerli
+    if (((await L2Provider.getNetwork()).chainId) !== 421613) {
+        throw new Error('The L2 RPC URL you have provided is not for Arbitrum Goerli');
+    }
+
     // Creating the signer
     const signer = new ethers.Wallet(privateKey).connect(L2Provider);
     
