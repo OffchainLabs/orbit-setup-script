@@ -37,9 +37,9 @@ services:
         POSTGRES_HOST_AUTH_METHOD: 'trust'
 
   nitro:
-    image: offchainlabs/nitro-node:v2.1.0-beta.3-278bcab
+    image: offchainlabs/nitro-node:v2.1.0-beta.4-837e45e
     ports:
       - "127.0.0.1:8449:8449"
     volumes:
-      - "./chain:/home/user/.arbitrum"
+      - "./config:/home/user/.arbitrum"
     command: --conf.file /home/user/.arbitrum/nodeConfig.json
