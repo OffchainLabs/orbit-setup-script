@@ -15,12 +15,15 @@ import { TransparentUpgradeableProxy__factory } from '../contracts/factories/Tra
 import { ProxyAdmin } from '../contracts/ProxyAdmin'
 import { ProxyAdmin__factory } from '../contracts/factories/ProxyAdmin__factory'
 import { AeWETH__factory } from '../contracts/factories/AeWETH__factory'
-import { TestWETH9__factory } from '../contracts/factories/TestWETH9__factory'
 import { Multicall2__factory } from '../contracts/factories/Multicall2__factory'
 import { ArbMulticall2__factory } from '../contracts/factories/ArbMulticall2__factory'
 
 import { L3Config } from "./l3ConfigType";
 import fs from 'fs';
+
+    // WETH address already deployed on L2 
+    // It's Arb Goerli currently. Need to change this when moving to Arb one
+    const wethAddress = "0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3";
 
 const deployBehindProxy = async <
   T extends ContractFactory & { contractName: string }
@@ -72,10 +75,7 @@ export const deployErc20l2 = async (deployer: Signer) => {
   )
   await wethGateway.deployed()
 
-  const weth = await new TestWETH9__factory()
-    .connect(deployer)
-    .deploy('WETH', 'WETH')
-  await weth.deployed()
+  const weth = wethAddress;
   const multicall = await new Multicall2__factory().connect(deployer).deploy()
   await multicall.deployed()
 
@@ -192,14 +192,14 @@ export const deployErc20AndInit = async (
       'WETH',
       18,
       l3.wethGateway.address,
-      l2.weth.address
+      l2.weth
     )
   ).wait()
   await (
     await l3.wethGateway.initialize(
       l2.wethGateway.address,
       l3.router.address,
-      l2.weth.address,
+      l2.weth,
       l3.weth.address
     )
   ).wait()
@@ -237,7 +237,7 @@ export const deployErc20AndInit = async (
       l3.wethGateway.address,
       l2.router.address,
       inboxAddress,
-      l2.weth.address,
+      l2.weth,
       l3.weth.address
     )
   ).wait()
@@ -265,7 +265,7 @@ async function main() {
     // Creating the signer
     const l2Signer = new ethers.Wallet(privateKey).connect(L2Provider);
     const l3Signer = new ethers.Wallet(privateKey).connect(L3Provider);
-
+ 
     // Read the JSON configuration
     const configRaw = fs.readFileSync('./config/orbitSetupScriptConfig.json', 'utf-8');
     const config: L3Config = JSON.parse(configRaw);
@@ -281,7 +281,7 @@ async function main() {
     console.log("L2 proxyAdmin address: ",l2.proxyAdmin.address)
     console.log("L2 router address: ",l2.router.address)
     console.log("L2 standardGateway address: ",l2.standardGateway.address)
-    console.log("L2 weth address: ",l2.weth.address)
+    console.log("L2 weth address: ",l2.weth)
     console.log("L2 wethGateway address: ",l2.wethGateway.address)
 
     console.log("Token bridge contracts on appchain 📇📇📇:");
@@ -325,7 +325,7 @@ async function main() {
         proxyAdmin: l2.proxyAdmin.address,
         router: l2.router.address,
         standardGateway: l2.standardGateway.address,
-        weth: l2.weth.address,
+        weth: l2.weth,
         wethGateway: l2.wethGateway.address
       },
       l3Contracts: {
