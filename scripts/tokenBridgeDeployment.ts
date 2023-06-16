@@ -274,6 +274,17 @@ async function main() {
   
     const { l2, l3 } = await deployErc20AndInit(l2Signer, l3Signer, inboxAddress);
   
+    // Registering L2 WETH gateway on the Router
+    console.log("Registering L2 WETH gateway on the Router");
+    const l2Router = l2.router.connect(l2Signer);
+    const l2WethGateway = l2.wethGateway.address;
+    const tx = await l2Router.setGateways([wethAddress],[l2WethGateway],ethers.BigNumber.from("200000"),ethers.utils.parseUnits("0.15","gwei"),ethers.BigNumber.from("5000000000000000"), {value: ethers.utils.parseUnits("0.05","ether")});
+    const recep = await tx.wait();
+    console.log(`L2 Weth Gateway registered on Arb Goerli with transaction hash: ${recep.transactionHash}`)
+
+    // Printing the addresses
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
     console.log("ERC20 contracts deployed and initialized!");
     console.log("Token bridge contracts on Arbitrum Goerli 📇📇📇:");
     console.log("L2 customGateway address: ",l2.customGateway.address)
@@ -283,6 +294,9 @@ async function main() {
     console.log("L2 standardGateway address: ",l2.standardGateway.address)
     console.log("L2 weth address: ",l2.weth)
     console.log("L2 wethGateway address: ",l2.wethGateway.address)
+
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 
     console.log("Token bridge contracts on appchain 📇📇📇:");
     console.log("appchain customGateway address: ",l3.customGateway.address)
