@@ -1,4 +1,6 @@
 import { ArbOwner__factory} from '../contracts/factories/ArbOwner__factory'
+import {ArbGasInfo__factory} from '../contracts/factories/ArbGasInfo__factory'
+ 
 import {ethers} from 'ethers'
 import { L3Config } from "./l3ConfigType";
 
@@ -15,10 +17,12 @@ async function main() {
     }
 
     // Generating providers from RPCs
+   const L2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL);
    const L3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL);
 
    // Creating the wallet and signer
-    const signer = new ethers.Wallet(privateKey).connect(L3Provider);
+    const l2signer = new ethers.Wallet(privateKey).connect(L2Provider);
+    const l3signer = new ethers.Wallet(privateKey).connect(L3Provider);
     
     // Read the JSON configuration
     const configRaw = fs.readFileSync('./config/orbitSetupScriptConfig.json', 'utf-8');
@@ -31,7 +35,7 @@ async function main() {
     const chainOwner= config.chainOwner;
 
     // Check if the Private Key provided is the chain owner:
-    if (signer.address !== chainOwner) {
+    if (l3signer.address !== chainOwner) {
         throw new Error('The Private Key you have provided is not the chain owner');
     }
 
@@ -40,10 +44,10 @@ async function main() {
 
     // Arb Owner precompile address
     const arbOwnerAddress = "0x0000000000000000000000000000000000000070"
-    const ArbOwner = new ethers.Contract(arbOwnerAddress, arbOwnerABI, signer);
+    const ArbOwner = new ethers.Contract(arbOwnerAddress, arbOwnerABI, l3signer);
 
     // Call the isChainOwner function and check the response
-    const isSignerChainOwner = await ArbOwner.isChainOwner(signer.address);
+    const isSignerChainOwner = await ArbOwner.isChainOwner(l3signer.address);
     if (!isSignerChainOwner) {
         throw new Error('The address you have provided is not the chain owner');
     }
@@ -86,6 +90,29 @@ async function main() {
         if (receipt3.status === 0) {
             throw new Error('Setting Set the infrastructure fee collector transaction failed');
         }
+
+        // Setting L1 basefee on L3
+        const arbGasInfoAbi = ArbGasInfo__factory.abi;
+        const arbGasInfoAddress = "0x000000000000000000000000000000000000006c";
+        const ArbOGasInfo = new ethers.Contract(arbGasInfoAddress, arbGasInfoAbi, l2signer);
+
+        console.log("Getting L1 base fee estimate")
+        const l1BaseFeeEstimate = await ArbOGasInfo.getL1BaseFeeEstimate();
+        console.log(`L1 Base Fee estimate on L2 is ${l1BaseFeeEstimate.toNumber()}`)
+
+        console.log("Setting L1 base fee estimate on L3 ")
+        const tx4 = await ArbOwner.setL1PricePerUnit(l1BaseFeeEstimate);
+    
+        // Wait for the transaction to be mined
+        const receipt4 = await tx4.wait();
+        console.log(`L1 base fee estimate is set on the block number ${await receipt4.blockNumber} on the appchain`)
+
+        // Check the status of the transaction: 1 is successful, 0 is failure
+        if (receipt2.status === 0) {
+            throw new Error('network fee receiver Setting network fee receiver transaction failed');
+        }
+    
+
         console.log("All things done! Enjoy your appchain. LFG 🚀🚀🚀🚀")
   }
 
