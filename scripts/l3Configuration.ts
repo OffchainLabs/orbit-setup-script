@@ -99,17 +99,18 @@ async function main() {
         console.log("Getting L1 base fee estimate")
         const l1BaseFeeEstimate = await ArbOGasInfo.getL1BaseFeeEstimate();
         console.log(`L1 Base Fee estimate on L2 is ${l1BaseFeeEstimate.toNumber()}`)
-
+        const l2Basefee = await L2Provider.getGasPrice();
+        const totalGasPrice = await l1BaseFeeEstimate.add(l2Basefee);
         console.log("Setting L1 base fee estimate on L3 ")
-        const tx4 = await ArbOwner.setL1PricePerUnit(l1BaseFeeEstimate);
+        const tx4 = await ArbOwner.setL1PricePerUnit(totalGasPrice);
     
         // Wait for the transaction to be mined
         const receipt4 = await tx4.wait();
         console.log(`L1 base fee estimate is set on the block number ${await receipt4.blockNumber} on the appchain`)
 
         // Check the status of the transaction: 1 is successful, 0 is failure
-        if (receipt2.status === 0) {
-            throw new Error('network fee receiver Setting network fee receiver transaction failed');
+        if (receipt4.status === 0) {
+            throw new Error('Base Fee Setting failed');
         }
     
 
