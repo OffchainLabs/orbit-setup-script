@@ -2,6 +2,9 @@ import { ethers } from "ethers";
 import { L3Config } from "./l3ConfigType";
 import { execSync } from 'child_process';
 import fs from 'fs';
+import { ethDeposit } from './ethDeposit'; 
+import {l3Configuration } from './l3Configuration';
+import {tokenBridgeDeployment} from './tokenBridgeDeployment'
 
 // Delay function
 function delay(ms: number) {
@@ -58,14 +61,14 @@ async function main() {
 
 
     try {
-
         ////////////////////////////////
         /// ETH deposit to L3 /////////
         //////////////////////////////        
         console.log("Running ethDeposit Script to Deposit ETH from Arbitrum Goerli to your account on appchain ... 💰💰💰💰💰💰");
         let oldBalance = await L3Provider.getBalance(config.chainOwner);
-        execSync(`ts-node scripts/ethDeposit.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
-        // Waiting for 1 minute to be sure that ETH deposited is received on L3
+        await ethDeposit(privateKey, L2_RPC_URL, L3_RPC_URL);
+
+        // Waiting for 30 secs to be sure that ETH deposited is received on L3
         // Repeatedly check the balance until it changes by 1 Ether
         while (true) {
             let newBalance = await L3Provider.getBalance(config.chainOwner);
@@ -81,17 +84,17 @@ async function main() {
         /// Token Bridge Deployment ///
         //////////////////////////////
         console.log("Running tokenBridgeDeployment script to deploy token bridge contracts on Arbitrum Goerli and your appchain 🌉🌉🌉🌉🌉");
-        execSync(`ts-node scripts/tokenBridgeDeployment.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
+        await tokenBridgeDeployment(privateKey, L2_RPC_URL, L3_RPC_URL);
     
         ////////////////////////////////
         /// L3 Chain Configuration ///
         //////////////////////////////
         console.log("Running l3Configuration script to configure your appchain 📝📝📝📝📝");
-        execSync(`ts-node scripts/l3Configuration.ts ${privateKey} ${L2_RPC_URL} ${L3_RPC_URL}`, { stdio: 'inherit' });
+        await l3Configuration(privateKey, L2_RPC_URL, L3_RPC_URL);
     } catch (error) {
         console.error('Error occurred:', error);
     }
-    }
+}
 
 // Run the script
 main().catch((error) => {

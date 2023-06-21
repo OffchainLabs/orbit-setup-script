@@ -1,17 +1,10 @@
 import { ArbOwner__factory} from '../contracts/factories/ArbOwner__factory'
 import {ArbGasInfo__factory} from '../contracts/factories/ArbGasInfo__factory'
- 
 import {ethers} from 'ethers'
 import { L3Config } from "./l3ConfigType";
-
 import fs from 'fs';
 
-async function main() {
-    // Read the environment variables
-    const privateKey = process.argv[2];
-    const L2_RPC_URL = process.argv[3];
-    const L3_RPC_URL = process.argv[4];
-
+export async function l3Configuration(privateKey: string, L2_RPC_URL: string, L3_RPC_URL: string) {
     if (!privateKey || !L2_RPC_URL || !L3_RPC_URL) {
         throw new Error('Required environment variable not found');
     }
@@ -101,7 +94,7 @@ async function main() {
         console.log(`L1 Base Fee estimate on L2 is ${l1BaseFeeEstimate.toNumber()}`)
         const l2Basefee = await L2Provider.getGasPrice();
         const totalGasPrice = await l1BaseFeeEstimate.add(l2Basefee);
-        console.log("Setting L1 base fee estimate on L3 ")
+        console.log(`Setting L1 base fee estimate on L3 to ${totalGasPrice}`)
         const tx4 = await ArbOwner.setL1PricePerUnit(totalGasPrice);
     
         // Wait for the transaction to be mined
@@ -116,11 +109,3 @@ async function main() {
 
         console.log("All things done! Enjoy your appchain. LFG 🚀🚀🚀🚀")
   }
-
-  
-  main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-      console.error(error);
-      process.exit(1);
-    });

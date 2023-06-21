@@ -245,12 +245,7 @@ export const deployErc20AndInit = async (
   return { l2, l3 }
 }
 
-async function main() {
-    // Read the environment variables
-    const privateKey = process.argv[2];
-    const L2_RPC_URL = process.argv[3];
-    const L3_RPC_URL = process.argv[4];
-
+export async function tokenBridgeDeployment(privateKey: string, L2_RPC_URL: string, L3_RPC_URL: string) {
     if (!privateKey || !L2_RPC_URL || !L3_RPC_URL) {
         throw new Error('Required environment variable not found');
     }
@@ -358,10 +353,3 @@ async function main() {
     
     console.log("Congrats. Contracts are deployed and initialized! 🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉");
   }
-  
-  main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-      console.error(error);
-      process.exit(1);
-    });
