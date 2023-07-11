@@ -46,9 +46,10 @@
 
     das-server:
       image: offchainlabs/nitro-node:v2.1.0-beta.6-152b9ff
-      entrypoint: ["/bin/bash", "/home/user/.arbitrum/das-server.sh"]
+      entrypoint: ["/bin/bash", "/main/das-server.sh"]
       volumes:
           - "./config:/home/user/.arbitrum"
+          - ".:/main"
       ports:
         - "9876:9876"
         - "9877:9877"

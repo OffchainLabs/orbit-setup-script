@@ -5,4 +5,3 @@ config/*
 .DS_Store
 outputInfo.json
 config/.DS_Store
-!config/das-server.sh
