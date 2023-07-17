@@ -12,6 +12,21 @@ function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
+function checkRuntimeStateIntegrity(rs: RuntimeState) {
+    if(!rs.l3) {
+        rs.l3 = defaultRunTimeState.l3
+    }
+    if(!rs.l2) {
+        rs.l2 = defaultRunTimeState.l2
+    }
+    if(!rs.etherSent) {
+        rs.etherSent = rs.etherSent
+    }
+    if(!rs.initializedState) {
+        rs.initializedState = rs.initializedState
+    }
+}
+
 async function main() {
     // Read the environment variables
     const privateKey = process.env.PRIVATE_KEY;
@@ -25,12 +40,14 @@ async function main() {
     // Read the JSON configuration
     const configRaw = fs.readFileSync('./config/orbitSetupScriptConfig.json', 'utf-8');
     const config: L3Config = JSON.parse(configRaw);
-    let rs: RuntimeState
+    let rs: RuntimeState;
     if(fs.existsSync('./config/resumeState.json')) {
         const stateRaw = fs.readFileSync('./config/resumeState.json', 'utf-8');
         rs = JSON.parse(stateRaw);
+        //check integrity
+        checkRuntimeStateIntegrity(rs)
     } else {
-        rs = defaultRunTimeState
+        rs = defaultRunTimeState;
     }
 
     // Generating providers from RPCs
