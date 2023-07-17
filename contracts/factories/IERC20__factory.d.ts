@@ -1,35 +1,38 @@
-import { Signer } from "ethers";
-import { Provider } from "@ethersproject/providers";
-import type { IERC20, IERC20Interface } from "@arbitrum/sdk/dist/lib/abi/IERC20";
+import { Signer } from 'ethers'
+import { Provider } from '@ethersproject/providers'
+import type { IERC20, IERC20Interface } from '@arbitrum/sdk/dist/lib/abi/IERC20'
 export declare class IERC20__factory {
-    static readonly abi: ({
-        anonymous: boolean;
+  static readonly abi: (
+    | {
+        anonymous: boolean
         inputs: {
-            indexed: boolean;
-            internalType: string;
-            name: string;
-            type: string;
-        }[];
-        name: string;
-        type: string;
-        outputs?: undefined;
-        stateMutability?: undefined;
-    } | {
+          indexed: boolean
+          internalType: string
+          name: string
+          type: string
+        }[]
+        name: string
+        type: string
+        outputs?: undefined
+        stateMutability?: undefined
+      }
+    | {
         inputs: {
-            internalType: string;
-            name: string;
-            type: string;
-        }[];
-        name: string;
+          internalType: string
+          name: string
+          type: string
+        }[]
+        name: string
         outputs: {
-            internalType: string;
-            name: string;
-            type: string;
-        }[];
-        stateMutability: string;
-        type: string;
-        anonymous?: undefined;
-    })[];
-    static createInterface(): IERC20Interface;
-    static connect(address: string, signerOrProvider: Signer | Provider): IERC20;
+          internalType: string
+          name: string
+          type: string
+        }[]
+        stateMutability: string
+        type: string
+        anonymous?: undefined
+      }
+  )[]
+  static createInterface(): IERC20Interface
+  static connect(address: string, signerOrProvider: Signer | Provider): IERC20
 }

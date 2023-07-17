@@ -1,31 +1,40 @@
-import { Signer } from "ethers";
-import { Provider } from "@ethersproject/providers";
-import type { UUPSNotUpgradeable, UUPSNotUpgradeableInterface } from "@arbitrum/sdk/dist/lib/abi/UUPSNotUpgradeable";
+import { Signer } from 'ethers'
+import { Provider } from '@ethersproject/providers'
+import type {
+  UUPSNotUpgradeable,
+  UUPSNotUpgradeableInterface,
+} from '@arbitrum/sdk/dist/lib/abi/UUPSNotUpgradeable'
 export declare class UUPSNotUpgradeable__factory {
-    static readonly abi: ({
-        anonymous: boolean;
+  static readonly abi: (
+    | {
+        anonymous: boolean
         inputs: {
-            indexed: boolean;
-            internalType: string;
-            name: string;
-            type: string;
-        }[];
-        name: string;
-        type: string;
-        outputs?: undefined;
-        stateMutability?: undefined;
-    } | {
-        inputs: never[];
-        name: string;
+          indexed: boolean
+          internalType: string
+          name: string
+          type: string
+        }[]
+        name: string
+        type: string
+        outputs?: undefined
+        stateMutability?: undefined
+      }
+    | {
+        inputs: never[]
+        name: string
         outputs: {
-            internalType: string;
-            name: string;
-            type: string;
-        }[];
-        stateMutability: string;
-        type: string;
-        anonymous?: undefined;
-    })[];
-    static createInterface(): UUPSNotUpgradeableInterface;
-    static connect(address: string, signerOrProvider: Signer | Provider): UUPSNotUpgradeable;
+          internalType: string
+          name: string
+          type: string
+        }[]
+        stateMutability: string
+        type: string
+        anonymous?: undefined
+      }
+  )[]
+  static createInterface(): UUPSNotUpgradeableInterface
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): UUPSNotUpgradeable
 }
