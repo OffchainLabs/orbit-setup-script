@@ -12,6 +12,7 @@ import { BeaconProxyFactory } from '@arbitrum/sdk/dist/lib/abi/BeaconProxyFactor
 import { AeWETH } from '@arbitrum/sdk/dist/lib/abi/AeWETH'
 import { ArbMulticall2 } from '@arbitrum/sdk/dist/lib/abi/ArbMulticall2'
 import { StandardArbERC20 } from '@arbitrum/sdk/dist/lib/abi/StandardArbERC20'
+import { ProxyAdmin } from '../contracts/ProxyAdmin'
 
 export interface RuntimeState {
     l2: L2_Address;

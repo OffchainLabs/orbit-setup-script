@@ -12,7 +12,7 @@ import { StandardArbERC20__factory } from '../contracts/factories/StandardArbERC
 import { UpgradeableBeacon__factory } from '../contracts/factories/UpgradeableBeacon__factory'
 import { BeaconProxyFactory__factory } from '../contracts/factories/BeaconProxyFactory__factory'
 import { TransparentUpgradeableProxy__factory } from '../contracts/factories/TransparentUpgradeableProxy__factory'
-import { ProxyAdmin } from '@arbitrum/sdk/dist/lib/abi/ProxyAdmin'
+import { ProxyAdmin } from '../contracts/ProxyAdmin'
 import { ProxyAdmin__factory } from '../contracts/factories/ProxyAdmin__factory'
 import { AeWETH__factory } from '../contracts/factories/AeWETH__factory'
 import { Multicall2__factory } from '../contracts/factories/Multicall2__factory'
@@ -21,7 +21,7 @@ import { ArbMulticall2__factory } from '../contracts/factories/ArbMulticall2__fa
 import { L3Config } from "./l3ConfigType";
 import fs from 'fs';
 
-import { L2, L3, RuntimeState } from './runTimeState'
+import { defaultRunTimeState, L2, L3, RuntimeState } from './runTimeState'
 
 // WETH address already deployed on L2 
 // It's Arb Goerli currently. Need to change this when moving to Arb one
@@ -34,9 +34,15 @@ export const deployContract = async <
   factory: T,
   param?: Array<any>
 ): Promise<ReturnType<T['deploy']>> => {
-  const instance = await factory.connect(deployer).deploy(param);
+  let instance
+  if(param) {
+    instance = await factory.connect(deployer).deploy(...param);
+  } else{
+    instance = await factory.connect(deployer).deploy();
+  }
+  
   await instance.deployed();
-  return instance;
+  return instance as ReturnType<T['deploy']>;
 }
 
 export const deployBehindProxy = async <
@@ -49,13 +55,12 @@ export const deployBehindProxy = async <
 ): Promise<ReturnType<T['deploy']>> => {
   const instance = await factory.connect(deployer).deploy()
   await instance.deployed()
-
   const proxy = await new TransparentUpgradeableProxy__factory()
     .connect(deployer)
     .deploy(instance.address, admin.address, dataToCallProxy)
   await proxy.deployed()
-  
-  return instance.attach(proxy.address);
+
+  return instance.attach(proxy.address) as ReturnType<T['deploy']>;
 }
 
 
@@ -111,7 +116,7 @@ export const deployErc20l2 = async (rs: RuntimeState, deployer: Signer) => {
           new Multicall2__factory()
       )
   rs.l2.multicall = multicall.address
-
+    
   return {
       proxyAdmin,
       router,
@@ -235,29 +240,33 @@ const initializeContract = async (
 ) => {
   console.log('initialising token bridge contracts on the appchain')
   try {
-      await (
-          await l3.router!.initialize(
-            l2.router!.address, 
-            l3.standardGateway!.address
-          )
-      ).wait()
-      
-      rs.initializedState.l3_router = true;
+    if(!rs.initializedState.l3_router) {
+        await (
+            await l3.router!.initialize(
+              l2.router!.address, 
+              l3.standardGateway!.address
+            )
+        ).wait()
+        
+        rs.initializedState.l3_router = true;
+    }
   } catch (err) {
-      const error = err as Error;
-      const initialized = handleInitailizeError(error);
-      if(initialized) {
-          rs.initializedState.l3_router = true
-      } else {
-          throw err
-      }
+    const error = err as Error;
+    const initialized = handleInitailizeError(error);
+    if(initialized) {
+        rs.initializedState.l3_router = true
+    } else {
+        throw err
+    }
   }
   
   try {
-      await (
-          await l3.beaconProxyFactory!.initialize(l3.beacon!.address)
-      ).wait()
-      rs.initializedState.l3_beaconProxyFactory = true
+    if(!rs.initializedState.l3_beaconProxyFactory) {
+        await (
+            await l3.beaconProxyFactory!.initialize(l3.beacon!.address)
+        ).wait()
+        rs.initializedState.l3_beaconProxyFactory = true
+    }
   } catch (err) {
       const error = err as Error;
       const initialized = handleInitailizeError(error);
@@ -269,14 +278,16 @@ const initializeContract = async (
   }
 
   try {
-      await (
-          await l3.standardGateway!.initialize(
-            l2.standardGateway!.address,
-            l3.router!.address,
-            l3.beaconProxyFactory!.address
-          )
-        ).wait()
-      rs.initializedState.l3_standardGateway = true
+    if(!rs.initializedState.l3_standardGateway) {
+        await (
+            await l3.standardGateway!.initialize(
+              l2.standardGateway!.address,
+              l3.router!.address,
+              l3.beaconProxyFactory!.address
+            )
+          ).wait()
+        rs.initializedState.l3_standardGateway = true
+    }
   } catch (err) {
       const error = err as Error;
       const initialized = handleInitailizeError(error);
@@ -288,13 +299,15 @@ const initializeContract = async (
   }
   
   try {
-      await (
-          await l3.customGateway!.initialize(
-            l2.customGateway!.address,
-            l3.router!.address
-          )
-        ).wait()
-        rs.initializedState.l3_customGateway = true
+    if(!rs.initializedState.l3_customGateway) {
+        await (
+            await l3.customGateway!.initialize(
+              l2.customGateway!.address,
+              l3.router!.address
+            )
+          ).wait()
+          rs.initializedState.l3_customGateway = true
+    }
   } catch (err) {
       const error = err as Error;
       const initialized = handleInitailizeError(error);
@@ -306,16 +319,18 @@ const initializeContract = async (
   }
   
   try {
-      await (
-          await l3.weth!.initialize(
-            'WETH',
-            'WETH',
-            18,
-            l3.wethGateway!.address,
-            l2.weth!
-          )
-        ).wait()
-      rs.initializedState.l3_weth = true
+    if(!rs.initializedState.l3_weth) {
+        await (
+            await l3.weth!.initialize(
+              'WETH',
+              'WETH',
+              18,
+              l3.wethGateway!.address,
+              l2.weth!
+            )
+          ).wait()
+        rs.initializedState.l3_weth = true
+    }
   } catch (err) {
       const error = err as Error;
       const initialized = handleInitailizeError(error);
@@ -327,15 +342,17 @@ const initializeContract = async (
   }
   
   try {
-      await (
-          await l3.wethGateway!.initialize(
-            l2.wethGateway!.address,
-            l3.router!.address,
-            l2.weth!,
-            l3.weth!.address
-          )
-        ).wait()
-      rs.initializedState.l3_wethGateway = true
+    if(!rs.initializedState.l3_wethGateway) {
+        await (
+            await l3.wethGateway!.initialize(
+              l2.wethGateway!.address,
+              l3.router!.address,
+              l2.weth!,
+              l3.weth!.address
+            )
+          ).wait()
+        rs.initializedState.l3_wethGateway = true
+    }
   } catch (err) {
       const error = err as Error;
       const initialized = handleInitailizeError(error);
@@ -349,16 +366,18 @@ const initializeContract = async (
 
   console.log('initialising token bridge contracts on Arbitrum Goerli chain')
   try {
-      await (
-          await l2.router!.initialize(
-            await l2Signer.getAddress(),
-            l2.standardGateway!.address,
-            constants.AddressZero,
-            l3.router!.address,
-            inboxAddress
-          )
-        ).wait()
-      rs.initializedState.l2_router = true
+    if(!rs.initializedState.l2_router) {
+        await (
+            await l2.router!.initialize(
+              await l2Signer.getAddress(),
+              l2.standardGateway!.address,
+              constants.AddressZero,
+              l3.router!.address,
+              inboxAddress
+            )
+          ).wait()
+        rs.initializedState.l2_router = true
+    }
   } catch (err) {
       const error = err as Error;
       const initialized = handleInitailizeError(error);
@@ -370,16 +389,18 @@ const initializeContract = async (
   }
   
   try {
-      await (
-          await l2.standardGateway!.initialize(
-            l3.standardGateway!.address,
-            l2.router!.address,
-            inboxAddress,
-            await l3.beaconProxyFactory!.cloneableProxyHash(),
-            l3.beaconProxyFactory!.address
-          )
-        ).wait()
-      rs.initializedState.l2_standardGateway = true
+    if(rs.initializedState.l2_standardGateway) {
+        await (
+            await l2.standardGateway!.initialize(
+              l3.standardGateway!.address,
+              l2.router!.address,
+              inboxAddress,
+              await l3.beaconProxyFactory!.cloneableProxyHash(),
+              l3.beaconProxyFactory!.address
+            )
+          ).wait()
+        rs.initializedState.l2_standardGateway = true
+    }
   } catch (err) {
       const error = err as Error;
       const initialized = handleInitailizeError(error);
@@ -391,15 +412,17 @@ const initializeContract = async (
   }
 
   try {
-      await (
-          await l2.customGateway!.initialize(
-            l3.customGateway!.address,
-            l2.router!.address,
-            inboxAddress,
-            await l2Signer.getAddress()
-          )
-        ).wait()
-      rs.initializedState.l2_customGateway = true
+    if(rs.initializedState.l2_customGateway) {
+        await (
+            await l2.customGateway!.initialize(
+              l3.customGateway!.address,
+              l2.router!.address,
+              inboxAddress,
+              await l2Signer.getAddress()
+            )
+          ).wait()
+        rs.initializedState.l2_customGateway = true
+    }
   } catch (err) {
       const error = err as Error;
       const initialized = handleInitailizeError(error);
@@ -411,16 +434,18 @@ const initializeContract = async (
   }
   
   try {
-      await (
-          await l2.wethGateway!.initialize(
-            l3.wethGateway!.address,
-            l2.router!.address,
-            inboxAddress,
-            l2.weth!,
-            l3.weth!.address
-          )
-        ).wait()
-      rs.initializedState.l2_wethGateway = true
+    if(rs.initializedState.l2_wethGateway) {
+        await (
+            await l2.wethGateway!.initialize(
+              l3.wethGateway!.address,
+              l2.router!.address,
+              inboxAddress,
+              l2.weth!,
+              l3.weth!.address
+            )
+          ).wait()
+        rs.initializedState.l2_wethGateway = true
+    }
   } catch (err) {
       const error = err as Error;
       const initialized = handleInitailizeError(error);
@@ -439,7 +464,8 @@ const handleInitailizeError = (error: Error) => {
   if(
       errMsg.includes('Initializable: contract is already initialized') ||
       errMsg.includes('0x0dc149f0')   || // Signature of AlreadyInitialized()
-      errMsg.includes('Contract instance has already been initialized')
+      errMsg.includes('Contract instance has already been initialized') ||
+      errMsg.includes('ALREADY_INIT')
   ) {
       initialized = true;
   }
@@ -454,9 +480,15 @@ export const deployErc20AndInit = async (
 ) => {
   console.log('deploying token bridge contracts on Arbitrum Goerli chain')
   console.log("it may take a minute ⏰")
+  if(!rs.l2) {
+    rs.l2 = defaultRunTimeState.l2
+  }
   const l2 = await deployErc20l2(rs, l2Signer)
   
   console.log('deploying token bridge contracts on appchain')
+  if(!rs.l3) {
+    rs.l3 = defaultRunTimeState.l3
+  }
   const l3 = await deployErc20L3(rs, L3Signer)
 
 
