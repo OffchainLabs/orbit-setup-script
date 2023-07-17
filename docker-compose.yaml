@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.9'
 services:
   blockscout:
     depends_on:
@@ -15,16 +15,16 @@ services:
         node init/install.js postgres 5432
         bin/blockscout start
     environment:
-        ETHEREUM_JSONRPC_VARIANT: 'geth'
-        ETHEREUM_JSONRPC_HTTP_URL: http://nitro:8449/
-        ETHEREUM_JSONRPC_TRACE_URL: http://nitro:8449/
-        INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: "true"
-        DATABASE_URL: postgresql://postgres:@postgres:5432/blockscout
-        ECTO_USE_SSL: "false"
-        NETWORK: ""
-        SUBNETWORK: "Arbitrum Local"
-        BLOCKSCOUT_VERSION: "Arbitrum 0.0.1"
-        PORT: 4000
+      ETHEREUM_JSONRPC_VARIANT: 'geth'
+      ETHEREUM_JSONRPC_HTTP_URL: http://nitro:8449/
+      ETHEREUM_JSONRPC_TRACE_URL: http://nitro:8449/
+      INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: "true"
+      DATABASE_URL: postgresql://postgres:@postgres:5432/blockscout
+      ECTO_USE_SSL: "false"
+      NETWORK: ""
+      SUBNETWORK: "Arbitrum Local"
+      BLOCKSCOUT_VERSION: "Arbitrum 0.0.1"
+      PORT: 4000
     ports:
       - "127.0.0.1:4000:4000"
 
@@ -32,14 +32,24 @@ services:
     image: postgres:13.6
     restart: always
     environment:
-        POSTGRES_PASSWORD: ''
-        POSTGRES_USER: 'postgres'
-        POSTGRES_HOST_AUTH_METHOD: 'trust'
+      POSTGRES_PASSWORD: ''
+      POSTGRES_USER: 'postgres'
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
 
   nitro:
-    image: offchainlabs/nitro-node:v2.1.0-beta.4-837e45e
+    image: offchainlabs/nitro-node:v2.1.0-beta.6-152b9ff
     ports:
       - "127.0.0.1:8449:8449"
     volumes:
       - "./config:/home/user/.arbitrum"
     command: --conf.file /home/user/.arbitrum/nodeConfig.json
+
+  das-server:
+    image: offchainlabs/nitro-node:v2.1.0-beta.6-152b9ff
+    entrypoint: [ "/bin/bash", "/das-server.sh" ]
+    volumes:
+      - "./config:/home/user/.arbitrum"
+      - "./das-server.sh:/das-server.sh"
+    ports:
+      - "9876:9876"
+      - "9877:9877"
