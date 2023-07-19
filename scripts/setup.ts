@@ -129,7 +129,7 @@ async function main() {
         console.error('Error occurred:', error);
         const runtimeString = JSON.stringify(rs)
         fs.writeFileSync('./config/resumeState.json', runtimeString)
-        console.log("This running record has been saved to ./config/resumeState.json , please check the cause of the error and the program will read the file and continue to execute the unfinished part. (In most failure case is out of gas)")
+        console.log("Seems something went wrong during this process, but don't worry, we have recorded the deployed and initialized contracts into ./config/resumeState.json, next time you rerun the script, it will restart from where it failed ")
     }
 }
 
