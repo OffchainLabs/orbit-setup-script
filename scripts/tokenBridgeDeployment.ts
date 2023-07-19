@@ -325,8 +325,7 @@ export async function tokenBridgeDeployment(
   console.log('appchain standardGateway address: ', l3.standardGateway.address)
   console.log('appchain weth address: ', l3.weth.address)
   console.log('appchain wethGateway address: ', l3.wethGateway.address)
-  {
-  }
+
   const outputInfo = {
     chainInfo: {
       minL2BaseFee: config.minL2BaseFee,
