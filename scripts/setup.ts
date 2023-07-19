@@ -46,6 +46,7 @@ async function main() {
         rs = JSON.parse(stateRaw);
         //check integrity
         checkRuntimeStateIntegrity(rs)
+        console.log("resumeState file found, will restart from where it failed last time.")
     } else {
         rs = defaultRunTimeState;
     }
