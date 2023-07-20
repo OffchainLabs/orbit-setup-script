@@ -459,15 +459,9 @@ export const deployErc20AndInit = async (
 ) => {
   console.log('deploying token bridge contracts on Arbitrum Goerli chain')
   console.log('it may take a minute ⏰')
-  if (!rs.l2) {
-    rs.l2 = defaultRunTimeState.l2
-  }
   const l2 = await deployErc20l2(rs, l2Signer)
 
   console.log('deploying token bridge contracts on appchain')
-  if (!rs.l3) {
-    rs.l3 = defaultRunTimeState.l3
-  }
   const l3 = await deployErc20L3(rs, L3Signer)
 
   await initializeContract(l2Signer, inboxAddress, l2, l3, rs)
