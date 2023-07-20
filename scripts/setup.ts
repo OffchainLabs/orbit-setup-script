@@ -12,7 +12,7 @@ function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
-function checkAndFixRuntimeStateIntegrity(rs: RuntimeState) {
+function checkRuntimeStateIntegrity(rs: RuntimeState) {
     if(!rs.l3) {
         rs.l3 = defaultRunTimeState.l3
     }
@@ -45,7 +45,7 @@ async function main() {
         const stateRaw = fs.readFileSync('./config/resumeState.json', 'utf-8');
         rs = JSON.parse(stateRaw);
         //check integrity
-        checkAndFixRuntimeStateIntegrity(rs)
+        checkRuntimeStateIntegrity(rs)
         console.log("resumeState file found, will restart from where it failed last time.")
     } else {
         rs = defaultRunTimeState;
