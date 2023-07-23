@@ -171,8 +171,8 @@ export const deployErc20AndInit = async (
   const l3 = await deployErc20L3(L3Signer)
 
   console.log('initialising token bridge contracts on the appchain')
-  await l3.router.initialize(l2.router.address, l3.standardGateway.address)
-  await l3.beaconProxyFactory.initialize(l3.beacon.address)
+  await (await l3.router.initialize(l2.router.address, l3.standardGateway.address)).wait()
+  await (await l3.beaconProxyFactory.initialize(l3.beacon.address)).wait()
   await (
     await l3.standardGateway.initialize(
       l2.standardGateway.address,
