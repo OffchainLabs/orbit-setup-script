@@ -125,13 +125,13 @@ async function main() {
           )
           break
         }
-        let tooLongNotify = ''
+        let tooLongNotification = ''
         if (depositCheckTime >= 6) {
-          tooLongNotify =
-            "(It takes too long, did you change the config files? If you changed, you need delete ./config/My Arbitrum L3 Chain, since this chain data is for your last config file, if you didn't change, pleasen ignore this msg.)"
+          tooLongNotification =
+            "(It takes too long, did you change the config files? If you changed, you need delete ./config/My Arbitrum L3 Chain, since this chain data is for your last config file, if you didn't, pleasen ignore this msg.)"
         }
         console.log(
-          `Balance not changed yet. Waiting for another 30 seconds ⏰⏰⏰⏰⏰⏰ ${tooLongNotify}`
+          `Balance not changed yet. Waiting for another 30 seconds ⏰⏰⏰⏰⏰⏰ ${tooLongNotification}`
         )
         await delay(30 * 1000)
       }
