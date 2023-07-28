@@ -112,10 +112,12 @@ async function main() {
       )
       const oldBalance = await L3Provider.getBalance(config.chainOwner)
       await ethDeposit(privateKey, L2_RPC_URL, L3_RPC_URL)
+      let depositCheckTime = 0
 
       // Waiting for 30 secs to be sure that ETH deposited is received on L3
       // Repeatedly check the balance until it changes by 1 Ether
       while (true) {
+        depositCheckTime++
         const newBalance = await L3Provider.getBalance(config.chainOwner)
         if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther('0.4'))) {
           console.log(
@@ -123,8 +125,13 @@ async function main() {
           )
           break
         }
+        let tooLongNotify = ''
+        if (depositCheckTime >= 6) {
+          tooLongNotify =
+            "(It takes too long, did you change the config files? If you changed, you need delete ./config/My Arbitrum L3 Chain, since this chain data is for your last config file, if you didn't change, pleasen ignore this msg.)"
+        }
         console.log(
-          'Balance not changed yet. Waiting for another 30 seconds ⏰⏰⏰⏰⏰⏰'
+          `Balance not changed yet. Waiting for another 30 seconds ⏰⏰⏰⏰⏰⏰ ${tooLongNotify}`
         )
         await delay(30 * 1000)
       }

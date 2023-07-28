@@ -21,7 +21,7 @@ import { ArbMulticall2__factory } from '../contracts/factories/ArbMulticall2__fa
 import { L3Config } from './l3ConfigType'
 import fs from 'fs'
 
-import { defaultRunTimeState, L2, L3, RuntimeState } from './runTimeState'
+import { L2, L3, RuntimeState } from './runTimeState'
 
 // WETH address already deployed on L2
 // It's Arb Goerli currently. Need to change this when moving to Arb one
