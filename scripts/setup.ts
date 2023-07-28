@@ -128,7 +128,7 @@ async function main() {
         let tooLongNotification = ''
         if (depositCheckTime >= 6) {
           tooLongNotification =
-            "(It takes too long, did you change the config files? If you changed, you need delete ./config/My Arbitrum L3 Chain, since this chain data is for your last config file, if you didn't, pleasen ignore this msg.)"
+            "(It is taking a long time. Did you change the config files? If you did, you will need to delete ./config/My Arbitrum L3 Chain, since this chain data is for your last config file. If you didn't change the file, please ignore this message.)"
         }
         console.log(
           `Balance not changed yet. Waiting for another 30 seconds ⏰⏰⏰⏰⏰⏰ ${tooLongNotification}`
