@@ -566,6 +566,9 @@ export async function tokenBridgeDeployment(
       chainOwner: config.chainOwner,
       chainName: config.chainName,
       chainId: config.chainId,
+      parentChainId: 421613,
+      rpcUrl: 'http://localhost/:8449',
+      explorerUrl: 'http://localhost:4000/',
     },
     coreContracts: {
       rollup: config.rollup,
