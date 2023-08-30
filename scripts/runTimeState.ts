@@ -1,18 +1,4 @@
-import { L1GatewayRouter } from '@arbitrum/sdk/dist/lib/abi/L1GatewayRouter'
-import { L1ERC20Gateway } from '@arbitrum/sdk/dist/lib/abi/L1ERC20Gateway'
-import { L1CustomGateway } from '@arbitrum/sdk/dist/lib/abi/L1CustomGateway'
-import { L1WethGateway } from '@arbitrum/sdk/dist/lib/abi/L1WethGateway'
-import { Multicall2 } from '@arbitrum/sdk/dist/lib/abi/Multicall2'
-import { L2GatewayRouter } from '@arbitrum/sdk/dist/lib/abi/L2GatewayRouter'
-import { L2ERC20Gateway } from '@arbitrum/sdk/dist/lib/abi/L2ERC20Gateway'
-import { L2CustomGateway } from '@arbitrum/sdk/dist/lib/abi/L2CustomGateway'
-import { L2WethGateway } from '@arbitrum/sdk/dist/lib/abi/L2WethGateway'
-import { UpgradeableBeacon } from '@arbitrum/sdk/dist/lib/abi/UpgradeableBeacon'
-import { BeaconProxyFactory } from '@arbitrum/sdk/dist/lib/abi/BeaconProxyFactory'
-import { AeWETH } from '@arbitrum/sdk/dist/lib/abi/AeWETH'
-import { ArbMulticall2 } from '@arbitrum/sdk/dist/lib/abi/ArbMulticall2'
-import { StandardArbERC20 } from '@arbitrum/sdk/dist/lib/abi/StandardArbERC20'
-import { ProxyAdmin } from '../contracts/ProxyAdmin'
+import { Contract } from 'ethers'
 
 export interface RuntimeState {
   l2: L2_Address
@@ -90,13 +76,13 @@ export interface L2_Address {
   multicall: string | null
 }
 export interface L2 {
-  proxyAdmin: ProxyAdmin
-  router: L1GatewayRouter
-  standardGateway: L1ERC20Gateway
-  customGateway: L1CustomGateway
-  wethGateway: L1WethGateway
+  proxyAdmin: Contract
+  router: Contract
+  standardGateway: Contract
+  customGateway: Contract
+  wethGateway: Contract
   weth: string
-  multicall: Multicall2
+  multicall: Contract
 }
 export interface L3_Address {
   proxyAdmin: string | null
@@ -111,14 +97,14 @@ export interface L3_Address {
   multicall: string | null
 }
 export interface L3 {
-  proxyAdmin: ProxyAdmin
-  router: L2GatewayRouter
-  standardGateway: L2ERC20Gateway
-  customGateway: L2CustomGateway
-  wethGateway: L2WethGateway
-  standardArbERC20: StandardArbERC20
-  beacon: UpgradeableBeacon
-  beaconProxyFactory: BeaconProxyFactory
-  weth: AeWETH
-  multicall: ArbMulticall2
+  proxyAdmin: Contract
+  router: Contract
+  standardGateway: Contract
+  customGateway: Contract
+  wethGateway: Contract
+  standardArbERC20: Contract
+  beacon: Contract
+  beaconProxyFactory: Contract
+  weth: Contract
+  multicall: Contract
 }

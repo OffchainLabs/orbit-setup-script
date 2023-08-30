@@ -1,27 +1,64 @@
 import { Signer, ContractFactory, constants } from 'ethers'
 import { ethers } from 'ethers'
-import { L1GatewayRouter__factory } from '../contracts/factories/L1GatewayRouter__factory'
-import { L1ERC20Gateway__factory } from '../contracts/factories/L1ERC20Gateway__factory'
-import { L1CustomGateway__factory } from '../contracts/factories/L1CustomGateway__factory'
-import { L1WethGateway__factory } from '../contracts/factories/L1WethGateway__factory'
-import { L2GatewayRouter__factory } from '../contracts/factories/L2GatewayRouter__factory'
-import { L2ERC20Gateway__factory } from '../contracts/factories/L2ERC20Gateway__factory'
-import { L2CustomGateway__factory } from '../contracts/factories/L2CustomGateway__factory'
-import { L2WethGateway__factory } from '../contracts/factories/L2WethGateway__factory'
-import { StandardArbERC20__factory } from '../contracts/factories/StandardArbERC20__factory'
-import { UpgradeableBeacon__factory } from '../contracts/factories/UpgradeableBeacon__factory'
-import { BeaconProxyFactory__factory } from '../contracts/factories/BeaconProxyFactory__factory'
-import { TransparentUpgradeableProxy__factory } from '../contracts/factories/TransparentUpgradeableProxy__factory'
-import { ProxyAdmin } from '../contracts/ProxyAdmin'
-import { ProxyAdmin__factory } from '../contracts/factories/ProxyAdmin__factory'
-import { AeWETH__factory } from '../contracts/factories/AeWETH__factory'
-import { Multicall2__factory } from '../contracts/factories/Multicall2__factory'
-import { ArbMulticall2__factory } from '../contracts/factories/ArbMulticall2__factory'
+
+type NamedFactory = ContractFactory & { contractName: string }
+const NamedFactoryInstance = (contractJson: {
+  abi: any
+  bytecode: string
+  contractName: string
+}): NamedFactory => {
+  const factory = new ContractFactory(
+    contractJson.abi,
+    contractJson.bytecode
+  ) as NamedFactory
+  factory['contractName'] = contractJson.contractName
+  return factory
+}
+
+// import from token-bridge-contracts directly to make sure the bytecode is the same
+import L1GatewayRouter from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1GatewayRouter.sol/L1GatewayRouter.json'
+const L1GatewayRouter__fac = NamedFactoryInstance(L1GatewayRouter)
+import L1ERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1ERC20Gateway.sol/L1ERC20Gateway.json'
+const L1ERC20Gateway__fac = NamedFactoryInstance(L1ERC20Gateway)
+import L1CustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1CustomGateway.sol/L1CustomGateway.json'
+const L1CustomGateway__fac = NamedFactoryInstance(L1CustomGateway)
+import L1WethGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1WethGateway.sol/L1WethGateway.json'
+const L1WethGateway__fac = NamedFactoryInstance(L1WethGateway)
+import L2GatewayRouter from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2GatewayRouter.sol/L2GatewayRouter.json'
+const L2GatewayRouter__fac = NamedFactoryInstance(L2GatewayRouter)
+import L2ERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2ERC20Gateway.sol/L2ERC20Gateway.json'
+const L2ERC20Gateway__fac = NamedFactoryInstance(L2ERC20Gateway)
+import L2CustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2CustomGateway.sol/L2CustomGateway.json'
+const L2CustomGateway__fac = NamedFactoryInstance(L2CustomGateway)
+import L2WethGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2WethGateway.sol/L2WethGateway.json'
+const L2WethGateway__fac = NamedFactoryInstance(L2WethGateway)
+import StandardArbERC20 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/StandardArbERC20.sol/StandardArbERC20.json'
+const StandardArbERC20__fac = NamedFactoryInstance(StandardArbERC20)
+import BeaconProxyFactory from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/ClonableBeaconProxy.sol/BeaconProxyFactory.json'
+const BeaconProxyFactory__fac = NamedFactoryInstance(BeaconProxyFactory)
+import AeWETH from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/aeWETH.sol/aeWETH.json'
+const AeWETH__fac = NamedFactoryInstance(AeWETH)
+import TestWETH9 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/test/TestWETH9.sol/TestWETH9.json'
+const TestWETH9__fac = NamedFactoryInstance(TestWETH9)
+import Multicall2 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/rpc-utils/MulticallV2.sol/Multicall2.json'
+const Multicall2__fac = NamedFactoryInstance(Multicall2)
+import ArbMulticall2 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/rpc-utils/MulticallV2.sol/ArbMulticall2.json'
+const ArbMulticall2__fac = NamedFactoryInstance(ArbMulticall2)
+
+// import from nitro-contracts directly to make sure the bytecode is the same
+import UpgradeableBeacon from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol/UpgradeableBeacon.json'
+const UpgradeableBeacon__fac = NamedFactoryInstance(UpgradeableBeacon)
+import TransparentUpgradeableProxy from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol/TransparentUpgradeableProxy.json'
+const TransparentUpgradeableProxy__fac = NamedFactoryInstance(
+  TransparentUpgradeableProxy
+)
+import ProxyAdmin from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol/ProxyAdmin.json'
+const ProxyAdmin__fac = NamedFactoryInstance(ProxyAdmin)
 
 import { L3Config } from './l3ConfigType'
 import fs from 'fs'
 
-import { defaultRunTimeState, L2, L3, RuntimeState } from './runTimeState'
+import { L2, L3, RuntimeState } from './runTimeState'
 
 // WETH address already deployed on L2
 // It's Arb Goerli currently. Need to change this when moving to Arb one
@@ -50,14 +87,16 @@ export const deployBehindProxy = async <
 >(
   deployer: Signer,
   factory: T,
-  admin: ProxyAdmin,
+  adminAddr: string,
   dataToCallProxy = '0x'
 ): Promise<ReturnType<T['deploy']>> => {
   const instance = await factory.connect(deployer).deploy()
   await instance.deployed()
-  const proxy = await new TransparentUpgradeableProxy__factory()
-    .connect(deployer)
-    .deploy(instance.address, admin.address, dataToCallProxy)
+  const proxy = await TransparentUpgradeableProxy__fac.connect(deployer).deploy(
+    instance.address,
+    adminAddr,
+    dataToCallProxy
+  )
   await proxy.deployed()
 
   return instance.attach(proxy.address) as ReturnType<T['deploy']>
@@ -65,52 +104,44 @@ export const deployBehindProxy = async <
 
 export const deployErc20l2 = async (rs: RuntimeState, deployer: Signer) => {
   const proxyAdmin = rs.l2.proxyAdmin
-    ? ProxyAdmin__factory.connect(rs.l2.proxyAdmin, deployer)
-    : await deployContract(deployer, new ProxyAdmin__factory())
+    ? ProxyAdmin__fac.attach(rs.l2.proxyAdmin).connect(deployer)
+    : await deployContract(deployer, ProxyAdmin__fac)
   rs.l2.proxyAdmin = proxyAdmin.address
 
   const router = rs.l2.router
-    ? L1GatewayRouter__factory.connect(rs.l2.router, deployer)
+    ? L1GatewayRouter__fac.attach(rs.l2.router).connect(deployer)
     : await deployBehindProxy(
         deployer,
-        new L1GatewayRouter__factory(),
-        proxyAdmin
+        L1GatewayRouter__fac,
+        proxyAdmin.address
       )
   rs.l2.router = router.address
 
   const standardGateway = rs.l2.standardGateway
-    ? L1ERC20Gateway__factory.connect(rs.l2.standardGateway, deployer)
-    : await deployBehindProxy(
-        deployer,
-        new L1ERC20Gateway__factory(),
-        proxyAdmin
-      )
+    ? L1ERC20Gateway__fac.attach(rs.l2.standardGateway).connect(deployer)
+    : await deployBehindProxy(deployer, L1ERC20Gateway__fac, proxyAdmin.address)
   rs.l2.standardGateway = standardGateway.address
 
   const customGateway = rs.l2.customGateway
-    ? L1CustomGateway__factory.connect(rs.l2.customGateway, deployer)
+    ? L1CustomGateway__fac.attach(rs.l2.customGateway).connect(deployer)
     : await deployBehindProxy(
         deployer,
-        new L1CustomGateway__factory(),
-        proxyAdmin
+        L1CustomGateway__fac,
+        proxyAdmin.address
       )
   rs.l2.customGateway = customGateway.address
 
   const wethGateway = rs.l2.wethGateway
-    ? L1WethGateway__factory.connect(rs.l2.wethGateway, deployer)
-    : await deployBehindProxy(
-        deployer,
-        new L1WethGateway__factory(),
-        proxyAdmin
-      )
+    ? L1WethGateway__fac.attach(rs.l2.wethGateway).connect(deployer)
+    : await deployBehindProxy(deployer, L1WethGateway__fac, proxyAdmin.address)
   rs.l2.wethGateway = wethGateway.address
 
   const weth = wethAddress
   rs.l2.weth = weth
 
   const multicall = rs.l2.multicall
-    ? Multicall2__factory.connect(rs.l2.multicall, deployer)
-    : await deployContract(deployer, new Multicall2__factory())
+    ? Multicall2__fac.attach(rs.l2.multicall).connect(deployer)
+    : await deployContract(deployer, Multicall2__fac)
   rs.l2.multicall = multicall.address
 
   return {
@@ -129,75 +160,63 @@ export const deployErc20L3 = async (
   deployer: Signer
 ): Promise<L3> => {
   const proxyAdmin = rs.l3.proxyAdmin
-    ? ProxyAdmin__factory.connect(rs.l3.proxyAdmin, deployer)
-    : await deployContract(deployer, new ProxyAdmin__factory())
+    ? ProxyAdmin__fac.attach(rs.l3.proxyAdmin).connect(deployer)
+    : await deployContract(deployer, ProxyAdmin__fac)
   rs.l3.proxyAdmin = proxyAdmin.address
 
   const router = rs.l3.router
-    ? L2GatewayRouter__factory.connect(rs.l3.router, deployer)
+    ? L2GatewayRouter__fac.attach(rs.l3.router).connect(deployer)
     : await deployBehindProxy(
         deployer,
-        new L2GatewayRouter__factory(),
-        proxyAdmin
+        L2GatewayRouter__fac,
+        proxyAdmin.address
       )
   rs.l3.router = router.address
 
   const standardGateway = rs.l3.standardGateway
-    ? L2ERC20Gateway__factory.connect(rs.l3.standardGateway, deployer)
-    : await deployBehindProxy(
-        deployer,
-        new L2ERC20Gateway__factory(),
-        proxyAdmin
-      )
+    ? L2ERC20Gateway__fac.attach(rs.l3.standardGateway).connect(deployer)
+    : await deployBehindProxy(deployer, L2ERC20Gateway__fac, proxyAdmin.address)
   rs.l3.standardGateway = standardGateway.address
 
   const customGateway = rs.l3.customGateway
-    ? L2CustomGateway__factory.connect(rs.l3.customGateway, deployer)
+    ? L2CustomGateway__fac.attach(rs.l3.customGateway).connect(deployer)
     : await deployBehindProxy(
         deployer,
-        new L2CustomGateway__factory(),
-        proxyAdmin
+        L2CustomGateway__fac,
+        proxyAdmin.address
       )
   rs.l3.customGateway = customGateway.address
 
   const wethGateway = rs.l3.wethGateway
-    ? L2WethGateway__factory.connect(rs.l3.wethGateway, deployer)
-    : await deployBehindProxy(
-        deployer,
-        new L2WethGateway__factory(),
-        proxyAdmin
-      )
+    ? L2WethGateway__fac.attach(rs.l3.wethGateway).connect(deployer)
+    : await deployBehindProxy(deployer, L2WethGateway__fac, proxyAdmin.address)
   rs.l3.wethGateway = wethGateway.address
 
   const standardArbERC20 = rs.l3.standardArbERC20
-    ? StandardArbERC20__factory.connect(rs.l3.standardArbERC20, deployer)
-    : await deployContract(deployer, new StandardArbERC20__factory())
+    ? StandardArbERC20__fac.attach(rs.l3.standardArbERC20).connect(deployer)
+    : await deployContract(deployer, StandardArbERC20__fac)
   rs.l3.standardArbERC20 = standardArbERC20.address
 
   const beaconParam = []
   beaconParam.push(rs.l3.standardArbERC20)
   const beacon = rs.l3.beacon
-    ? UpgradeableBeacon__factory.connect(rs.l3.beacon, deployer)
-    : await deployContract(
-        deployer,
-        new UpgradeableBeacon__factory(),
-        beaconParam
-      )
+    ? UpgradeableBeacon__fac.attach(rs.l3.beacon).connect(deployer)
+    : await deployContract(deployer, UpgradeableBeacon__fac, beaconParam)
   rs.l3.beacon = beacon.address
 
   const beaconProxyFactory = rs.l3.beaconProxyFactory
-    ? BeaconProxyFactory__factory.connect(rs.l3.beaconProxyFactory, deployer)
-    : await deployContract(deployer, new BeaconProxyFactory__factory())
+    ? BeaconProxyFactory__fac.attach(rs.l3.beaconProxyFactory).connect(deployer)
+    : await deployContract(deployer, BeaconProxyFactory__fac)
   rs.l3.beaconProxyFactory = beaconProxyFactory.address
 
   const weth = rs.l3.weth
-    ? AeWETH__factory.connect(rs.l3.weth, deployer)
-    : await deployBehindProxy(deployer, new AeWETH__factory(), proxyAdmin)
+    ? AeWETH__fac.attach(rs.l3.weth).connect(deployer)
+    : await deployBehindProxy(deployer, AeWETH__fac, proxyAdmin.address)
   rs.l3.weth = weth.address
 
   const multicall = rs.l3.multicall
-    ? ArbMulticall2__factory.connect(rs.l3.multicall, deployer)
-    : await deployContract(deployer, new ArbMulticall2__factory())
+    ? ArbMulticall2__fac.attach(rs.l3.multicall).connect(deployer)
+    : await deployContract(deployer, ArbMulticall2__fac)
   rs.l3.multicall = multicall.address
 
   return {

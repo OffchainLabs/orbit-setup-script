@@ -1,5 +1,5 @@
-import { ArbOwner__factory } from '../contracts/factories/ArbOwner__factory'
-import { ArbGasInfo__factory } from '../contracts/factories/ArbGasInfo__factory'
+import { abi as ArbOwner__abi } from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbOwner.sol/ArbOwner.json'
+import { abi as ArbGasInfo__abi } from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbGasInfo.sol/ArbGasInfo.json'
 import { ethers } from 'ethers'
 import { L3Config } from './l3ConfigType'
 import fs from 'fs'
@@ -40,7 +40,7 @@ export async function l3Configuration(
   }
 
   // ArbOwner precompile setup
-  const arbOwnerABI = ArbOwner__factory.abi
+  const arbOwnerABI = ArbOwner__abi
 
   // Arb Owner precompile address
   const arbOwnerAddress = '0x0000000000000000000000000000000000000070'
@@ -104,7 +104,7 @@ export async function l3Configuration(
   }
 
   // Setting L1 basefee on L3
-  const arbGasInfoAbi = ArbGasInfo__factory.abi
+  const arbGasInfoAbi = ArbGasInfo__abi
   const arbGasInfoAddress = '0x000000000000000000000000000000000000006c'
   const ArbOGasInfo = new ethers.Contract(
     arbGasInfoAddress,
