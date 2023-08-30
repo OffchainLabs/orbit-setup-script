@@ -36,7 +36,7 @@ import StandardArbERC20 from '@arbitrum/token-bridge-contracts/build/contracts/c
 const StandardArbERC20__fac = NamedFactoryInstance(StandardArbERC20)
 import BeaconProxyFactory from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/ClonableBeaconProxy.sol/BeaconProxyFactory.json'
 const BeaconProxyFactory__fac = NamedFactoryInstance(BeaconProxyFactory)
-import AeWETH from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/aeWETH.sol/AeWETH.json'
+import AeWETH from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/aeWETH.sol/aeWETH.json'
 const AeWETH__fac = NamedFactoryInstance(AeWETH)
 import TestWETH9 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/test/TestWETH9.sol/TestWETH9.json'
 const TestWETH9__fac = NamedFactoryInstance(TestWETH9)
