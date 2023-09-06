@@ -16,4 +16,6 @@ export interface L3Config {
   staker: string
   chainId: number
   chainName: string
+  parentChainId: number
+  'parent-chain-node-url': string
 }
