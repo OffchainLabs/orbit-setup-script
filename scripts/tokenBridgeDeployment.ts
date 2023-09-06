@@ -358,7 +358,7 @@ const initializeContract = async (
     }
   }
 
-  console.log('initialising token bridge contracts on Parent Chain')
+  console.log('initialising token bridge contracts on parent chain')
   try {
     if (!rs.initializedState.l2_router) {
       await (
@@ -471,7 +471,7 @@ export const deployErc20AndInit = async (
   inboxAddress: string,
   rs: RuntimeState
 ) => {
-  console.log('deploying token bridge contracts on Parent Chain')
+  console.log('deploying token bridge contracts on parent chain')
   console.log('it may take a minute ⏰')
 
   const chainid = await l2Signer.getChainId()
@@ -551,7 +551,7 @@ export async function tokenBridgeDeployment(
   )
   const recep = await tx.wait()
   console.log(
-    `L2 Weth Gateway registered on Parent Chain with transaction hash: ${recep.transactionHash}`
+    `L2 Weth Gateway registered on parent chain with transaction hash: ${recep.transactionHash}`
   )
 
   // Printing the addresses
@@ -562,7 +562,7 @@ export async function tokenBridgeDeployment(
     '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
   )
   console.log('ERC20 contracts deployed and initialized!')
-  console.log('Token bridge contracts on Parent Chain 📇📇📇:')
+  console.log('Token bridge contracts on parent chain 📇📇📇:')
   console.log('L2 customGateway address: ', l2.customGateway.address)
   console.log('L2 multicall address: ', l2.multicall.address)
   console.log('L2 proxyAdmin address: ', l2.proxyAdmin.address)
