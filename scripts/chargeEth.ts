@@ -49,7 +49,7 @@ async function main() {
   // Getting the current balance on the appchain
   const oldBalance = await L3Provider.getBalance(config.chainOwner)
 
-  console.log('Transaction hash on Arbitrum Goerli: ', tx.hash)
+  console.log('Transaction hash on Parent Chain: ', tx.hash)
   await tx.wait()
   console.log('Transaction has been mined')
 

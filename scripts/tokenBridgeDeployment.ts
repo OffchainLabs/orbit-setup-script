@@ -60,10 +60,6 @@ import fs from 'fs'
 
 import { L2, L3, RuntimeState } from './runTimeState'
 
-// WETH address already deployed on L2
-// It's Arb Goerli currently. Need to change this when moving to Arb one
-const wethAddress = '0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3'
-
 export const deployContract = async <
   T extends ContractFactory & { contractName: string }
 >(
@@ -136,8 +132,7 @@ export const deployErc20l2 = async (rs: RuntimeState, deployer: Signer) => {
     : await deployBehindProxy(deployer, L1WethGateway__fac, proxyAdmin.address)
   rs.l2.wethGateway = wethGateway.address
 
-  const weth = wethAddress
-  rs.l2.weth = weth
+  const weth = rs.l2.weth
 
   const multicall = rs.l2.multicall
     ? Multicall2__fac.attach(rs.l2.multicall).connect(deployer)
@@ -363,7 +358,7 @@ const initializeContract = async (
     }
   }
 
-  console.log('initialising token bridge contracts on Arbitrum Goerli chain')
+  console.log('initialising token bridge contracts on Parent Chain')
   try {
     if (!rs.initializedState.l2_router) {
       await (
@@ -476,8 +471,25 @@ export const deployErc20AndInit = async (
   inboxAddress: string,
   rs: RuntimeState
 ) => {
-  console.log('deploying token bridge contracts on Arbitrum Goerli chain')
+  console.log('deploying token bridge contracts on Parent Chain')
   console.log('it may take a minute ⏰')
+
+  const chainid = await l2Signer.getChainId()
+  if (!rs.l2.weth) {
+    if (chainid === 42161) {
+      rs.l2.weth = '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+    } else if (chainid === 421613) {
+      rs.l2.weth = '0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3'
+    } else if (chainid === 421614) {
+      rs.l2.weth = '0x980B62Da83eFf3D4576C647993b0c1D7faf17c73'
+    } else {
+      throw new Error('Please config rs.l2.weth in resumeState.json')
+    }
+  }
+  if ((await l2Signer.provider?.getCode(rs.l2.weth)) === '0x') {
+    throw new Error('rs.l2.weth is not deployed')
+  }
+
   const l2 = await deployErc20l2(rs, l2Signer)
 
   console.log('deploying token bridge contracts on appchain')
@@ -539,7 +551,7 @@ export async function tokenBridgeDeployment(
   )
   const recep = await tx.wait()
   console.log(
-    `L2 Weth Gateway registered on Arb Goerli with transaction hash: ${recep.transactionHash}`
+    `L2 Weth Gateway registered on Parent Chain with transaction hash: ${recep.transactionHash}`
   )
 
   // Printing the addresses
@@ -550,7 +562,7 @@ export async function tokenBridgeDeployment(
     '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
   )
   console.log('ERC20 contracts deployed and initialized!')
-  console.log('Token bridge contracts on Arbitrum Goerli 📇📇📇:')
+  console.log('Token bridge contracts on Parent Chain 📇📇📇:')
   console.log('L2 customGateway address: ', l2.customGateway.address)
   console.log('L2 multicall address: ', l2.multicall.address)
   console.log('L2 proxyAdmin address: ', l2.proxyAdmin.address)
@@ -585,7 +597,7 @@ export async function tokenBridgeDeployment(
       chainOwner: config.chainOwner,
       chainName: config.chainName,
       chainId: config.chainId,
-      parentChainId: 421613,
+      parentChainId: config.parentChainId,
       rpcUrl: 'http://localhost/:8449',
       explorerUrl: 'http://localhost:4000/',
     },

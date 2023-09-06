@@ -59,10 +59,10 @@ async function main() {
   const L2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL)
   const L3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL)
 
-  // Checking if the L2 network is Arb Goerli
-  if ((await L2Provider.getNetwork()).chainId !== 421613) {
+  // Checking if the L2 network is the expected parent chain
+  if ((await L2Provider.getNetwork()).chainId !== config.parentChainId) {
     throw new Error(
-      'The L2 RPC URL you have provided is not for Arbitrum Goerli'
+      'The L2 RPC URL you have provided is not for the correct parent chain'
     )
   }
 
@@ -74,31 +74,29 @@ async function main() {
     /// Funding batch-poster and staker address ///
     //////////////////////////////////////////////
     if (!rs.etherSent.batchPoster) {
-      console.log(
-        'Funding batch-poster accounts on Arbitrum Goerli  with 0.3 ETH'
-      )
+      console.log('Funding batch-poster accounts on Parent Chain with 0.3 ETH')
       const tx1 = await signer.sendTransaction({
         to: config.batchPoster,
         value: ethers.utils.parseEther('0.3'),
       })
-      console.log(`Transaction hash on Arbitrum Goerli: ${tx1.hash}`)
+      console.log(`Transaction hash on Parent Chain: ${tx1.hash}`)
       const receipt1 = await tx1.wait()
       console.log(
-        `Transaction was mined in block ${receipt1.blockNumber} on Arbitrum Goerli`
+        `Transaction was mined in block ${receipt1.blockNumber} on Parent Chain`
       )
       rs.etherSent.batchPoster = true
     }
 
     if (!rs.etherSent.staker) {
-      console.log('Funding staker accounts on Arbitrum Goerli with 0.3 ETH')
+      console.log('Funding staker accounts on Parent Chain with 0.3 ETH')
       const tx2 = await signer.sendTransaction({
         to: config.staker,
         value: ethers.utils.parseEther('0.3'),
       })
-      console.log(`Transaction hash on Arbitrum Goerli: ${tx2.hash}`)
+      console.log(`Transaction hash on Parent Chain: ${tx2.hash}`)
       const receipt2 = await tx2.wait()
       console.log(
-        `Transaction was mined in block ${receipt2.blockNumber} on Arbitrum Goerli`
+        `Transaction was mined in block ${receipt2.blockNumber} on Parent Chain`
       )
       rs.etherSent.staker = true
     }
@@ -108,7 +106,7 @@ async function main() {
       /// ETH deposit to L3 /////////
       //////////////////////////////
       console.log(
-        'Running ethDeposit Script to Deposit ETH from Arbitrum Goerli to your account on appchain ... 💰💰💰💰💰💰'
+        'Running ethDeposit Script to Deposit ETH from Parent Chain to your account on appchain ... 💰💰💰💰💰💰'
       )
       const oldBalance = await L3Provider.getBalance(config.chainOwner)
       await ethDeposit(privateKey, L2_RPC_URL, L3_RPC_URL)
@@ -135,7 +133,7 @@ async function main() {
     /// Token Bridge Deployment ///
     //////////////////////////////
     console.log(
-      'Running tokenBridgeDeployment script to deploy token bridge contracts on Arbitrum Goerli and your appchain 🌉🌉🌉🌉🌉'
+      'Running tokenBridgeDeployment script to deploy token bridge contracts on Parent Chain and your appchain 🌉🌉🌉🌉🌉'
     )
     await tokenBridgeDeployment(privateKey, L2_RPC_URL, L3_RPC_URL, rs)
 
