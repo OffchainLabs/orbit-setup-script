@@ -133,6 +133,9 @@ export const deployErc20l2 = async (rs: RuntimeState, deployer: Signer) => {
   rs.l2.wethGateway = wethGateway.address
 
   const weth = rs.l2.weth
+    ? AeWETH__fac.attach(rs.l2.weth).connect(deployer)
+    : await deployBehindProxy(deployer, AeWETH__fac, proxyAdmin.address)
+  rs.l2.weth = weth.address
 
   const multicall = rs.l2.multicall
     ? Multicall2__fac.attach(rs.l2.multicall).connect(deployer)
@@ -541,6 +544,7 @@ export async function tokenBridgeDeployment(
   console.log('Registering L2 WETH gateway on the Router')
   const l2Router = l2.router.connect(l2Signer)
   const l2WethGateway = l2.wethGateway.address
+  const wethAddress = l2.weth.address
   const tx = await l2Router.setGateways(
     [wethAddress],
     [l2WethGateway],

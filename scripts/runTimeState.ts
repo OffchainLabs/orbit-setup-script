@@ -81,7 +81,7 @@ export interface L2 {
   standardGateway: Contract
   customGateway: Contract
   wethGateway: Contract
-  weth: string
+  weth: Contract
   multicall: Contract
 }
 export interface L3_Address {
