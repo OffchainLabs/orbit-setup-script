@@ -106,7 +106,7 @@ async function main() {
       /// ETH deposit to L3 /////////
       //////////////////////////////
       console.log(
-        'Running ethDeposit Script to Deposit ETH from parent chain to your account on appchain ... 💰💰💰💰💰💰'
+        'Running ethDeposit Script to Deposit ETH from parent chain to your account on Orbit chain ... 💰💰💰💰💰💰'
       )
       const oldBalance = await L3Provider.getBalance(config.chainOwner)
       await ethDeposit(privateKey, L2_RPC_URL, L3_RPC_URL)
@@ -117,7 +117,7 @@ async function main() {
         const newBalance = await L3Provider.getBalance(config.chainOwner)
         if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther('0.4'))) {
           console.log(
-            'Balance of your account on appchain increased by 0.4 Ether.'
+            'Balance of your account on Orbit chain increased by 0.4 Ether.'
           )
           break
         }
@@ -133,7 +133,7 @@ async function main() {
     /// Token Bridge Deployment ///
     //////////////////////////////
     console.log(
-      'Running tokenBridgeDeployment script to deploy token bridge contracts on parent chain and your appchain 🌉🌉🌉🌉🌉'
+      'Running tokenBridgeDeployment script to deploy token bridge contracts on parent chain and your Orbit chain 🌉🌉🌉🌉🌉'
     )
     await tokenBridgeDeployment(privateKey, L2_RPC_URL, L3_RPC_URL, rs)
 
@@ -141,7 +141,7 @@ async function main() {
     /// L3 Chain Configuration ///
     //////////////////////////////
     console.log(
-      'Running l3Configuration script to configure your appchain 📝📝📝📝📝'
+      'Running l3Configuration script to configure your Orbit chain 📝📝📝📝📝'
     )
     await l3Configuration(privateKey, L2_RPC_URL, L3_RPC_URL)
   } catch (error) {

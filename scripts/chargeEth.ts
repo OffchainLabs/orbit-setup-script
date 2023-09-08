@@ -41,29 +41,29 @@ async function main() {
     l2Signer
   )
 
-  // deposit ETH to the appchain
+  // deposit ETH to the Orbit chain
   const tx = await contract.depositEth({
     value: ethers.utils.parseEther(amount),
   })
 
-  // Getting the current balance on the appchain
+  // Getting the current balance on the Orbit chain
   const oldBalance = await L3Provider.getBalance(config.chainOwner)
 
   console.log('Transaction hash on parent chain: ', tx.hash)
   await tx.wait()
   console.log('Transaction has been mined')
 
-  // Checking to see if the funds are received on the appchain
+  // Checking to see if the funds are received on the Orbit chain
   while (true) {
     const newBalance = await L3Provider.getBalance(config.chainOwner)
     if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther(amount))) {
       console.log(
-        `LFG! 🚀 Balance of your account on appchain increased by ${amount} Ether.`
+        `LFG! 🚀 Balance of your account on Orbit chain increased by ${amount} Ether.`
       )
       break
     }
     console.log(
-      'Balance not changed yet. Waiting for another 30 seconds to receive the funds on the appchain ⏰⏰⏰⏰⏰⏰'
+      'Balance not changed yet. Waiting for another 30 seconds to receive the funds on the Orbit chain ⏰⏰⏰⏰⏰⏰'
     )
     await delay(30 * 1000)
   }
