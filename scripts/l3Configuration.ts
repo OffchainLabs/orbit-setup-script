@@ -53,13 +53,13 @@ export async function l3Configuration(
   }
 
   // Set the network fee receiver
-  console.log('Setting the Minimum Base Fee for the appchain')
+  console.log('Setting the Minimum Base Fee for the Orbit chain')
   const tx = await ArbOwner.setMinimumL2BaseFee(minL2BaseFee)
 
   // Wait for the transaction to be mined
   const receipt = await tx.wait()
   console.log(
-    `Minimum Base Fee is set on the block number ${await receipt.blockNumber} on the appchain`
+    `Minimum Base Fee is set on the block number ${await receipt.blockNumber} on the Orbit chain`
   )
 
   // Check the status of the transaction: 1 is successful, 0 is failure
@@ -68,13 +68,13 @@ export async function l3Configuration(
   }
 
   // Set the network fee receiver
-  console.log('Setting the  network fee receiver for the appchain')
+  console.log('Setting the  network fee receiver for the Orbit chain')
   const tx2 = await ArbOwner.setNetworkFeeAccount(networkFeeReceiver)
 
   // Wait for the transaction to be mined
   const receipt2 = await tx2.wait()
   console.log(
-    `network fee receiver is set on the block number ${await receipt2.blockNumber} on the appchain`
+    `network fee receiver is set on the block number ${await receipt2.blockNumber} on the Orbit chain`
   )
 
   // Check the status of the transaction: 1 is successful, 0 is failure
@@ -86,14 +86,14 @@ export async function l3Configuration(
 
   // Set the infrastructure fee collector
   console.log(
-    'Setting the infrastructure fee collector address for the appchain'
+    'Setting the infrastructure fee collector address for the Orbit chain'
   )
   const tx3 = await ArbOwner.setInfraFeeAccount(infrastructureFeeCollector)
 
   // Wait for the transaction to be mined
   const receipt3 = await tx3.wait()
   console.log(
-    `infrastructure fee collector address is set on the block number ${await receipt3.blockNumber} on the appchain`
+    `infrastructure fee collector address is set on the block number ${await receipt3.blockNumber} on the Orbit chain`
   )
 
   // Check the status of the transaction: 1 is successful, 0 is failure
@@ -123,7 +123,7 @@ export async function l3Configuration(
   // Wait for the transaction to be mined
   const receipt4 = await tx4.wait()
   console.log(
-    `L1 base fee estimate is set on the block number ${await receipt4.blockNumber} on the appchain`
+    `L1 base fee estimate is set on the block number ${await receipt4.blockNumber} on the Orbit chain`
   )
 
   // Check the status of the transaction: 1 is successful, 0 is failure
@@ -131,5 +131,5 @@ export async function l3Configuration(
     throw new Error('Base Fee Setting failed')
   }
 
-  console.log('All things done! Enjoy your appchain. LFG 🚀🚀🚀🚀')
+  console.log('All things done! Enjoy your Orbit chain. LFG 🚀🚀🚀🚀')
 }

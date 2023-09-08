@@ -238,7 +238,7 @@ const initializeContract = async (
   l3: L3,
   rs: RuntimeState
 ) => {
-  console.log('initialising token bridge contracts on the appchain')
+  console.log('initialising token bridge contracts on the Orbit chain')
   try {
     if (!rs.initializedState.l3_router) {
       await (
@@ -495,7 +495,7 @@ export const deployErc20AndInit = async (
 
   const l2 = await deployErc20l2(rs, l2Signer)
 
-  console.log('deploying token bridge contracts on appchain')
+  console.log('deploying token bridge contracts on Orbit chain')
   const l3 = await deployErc20L3(rs, L3Signer)
 
   await initializeContract(l2Signer, inboxAddress, l2, l3, rs)
@@ -582,14 +582,17 @@ export async function tokenBridgeDeployment(
     '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
   )
 
-  console.log('Token bridge contracts on appchain 📇📇📇:')
-  console.log('appchain customGateway address: ', l3.customGateway.address)
-  console.log('appchain multicall address: ', l3.multicall.address)
-  console.log('appchain proxyAdmin address: ', l3.proxyAdmin.address)
-  console.log('appchain router address: ', l3.router.address)
-  console.log('appchain standardGateway address: ', l3.standardGateway.address)
-  console.log('appchain weth address: ', l3.weth.address)
-  console.log('appchain wethGateway address: ', l3.wethGateway.address)
+  console.log('Token bridge contracts on Orbit chain 📇📇📇:')
+  console.log('Orbit chain customGateway address: ', l3.customGateway.address)
+  console.log('Orbit chain multicall address: ', l3.multicall.address)
+  console.log('Orbit chain proxyAdmin address: ', l3.proxyAdmin.address)
+  console.log('Orbit chain router address: ', l3.router.address)
+  console.log(
+    'Orbit chain standardGateway address: ',
+    l3.standardGateway.address
+  )
+  console.log('Orbit chain weth address: ', l3.weth.address)
+  console.log('Orbit chain wethGateway address: ', l3.wethGateway.address)
 
   const outputInfo = {
     chainInfo: {
