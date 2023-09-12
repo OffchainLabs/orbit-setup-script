@@ -60,10 +60,6 @@ import fs from 'fs'
 
 import { L2, L3, RuntimeState } from './runTimeState'
 
-// WETH address already deployed on L2
-// It's Arb Goerli currently. Need to change this when moving to Arb one
-const wethAddress = '0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3'
-
 export const deployContract = async <
   T extends ContractFactory & { contractName: string }
 >(
@@ -136,8 +132,10 @@ export const deployErc20l2 = async (rs: RuntimeState, deployer: Signer) => {
     : await deployBehindProxy(deployer, L1WethGateway__fac, proxyAdmin.address)
   rs.l2.wethGateway = wethGateway.address
 
-  const weth = wethAddress
-  rs.l2.weth = weth
+  const weth = rs.l2.weth
+    ? AeWETH__fac.attach(rs.l2.weth).connect(deployer)
+    : await deployBehindProxy(deployer, AeWETH__fac, proxyAdmin.address)
+  rs.l2.weth = weth.address
 
   const multicall = rs.l2.multicall
     ? Multicall2__fac.attach(rs.l2.multicall).connect(deployer)
@@ -240,7 +238,7 @@ const initializeContract = async (
   l3: L3,
   rs: RuntimeState
 ) => {
-  console.log('initialising token bridge contracts on the appchain')
+  console.log('initialising token bridge contracts on the Orbit chain')
   try {
     if (!rs.initializedState.l3_router) {
       await (
@@ -326,7 +324,7 @@ const initializeContract = async (
           'WETH',
           18,
           l3.wethGateway!.address,
-          l2.weth!
+          l2.weth!.address
         )
       ).wait()
       rs.initializedState.l3_weth = true
@@ -347,7 +345,7 @@ const initializeContract = async (
         await l3.wethGateway!.initialize(
           l2.wethGateway!.address,
           l3.router!.address,
-          l2.weth!,
+          l2.weth!.address,
           l3.weth!.address
         )
       ).wait()
@@ -363,7 +361,7 @@ const initializeContract = async (
     }
   }
 
-  console.log('initialising token bridge contracts on Arbitrum Goerli chain')
+  console.log('initialising token bridge contracts on parent chain')
   try {
     if (!rs.initializedState.l2_router) {
       await (
@@ -439,7 +437,7 @@ const initializeContract = async (
           l3.wethGateway!.address,
           l2.router!.address,
           inboxAddress,
-          l2.weth!,
+          l2.weth!.address,
           l3.weth!.address
         )
       ).wait()
@@ -476,11 +474,28 @@ export const deployErc20AndInit = async (
   inboxAddress: string,
   rs: RuntimeState
 ) => {
-  console.log('deploying token bridge contracts on Arbitrum Goerli chain')
+  console.log('deploying token bridge contracts on parent chain')
   console.log('it may take a minute ⏰')
+
+  const chainid = await l2Signer.getChainId()
+  if (!rs.l2.weth) {
+    if (chainid === 42161) {
+      rs.l2.weth = '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+    } else if (chainid === 421613) {
+      rs.l2.weth = '0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3'
+    } else if (chainid === 421614) {
+      rs.l2.weth = '0x980B62Da83eFf3D4576C647993b0c1D7faf17c73'
+    } else {
+      throw new Error('Please config rs.l2.weth in resumeState.json')
+    }
+  }
+  if ((await l2Signer.provider?.getCode(rs.l2.weth)) === '0x') {
+    throw new Error('rs.l2.weth is not deployed')
+  }
+
   const l2 = await deployErc20l2(rs, l2Signer)
 
-  console.log('deploying token bridge contracts on appchain')
+  console.log('deploying token bridge contracts on Orbit chain')
   const l3 = await deployErc20L3(rs, L3Signer)
 
   await initializeContract(l2Signer, inboxAddress, l2, l3, rs)
@@ -529,6 +544,7 @@ export async function tokenBridgeDeployment(
   console.log('Registering L2 WETH gateway on the Router')
   const l2Router = l2.router.connect(l2Signer)
   const l2WethGateway = l2.wethGateway.address
+  const wethAddress = l2.weth.address
   const tx = await l2Router.setGateways(
     [wethAddress],
     [l2WethGateway],
@@ -539,7 +555,7 @@ export async function tokenBridgeDeployment(
   )
   const recep = await tx.wait()
   console.log(
-    `L2 Weth Gateway registered on Arb Goerli with transaction hash: ${recep.transactionHash}`
+    `L2 Weth Gateway registered on parent chain with transaction hash: ${recep.transactionHash}`
   )
 
   // Printing the addresses
@@ -550,13 +566,13 @@ export async function tokenBridgeDeployment(
     '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
   )
   console.log('ERC20 contracts deployed and initialized!')
-  console.log('Token bridge contracts on Arbitrum Goerli 📇📇📇:')
+  console.log('Token bridge contracts on parent chain 📇📇📇:')
   console.log('L2 customGateway address: ', l2.customGateway.address)
   console.log('L2 multicall address: ', l2.multicall.address)
   console.log('L2 proxyAdmin address: ', l2.proxyAdmin.address)
   console.log('L2 router address: ', l2.router.address)
   console.log('L2 standardGateway address: ', l2.standardGateway.address)
-  console.log('L2 weth address: ', l2.weth)
+  console.log('L2 weth address: ', l2.weth.address)
   console.log('L2 wethGateway address: ', l2.wethGateway.address)
 
   console.log(
@@ -566,14 +582,17 @@ export async function tokenBridgeDeployment(
     '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
   )
 
-  console.log('Token bridge contracts on appchain 📇📇📇:')
-  console.log('appchain customGateway address: ', l3.customGateway.address)
-  console.log('appchain multicall address: ', l3.multicall.address)
-  console.log('appchain proxyAdmin address: ', l3.proxyAdmin.address)
-  console.log('appchain router address: ', l3.router.address)
-  console.log('appchain standardGateway address: ', l3.standardGateway.address)
-  console.log('appchain weth address: ', l3.weth.address)
-  console.log('appchain wethGateway address: ', l3.wethGateway.address)
+  console.log('Token bridge contracts on Orbit chain 📇📇📇:')
+  console.log('Orbit chain customGateway address: ', l3.customGateway.address)
+  console.log('Orbit chain multicall address: ', l3.multicall.address)
+  console.log('Orbit chain proxyAdmin address: ', l3.proxyAdmin.address)
+  console.log('Orbit chain router address: ', l3.router.address)
+  console.log(
+    'Orbit chain standardGateway address: ',
+    l3.standardGateway.address
+  )
+  console.log('Orbit chain weth address: ', l3.weth.address)
+  console.log('Orbit chain wethGateway address: ', l3.wethGateway.address)
 
   const outputInfo = {
     chainInfo: {
@@ -585,7 +604,7 @@ export async function tokenBridgeDeployment(
       chainOwner: config.chainOwner,
       chainName: config.chainName,
       chainId: config.chainId,
-      parentChainId: 421613,
+      parentChainId: config.parentChainId,
       rpcUrl: 'http://localhost:8449',
       explorerUrl: 'http://localhost:4000',
     },
@@ -607,7 +626,7 @@ export async function tokenBridgeDeployment(
         proxyAdmin: l2.proxyAdmin.address,
         router: l2.router.address,
         standardGateway: l2.standardGateway.address,
-        weth: l2.weth,
+        weth: l2.weth.address,
         wethGateway: l2.wethGateway.address,
       },
       l3Contracts: {

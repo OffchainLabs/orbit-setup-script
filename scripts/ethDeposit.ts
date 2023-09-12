@@ -40,7 +40,7 @@ export async function ethDeposit(
     value: ethers.utils.parseEther('0.4'),
   })
 
-  console.log('Transaction hash on Arbitrum Goerli: ', tx.hash)
+  console.log('Transaction hash on parent chain: ', tx.hash)
   await tx.wait()
   console.log('Transaction has been mined')
 }
