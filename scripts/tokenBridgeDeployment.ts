@@ -324,7 +324,7 @@ const initializeContract = async (
           'WETH',
           18,
           l3.wethGateway!.address,
-          l2.weth!
+          l2.weth!.address
         )
       ).wait()
       rs.initializedState.l3_weth = true
@@ -345,7 +345,7 @@ const initializeContract = async (
         await l3.wethGateway!.initialize(
           l2.wethGateway!.address,
           l3.router!.address,
-          l2.weth!,
+          l2.weth!.address,
           l3.weth!.address
         )
       ).wait()
@@ -437,7 +437,7 @@ const initializeContract = async (
           l3.wethGateway!.address,
           l2.router!.address,
           inboxAddress,
-          l2.weth!,
+          l2.weth!.address,
           l3.weth!.address
         )
       ).wait()
@@ -572,7 +572,7 @@ export async function tokenBridgeDeployment(
   console.log('L2 proxyAdmin address: ', l2.proxyAdmin.address)
   console.log('L2 router address: ', l2.router.address)
   console.log('L2 standardGateway address: ', l2.standardGateway.address)
-  console.log('L2 weth address: ', l2.weth)
+  console.log('L2 weth address: ', l2.weth.address)
   console.log('L2 wethGateway address: ', l2.wethGateway.address)
 
   console.log(
@@ -626,7 +626,7 @@ export async function tokenBridgeDeployment(
         proxyAdmin: l2.proxyAdmin.address,
         router: l2.router.address,
         standardGateway: l2.standardGateway.address,
-        weth: l2.weth,
+        weth: l2.weth.address,
         wethGateway: l2.wethGateway.address,
       },
       l3Contracts: {
