@@ -12,13 +12,17 @@ const configRaw = fs.readFileSync(
   'utf-8'
 )
 const config = JSON.parse(configRaw)
-const inboxAddress = config.inbox
-const depositEthInterface = new ethers.utils.Interface([
-  'function depositEth() public payable',
+const ERC20BridgeAddress = config.bridge
+const ERC20InboxAddress = config.inbox
+
+const erc20BridgeInterface = new ethers.utils.Interface([
+  'function nativeToken() public view returns (address)',
+])
+const erc20InboxInterface = new ethers.utils.Interface([
+  'function depositERC20(uint256) public returns (uint256)',
 ])
 
 async function main() {
-  // Read the environment variables
   const privateKey = process.env.PRIVATE_KEY
   const L2_RPC_URL = process.env.L2_RPC_URL
   const L3_RPC_URL = process.env.L3_RPC_URL
@@ -28,35 +32,40 @@ async function main() {
     throw new Error('Required environment variable not found')
   }
 
-  // Generating providers from RPCs
   const l2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL)
-  const L3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL)
-  // Creating the wallet and signer
+  const l3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL)
   const l2Signer = new ethers.Wallet(privateKey).connect(l2Provider)
 
-  // create contract instance
-  const contract = new ethers.Contract(
-    inboxAddress,
-    depositEthInterface,
+  const erc20Bridge = new ethers.Contract(
+    ERC20BridgeAddress,
+    erc20BridgeInterface,
+    l2Signer
+  )
+  const erc20Inbox = new ethers.Contract(
+    ERC20InboxAddress,
+    erc20InboxInterface,
     l2Signer
   )
 
-  // deposit ETH to the Orbit chain
-  const tx = await contract.depositEth({
-    value: ethers.utils.parseEther(amount),
-  })
-
-  // Getting the current balance on the Orbit chain
-  const oldBalance = await L3Provider.getBalance(config.chainOwner)
+  const nativeToken = await erc20Bridge.nativeToken()
+  let tx
+  if (nativeToken === ethers.constants.AddressZero) {
+    tx = await l2Signer.sendTransaction({
+      to: ERC20InboxAddress,
+      value: ethers.utils.parseEther(amount),
+    })
+  } else {
+    tx = await erc20Inbox.depositERC20(ethers.utils.parseEther(amount))
+  }
 
   console.log('Transaction hash on parent chain: ', tx.hash)
   await tx.wait()
   console.log('Transaction has been mined')
 
-  // Checking to see if the funds are received on the Orbit chain
+  const oldBalance = await l3Provider.getBalance(config.chainOwner)
   while (true) {
-    const newBalance = await L3Provider.getBalance(config.chainOwner)
-    if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther(amount))) {
+    const newBalance = await l3Provider.getBalance(config.chainOwner)
+    if (newBalance.gt(oldBalance)) {
       console.log(
         `LFG! 🚀 Balance of your account on Orbit chain increased by ${amount} Ether.`
       )

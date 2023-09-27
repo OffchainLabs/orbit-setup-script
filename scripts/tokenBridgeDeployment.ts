@@ -38,8 +38,6 @@ import BeaconProxyFactory from '@arbitrum/token-bridge-contracts/build/contracts
 const BeaconProxyFactory__fac = NamedFactoryInstance(BeaconProxyFactory)
 import AeWETH from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/aeWETH.sol/aeWETH.json'
 const AeWETH__fac = NamedFactoryInstance(AeWETH)
-import TestWETH9 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/test/TestWETH9.sol/TestWETH9.json'
-const TestWETH9__fac = NamedFactoryInstance(TestWETH9)
 import Multicall2 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/rpc-utils/MulticallV2.sol/Multicall2.json'
 const Multicall2__fac = NamedFactoryInstance(Multicall2)
 import ArbMulticall2 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/rpc-utils/MulticallV2.sol/ArbMulticall2.json'
