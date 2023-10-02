@@ -37,7 +37,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: 'trust'
 
   nitro:
-    image: offchainlabs/nitro-node:v2.1.0-beta.15-38ad1f1
+    image: offchainlabs/stylus-node:v0.1.0-f47fec1
     ports:
       - "127.0.0.1:8449:8449"
     volumes:
@@ -45,7 +45,7 @@ services:
     command: --conf.file /home/user/.arbitrum/nodeConfig.json
 
   das-server:
-    image: offchainlabs/nitro-node:v2.1.0-beta.15-38ad1f1
+    image: offchainlabs/stylus-node:v0.1.0-f47fec1
     entrypoint: [ "/bin/bash", "/das-server.sh" ]
     volumes:
       - "./config:/home/user/.arbitrum"
