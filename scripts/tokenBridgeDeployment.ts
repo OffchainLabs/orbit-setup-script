@@ -605,6 +605,7 @@ export async function tokenBridgeDeployment(
       parentChainId: config.parentChainId,
       rpcUrl: 'http://localhost:8449',
       explorerUrl: 'http://localhost:4000',
+      nativeToken: config.nativeToken,
     },
     coreContracts: {
       rollup: config.rollup,
