@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { ERC20__factory } from '@arbitrum/sdk/dist/lib/abi/factories/ERC20__factory'
 import fs from 'fs'
 
 async function sendEthOrDepositERC20(
@@ -18,6 +19,19 @@ async function sendEthOrDepositERC20(
     await tx.wait()
     console.log('0.4 ETHs are deposited to your account')
   } else {
+    const nativeTokenContract = ERC20__factory.connect(nativeToken, l2Signer)
+
+    console.log('Approving native token for deposit through inbox')
+    const approveTx = await nativeTokenContract.approve(
+      erc20Inbox.address,
+      ethers.constants.MaxUint256
+    )
+    const approveTxReceipt = await approveTx.wait()
+    console.log(
+      'Transaction hash for approval: ',
+      approveTxReceipt.transactionHash
+    )
+
     // Call depositERC20 with 2 tokens if nativeToken is not zero address.
     const amount = ethers.utils.parseEther('2.0')
     const tx = await erc20Inbox.depositERC20(amount)

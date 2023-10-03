@@ -109,7 +109,7 @@ async function main() {
         'Running ethDeposit Script to Deposit ETH from parent chain to your account on Orbit chain ... 💰💰💰💰💰💰'
       )
       const oldBalance = await L3Provider.getBalance(config.chainOwner)
-      await ethDeposit(privateKey, L2_RPC_URL, L3_RPC_URL)
+      await ethDeposit(privateKey, L2_RPC_URL)
       let depositCheckTime = 0
 
       // Waiting for 30 secs to be sure that ETH deposited is received on L3
