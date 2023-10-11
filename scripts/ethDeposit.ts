@@ -66,14 +66,7 @@ export async function ethDeposit(privateKey: string, L2_RPC_URL: string) {
     'utf-8'
   )
   const config = JSON.parse(configRaw)
-  const ERC20BridgeAddress = config.bridge
   const ERC20InboxAddress = config.inbox
-
-  const erc20Bridge = new ethers.Contract(
-    ERC20BridgeAddress,
-    ['function nativeToken() public view returns (address)'],
-    l2Signer
-  )
 
   const erc20Inbox = new ethers.Contract(
     ERC20InboxAddress,

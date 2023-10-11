@@ -12,12 +12,8 @@ const configRaw = fs.readFileSync(
   'utf-8'
 )
 const config = JSON.parse(configRaw)
-const ERC20BridgeAddress = config.bridge
 const ERC20InboxAddress = config.inbox
 
-const erc20BridgeInterface = new ethers.utils.Interface([
-  'function nativeToken() public view returns (address)',
-])
 const erc20InboxInterface = new ethers.utils.Interface([
   'function depositERC20(uint256) public returns (uint256)',
 ])
@@ -36,11 +32,6 @@ async function main() {
   const l3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL)
   const l2Signer = new ethers.Wallet(privateKey).connect(l2Provider)
 
-  const erc20Bridge = new ethers.Contract(
-    ERC20BridgeAddress,
-    erc20BridgeInterface,
-    l2Signer
-  )
   const erc20Inbox = new ethers.Contract(
     ERC20InboxAddress,
     erc20InboxInterface,
