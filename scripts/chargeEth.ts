@@ -47,13 +47,32 @@ async function main() {
     l2Signer
   )
 
-  const nativeToken = await erc20Bridge.nativeToken()
+  const configRaw = fs.readFileSync(
+    './config/orbitSetupScriptConfig.json',
+    'utf-8'
+  )
+  const config = JSON.parse(configRaw)
+  const nativeToken = config.nativeToken
   let tx
   if (nativeToken === ethers.constants.AddressZero) {
-    tx = await l2Signer.sendTransaction({
-      to: ERC20InboxAddress,
-      value: ethers.utils.parseEther(amount),
+    const inboxAddress = config.inbox
+    const depositEthInterface = new ethers.utils.Interface([
+      'function depositEth() public payable',
+    ])
+    // create contract instance
+    const contract = new ethers.Contract(
+      inboxAddress,
+      depositEthInterface,
+      l2Signer
+    )
+    // deposit 0.4 ETH
+    const tx = await contract.depositEth({
+      value: ethers.utils.parseEther('0.4'),
     })
+    console.log('Transaction hash on parent chain: ', tx.hash)
+    await tx.wait()
+    console.log('Transaction has been mined')
+    console.log('0.4 ETHs are deposited to your account')
   } else {
     tx = await erc20Inbox.depositERC20(ethers.utils.parseEther(amount))
   }

@@ -5,13 +5,6 @@ import { createTokenBridge, getSigner } from './erc20TokenBridgeDeployment'
 import { L1AtomicTokenBridgeCreator__factory } from '../toekn-bridge-contracts'
 import * as fs from 'fs'
 
-export const envVars = {
-  baseChainRpc: process.env['BASECHAIN_RPC'] as string,
-  baseChainDeployerKey: process.env['BASECHAIN_DEPLOYER_KEY'] as string,
-  childChainRpc: process.env['ORBIT_RPC'] as string,
-  rollupAddress: process.env['ROLLUP'] as string,
-}
-
 const L1_TOKEN_BRIDGE_CREATOR = '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
 
 /**
@@ -27,24 +20,20 @@ const L1_TOKEN_BRIDGE_CREATOR = '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
  * @param l2Url
  * @returns
  */
-export const createTokenBridgeOnGoerli = async () => {
-  if (envVars.baseChainRpc == undefined)
-    throw new Error('Missing BASECHAIN_RPC in env vars')
-  if (envVars.baseChainDeployerKey == undefined)
-    throw new Error('Missing BASECHAIN_DEPLOYER_KEY in env vars')
-  if (envVars.childChainRpc == undefined)
-    throw new Error('Missing ORBIT_RPC in env vars')
-  if (envVars.rollupAddress == undefined)
-    throw new Error('Missing rollupAddress in env vars')
-
-  const l1Provider = new JsonRpcProvider(envVars.baseChainRpc)
-  const l1Deployer = getSigner(l1Provider, envVars.baseChainDeployerKey)
-  const l2Provider = new JsonRpcProvider(envVars.childChainRpc)
+export const createTokenBridgeOnGoerli = async (
+  baseChainRpc: string,
+  baseChainDeployerKey: string,
+  childChainRpc: string,
+  rollupAddress: string
+) => {
+  const l1Provider = new JsonRpcProvider(baseChainRpc)
+  const l1Deployer = getSigner(l1Provider, baseChainDeployerKey)
+  const l2Provider = new JsonRpcProvider(childChainRpc)
 
   const { l1Network, l2Network: corel2Network } = await registerGoerliNetworks(
     l1Provider,
     l2Provider,
-    envVars.rollupAddress
+    rollupAddress
   )
 
   const l1TokenBridgeCreator = L1AtomicTokenBridgeCreator__factory.connect(
@@ -57,7 +46,7 @@ export const createTokenBridgeOnGoerli = async () => {
     l1Deployer,
     l2Provider,
     l1TokenBridgeCreator,
-    envVars.rollupAddress
+    rollupAddress
   )
 
   const l2Network = {
@@ -158,16 +147,25 @@ const registerGoerliNetworks = async (
   }
 }
 
-async function main() {
-  console.log('Creating token bridge for rollup', envVars.rollupAddress)
+export const createERC2oBridge = async (
+  baseChainRpc: string,
+  baseChainDeployerKey: string,
+  childChainRpc: string,
+  rollupAddress: string
+) => {
+  console.log('Creating token bridge for rollup', rollupAddress)
 
-  const { l1Network, l2Network } = await createTokenBridgeOnGoerli()
+  const { l1Network, l2Network } = await createTokenBridgeOnGoerli(
+    baseChainRpc,
+    baseChainDeployerKey,
+    childChainRpc,
+    rollupAddress
+  )
   const NETWORK_FILE = 'network.json'
   fs.writeFileSync(
     NETWORK_FILE,
     JSON.stringify({ l1Network, l2Network }, null, 2)
   )
   console.log(NETWORK_FILE + ' updated')
+  console.log('Done!')
 }
-
-main().then(() => console.log('Done.'))

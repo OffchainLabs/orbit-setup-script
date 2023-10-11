@@ -3,19 +3,31 @@ import { ERC20__factory } from '@arbitrum/sdk/dist/lib/abi/factories/ERC20__fact
 import fs from 'fs'
 
 async function sendEthOrDepositERC20(
-  erc20Bridge: ethers.Contract,
   erc20Inbox: ethers.Contract,
   l2Signer: ethers.Wallet
 ) {
-  const nativeToken = await erc20Bridge.nativeToken()
-
+  const configRaw = fs.readFileSync(
+    './config/orbitSetupScriptConfig.json',
+    'utf-8'
+  )
+  const config = JSON.parse(configRaw)
+  const nativeToken = config.nativeToken
   if (nativeToken === ethers.constants.AddressZero) {
     // Send 0.4 ETH if nativeToken is zero address
-    const tx = await l2Signer.sendTransaction({
-      to: erc20Inbox.address,
+    const inboxAddress = config.inbox
+    const depositEthInterface = new ethers.utils.Interface([
+      'function depositEth() public payable',
+    ])
+    // create contract instance
+    const contract = new ethers.Contract(
+      inboxAddress,
+      depositEthInterface,
+      l2Signer
+    )
+    const tx = await contract.depositEth({
       value: ethers.utils.parseEther('0.4'),
     })
-    console.log('Transaction hash: ', tx.hash)
+    console.log('Transaction hash on parent chain: ', tx.hash)
     await tx.wait()
     console.log('0.4 ETHs are deposited to your account')
   } else {
@@ -69,5 +81,5 @@ export async function ethDeposit(privateKey: string, L2_RPC_URL: string) {
     l2Signer
   )
 
-  await sendEthOrDepositERC20(erc20Bridge, erc20Inbox, l2Signer)
+  await sendEthOrDepositERC20(erc20Inbox, l2Signer)
 }
