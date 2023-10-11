@@ -25,7 +25,6 @@ services:
       SUBNETWORK: "Arbitrum Local"
       BLOCKSCOUT_VERSION: "Arbitrum 0.0.1"
       PORT: 4000
-      SECRET_KEY_BASE: qXmARElyUIfgb1dYY2hqlnxKODQ9lKmBibVqDT+w4BXoM6IwWErlour81xv5wqP7
     ports:
       - "127.0.0.1:4000:4000"
 

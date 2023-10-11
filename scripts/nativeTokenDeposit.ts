@@ -1,12 +1,10 @@
 import { ethers } from 'ethers'
 import { ERC20__factory } from '@arbitrum/sdk/dist/lib/abi/factories/ERC20__factory'
 import fs from 'fs'
-import { RuntimeState } from './runTimeState'
 
 async function sendEthOrDepositERC20(
   erc20Inbox: ethers.Contract,
-  l2Signer: ethers.Wallet,
-  rs: RuntimeState
+  l2Signer: ethers.Wallet
 ) {
   const configRaw = fs.readFileSync(
     './config/orbitSetupScriptConfig.json',
@@ -35,19 +33,16 @@ async function sendEthOrDepositERC20(
   } else {
     const nativeTokenContract = ERC20__factory.connect(nativeToken, l2Signer)
 
-    if(!rs.nativeTokenDeposit.erc20Approval) {
-      console.log('Approving native token for deposit through inbox')
-      const approveTx = await nativeTokenContract.approve(
-        erc20Inbox.address,
-        ethers.constants.MaxUint256
-      )
-      const approveTxReceipt = await approveTx.wait()
-      console.log(
-        'Transaction hash for approval: ',
-        approveTxReceipt.transactionHash
-      )
-      rs.nativeTokenDeposit.erc20Approval = true
-    }
+    console.log('Approving native token for deposit through inbox')
+    const approveTx = await nativeTokenContract.approve(
+      erc20Inbox.address,
+      ethers.constants.MaxUint256
+    )
+    const approveTxReceipt = await approveTx.wait()
+    console.log(
+      'Transaction hash for approval: ',
+      approveTxReceipt.transactionHash
+    )
 
     // Call depositERC20 with 2 tokens if nativeToken is not zero address.
     const amount = ethers.utils.parseEther('2.0')
@@ -60,8 +55,7 @@ async function sendEthOrDepositERC20(
 
 export async function ethOrERC20Deposit(
   privateKey: string,
-  L2_RPC_URL: string,
-  rs: RuntimeState
+  L2_RPC_URL: string
 ) {
   if (!privateKey || !L2_RPC_URL) {
     throw new Error('Required environment variable not found')
@@ -83,5 +77,5 @@ export async function ethOrERC20Deposit(
     l2Signer
   )
 
-  await sendEthOrDepositERC20(erc20Inbox, l2Signer, rs)
+  await sendEthOrDepositERC20(erc20Inbox, l2Signer)
 }
