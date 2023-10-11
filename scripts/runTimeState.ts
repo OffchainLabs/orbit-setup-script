@@ -5,12 +5,12 @@ export interface RuntimeState {
   l3: L3_Address
   initializedState: InitializedState
   etherSent: EtherSent
+  nativeTokenDeposit: Boolean
 }
 
 interface EtherSent {
   batchPoster: boolean
   staker: boolean
-  deposit: boolean
 }
 
 interface InitializedState {
@@ -63,8 +63,8 @@ export const defaultRunTimeState: RuntimeState = {
   etherSent: {
     batchPoster: false,
     staker: false,
-    deposit: false,
   },
+  nativeTokenDeposit: false
 }
 export interface L2_Address {
   proxyAdmin: string | null
