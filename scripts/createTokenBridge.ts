@@ -5,7 +5,13 @@ import { createTokenBridge, getSigner } from './erc20TokenBridgeDeployment'
 import { L1AtomicTokenBridgeCreator__factory } from '../toekn-bridge-contracts'
 import * as fs from 'fs'
 
-const L1_TOKEN_BRIDGE_CREATOR = '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
+const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
+  '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
+///////////////////////////// IMPORTANT /////////////////////
+/// Change this address for Arb Sepolia Token Bridge ////////
+/////////////////////////////////////////////////////////////
+const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
+  '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
 
 /**
  * Steps:
@@ -36,8 +42,19 @@ export const createTokenBridgeOnGoerli = async (
     rollupAddress
   )
 
+  let TOKEN_BRIDGE_CREATOR: string
+  if ((await l1Provider.getNetwork()).chainId === 421613) {
+    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Goerli
+  } else if ((await l1Provider.getNetwork()).chainId === 421614) {
+    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
+  } else {
+    throw new Error(
+      'The Base Chain you have provided is not supported, please put RPC for Arb Goerli or Arb Sepolia'
+    )
+  }
+
   const l1TokenBridgeCreator = L1AtomicTokenBridgeCreator__factory.connect(
-    L1_TOKEN_BRIDGE_CREATOR,
+    TOKEN_BRIDGE_CREATOR,
     l1Deployer
   )
 

@@ -53,7 +53,10 @@ async function sendEthOrDepositERC20(
   }
 }
 
-export async function ethDeposit(privateKey: string, L2_RPC_URL: string) {
+export async function ethOrERC20Deposit(
+  privateKey: string,
+  L2_RPC_URL: string
+) {
   if (!privateKey || !L2_RPC_URL) {
     throw new Error('Required environment variable not found')
   }

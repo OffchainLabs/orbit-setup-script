@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { L3Config } from './l3ConfigType'
 import fs from 'fs'
-import { ethDeposit } from './ethDeposit'
+import { ethOrERC20Deposit } from './nativeTokenDeposit'
 import { createERC2oBridge } from './createTokenBridge'
 import { l3Configuration } from './l3Configuration'
 import { tokenBridgeDeployment } from './tokenBridgeDeployment'
@@ -107,10 +107,10 @@ async function main() {
       /// ETH deposit to L3 /////////
       //////////////////////////////
       console.log(
-        'Running ethDeposit Script to Deposit ETH from parent chain to your account on Orbit chain ... 💰💰💰💰💰💰'
+        'Running Orbit Chain Native token deposit to Deposit ETH or native ERC20 token from parent chain to your account on Orbit chain ... 💰💰💰💰💰💰'
       )
       const oldBalance = await L3Provider.getBalance(config.chainOwner)
-      await ethDeposit(privateKey, L2_RPC_URL)
+      await ethOrERC20Deposit(privateKey, L2_RPC_URL)
       let depositCheckTime = 0
 
       // Waiting for 30 secs to be sure that ETH deposited is received on L3
@@ -120,7 +120,7 @@ async function main() {
         const newBalance = await L3Provider.getBalance(config.chainOwner)
         if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther('0.4'))) {
           console.log(
-            'Balance of your account on Orbit chain increased by 0.4 Ether.'
+            'Balance of your account on Orbit chain increased by the native token you have just sent.'
           )
           break
         }
@@ -141,7 +141,7 @@ async function main() {
     /// Token Bridge Deployment ///
     //////////////////////////////
     console.log(
-      'Running tokenBridgeDeployment script to deploy token bridge contracts on parent chain and your Orbit chain 🌉🌉🌉🌉🌉'
+      'Running tokenBridgeDeployment or erc20TokenBridge script to deploy token bridge contracts on parent chain and your Orbit chain 🌉🌉🌉🌉🌉'
     )
     if (config.nativeToken === ethers.constants.AddressZero) {
       await tokenBridgeDeployment(privateKey, L2_RPC_URL, L3_RPC_URL, rs)
