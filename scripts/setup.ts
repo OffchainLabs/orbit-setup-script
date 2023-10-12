@@ -25,6 +25,9 @@ function checkRuntimeStateIntegrity(rs: RuntimeState) {
   if (!rs.initializedState) {
     rs.initializedState = defaultRunTimeState.initializedState
   }
+  if (!rs.nativeTokenDeposit) {
+    rs.nativeTokenDeposit = defaultRunTimeState.nativeTokenDeposit
+  }
 }
 
 async function main() {
@@ -102,7 +105,7 @@ async function main() {
       rs.etherSent.staker = true
     }
 
-    if (!rs.etherSent.deposit) {
+    if (!rs.nativeTokenDeposit) {
       ////////////////////////////////
       /// ETH deposit to L3 /////////
       //////////////////////////////
@@ -134,7 +137,7 @@ async function main() {
         )
         await delay(30 * 1000)
       }
-      rs.etherSent.deposit = true
+      rs.nativeTokenDeposit = true
     }
 
     ////////////////////////////////
