@@ -2,8 +2,9 @@ import { JsonRpcProvider } from '@ethersproject/providers'
 import { L1Network, L2Network, addCustomNetwork } from '@arbitrum/sdk'
 import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/RollupAdminLogic__factory'
 import { createTokenBridge, getSigner } from './erc20TokenBridgeDeployment'
-import { L1AtomicTokenBridgeCreator__factory } from '../toekn-bridge-contracts'
+import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
 import * as fs from 'fs'
+import ethers from 'ethers'
 
 const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
   '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
@@ -53,10 +54,13 @@ export const createTokenBridgeOnGoerli = async (
     )
   }
 
-  const l1TokenBridgeCreator = L1AtomicTokenBridgeCreator__factory.connect(
+  const L1AtomicTokenBridgeCreator__factory = new ethers.Contract(
     TOKEN_BRIDGE_CREATOR,
+    L1AtomicTokenBridgeCreator.abi,
     l1Deployer
   )
+  const l1TokenBridgeCreator =
+    L1AtomicTokenBridgeCreator__factory.connect(l1Deployer)
 
   // create token bridge
   const deployedContracts = await createTokenBridge(

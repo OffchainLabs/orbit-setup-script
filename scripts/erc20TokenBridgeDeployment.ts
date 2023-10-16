@@ -1,29 +1,5 @@
 /* eslint-disable no-empty */
-import { BigNumber, Signer, Wallet, ethers } from 'ethers'
-import {
-  L1CustomGateway__factory,
-  L1ERC20Gateway__factory,
-  L1GatewayRouter__factory,
-  L1AtomicTokenBridgeCreator__factory,
-  L2AtomicTokenBridgeFactory__factory,
-  L2GatewayRouter__factory,
-  L2ERC20Gateway__factory,
-  L2CustomGateway__factory,
-  L1AtomicTokenBridgeCreator,
-  L2WethGateway__factory,
-  AeWETH__factory,
-  L1WethGateway__factory,
-  TransparentUpgradeableProxy__factory,
-  ProxyAdmin__factory,
-  L1TokenBridgeRetryableSender__factory,
-  L1OrbitERC20Gateway__factory,
-  L1OrbitCustomGateway__factory,
-  L1OrbitGatewayRouter__factory,
-  IInbox__factory,
-  IERC20Bridge__factory,
-  IERC20__factory,
-  UpgradeExecutor__factory,
-} from '../toekn-bridge-contracts'
+import { BigNumber, ContractFactory, Signer, Wallet, ethers } from 'ethers'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import {
   L1ToL2MessageGasEstimator,
@@ -34,6 +10,83 @@ import { exit } from 'process'
 import { getBaseFee } from '@arbitrum/sdk/dist/lib/utils/lib'
 import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/RollupAdminLogic__factory'
 
+type NamedFactory = ContractFactory & { contractName: string }
+const NamedFactoryInstance = (contractJson: {
+  abi: any
+  bytecode: string
+  contractName: string
+}): NamedFactory => {
+  const factory = new ContractFactory(
+    contractJson.abi,
+    contractJson.bytecode
+  ) as NamedFactory
+  factory['contractName'] = contractJson.contractName
+  return factory
+}
+
+///////////////////
+///////////////////
+// import from token-bridge-contracts directly to make sure the bytecode is the same
+import L1GatewayRouter from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1GatewayRouter.sol/L1GatewayRouter.json'
+const L1GatewayRouter__factory = NamedFactoryInstance(L1GatewayRouter)
+
+import L1ERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1ERC20Gateway.sol/L1ERC20Gateway.json'
+const L1ERC20Gateway__factory = NamedFactoryInstance(L1ERC20Gateway)
+
+import L1CustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1CustomGateway.sol/L1CustomGateway.json'
+const L1CustomGateway__factory = NamedFactoryInstance(L1CustomGateway)
+import L1WethGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1WethGateway.sol/L1WethGateway.json'
+const L1WethGateway__factory = NamedFactoryInstance(L1WethGateway)
+import L2AtomicTokenBridgeFactory from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/L2AtomicTokenBridgeFactory.sol/L2AtomicTokenBridgeFactory.json'
+const L2AtomicTokenBridgeFactory__factory = NamedFactoryInstance(
+  L2AtomicTokenBridgeFactory
+)
+import L1TokenBridgeRetryableSender from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1TokenBridgeRetryableSender.sol/L1TokenBridgeRetryableSender.json'
+const L1TokenBridgeRetryableSender__factory = NamedFactoryInstance(
+  L1TokenBridgeRetryableSender
+)
+import L1OrbitERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1OrbitERC20Gateway.sol/L1OrbitERC20Gateway.json'
+const L1OrbitERC20Gateway__factory = NamedFactoryInstance(L1OrbitERC20Gateway)
+import L1OrbitCustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1OrbitCustomGateway.sol/L1OrbitCustomGateway.json'
+const L1OrbitCustomGateway__factory = NamedFactoryInstance(L1OrbitCustomGateway)
+import L1OrbitGatewayRouter from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1OrbitGatewayRouter.sol/L1OrbitGatewayRouter.json'
+const L1OrbitGatewayRouter__factory = NamedFactoryInstance(L1OrbitGatewayRouter)
+
+import L2GatewayRouter from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2GatewayRouter.sol/L2GatewayRouter.json'
+const L2GatewayRouter__factory = NamedFactoryInstance(L2GatewayRouter)
+import L2ERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2ERC20Gateway.sol/L2ERC20Gateway.json'
+const L2ERC20Gateway__factory = NamedFactoryInstance(L2ERC20Gateway)
+import L2CustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2CustomGateway.sol/L2CustomGateway.json'
+import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
+const L1AtomicTokenBridgeCreator__factory = NamedFactoryInstance(
+  L1AtomicTokenBridgeCreator
+)
+const L2CustomGateway__factory = NamedFactoryInstance(L2CustomGateway)
+import L2WethGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2WethGateway.sol/L2WethGateway.json'
+const L2WethGateway__factory = NamedFactoryInstance(L2WethGateway)
+
+import AeWETH from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/aeWETH.sol/aeWETH.json'
+const AeWETH__factory = NamedFactoryInstance(AeWETH)
+
+// import from nitro-contracts directly to make sure the bytecode is the same
+
+import IInbox from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IInbox.sol/IInbox.json'
+const IInbox__factory = NamedFactoryInstance(IInbox)
+import IERC20Bridge from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IERC20Bridge.sol/IERC20Bridge.json'
+const IERC20Bridge__factory = NamedFactoryInstance(IERC20Bridge)
+import TransparentUpgradeableProxy from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol/TransparentUpgradeableProxy.json'
+const TransparentUpgradeableProxy__factory = NamedFactoryInstance(
+  TransparentUpgradeableProxy
+)
+import UpgradeExecutor from '@arbitrum/nitro-contracts/build/contracts/src/mocks/UpgradeExecutorMock.sol/UpgradeExecutorMock.json'
+const UpgradeExecutor__factory = NamedFactoryInstance(UpgradeExecutor)
+import ProxyAdmin from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol/ProxyAdmin.json'
+const ProxyAdmin__factory = NamedFactoryInstance(ProxyAdmin)
+import IERC20 from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json'
+const IERC20__factory = NamedFactoryInstance(IERC20)
+
+///////////////////
+///////////////////
 /**
  * Use already deployed L1TokenBridgeCreator to create and init token bridge contracts.
  * Function first gets estimates for 2 retryable tickets - one for deploying L2 factory and
