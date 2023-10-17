@@ -102,7 +102,8 @@ export const createTokenBridge = async (
   l1Signer: Signer,
   l2Provider: ethers.providers.Provider,
   l1TokenBridgeCreator: ethers.Contract,
-  rollupAddress: string
+  rollupAddress: string,
+  childChainId: number
 ) => {
   const gasPrice = await l2Provider.getGasPrice()
   //// run retryable estimate for deploying L2 factory
@@ -220,25 +221,25 @@ export const createTokenBridge = async (
   )[0].args
 
   /// pick up L2 contracts
-  const l2Router = await l1TokenBridgeCreator.getCanonicalL2RouterAddress()
+  const l2Router = await l1TokenBridgeCreator.getCanonicalL2RouterAddress(childChainId)
   const l2StandardGateway = L2ERC20Gateway__factory.attach(
-    await l1TokenBridgeCreator.getCanonicalL2StandardGatewayAddress()
+    await l1TokenBridgeCreator.getCanonicalL2StandardGatewayAddress(childChainId)
   ).connect(l2Provider)
   const beaconProxyFactory = await l2StandardGateway.beaconProxyFactory()
   const l2CustomGateway =
-    await l1TokenBridgeCreator.getCanonicalL2CustomGatewayAddress()
+    await l1TokenBridgeCreator.getCanonicalL2CustomGatewayAddress(childChainId)
 
   const isUsingFeeToken = feeToken != ethers.constants.AddressZero
   const l2WethGateway = isUsingFeeToken
     ? ethers.constants.AddressZero
     : L2WethGateway__factory.attach(
-        await l1TokenBridgeCreator.getCanonicalL2WethGatewayAddress()
+        await l1TokenBridgeCreator.getCanonicalL2WethGatewayAddress(childChainId)
       ).connect(l2Provider).address
   const l1Weth = await l1TokenBridgeCreator.l1Weth()
   const l2Weth = isUsingFeeToken
     ? ethers.constants.AddressZero
-    : await l1TokenBridgeCreator.getCanonicalL2WethAddress()
-  const l2ProxyAdmin = await l1TokenBridgeCreator.canonicalL2ProxyAdminAddress()
+    : await l1TokenBridgeCreator.getCanonicalL2WethAddress(childChainId)
+  const l2ProxyAdmin = await l1TokenBridgeCreator.canonicalL2ProxyAdminAddress(childChainId)
 
   return {
     l1Router,
