@@ -4,15 +4,15 @@ import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/
 import { createTokenBridge, getSigner } from './erc20TokenBridgeDeployment'
 import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
 import * as fs from 'fs'
-import ethers from 'ethers'
+import { ethers } from 'ethers'
 
 const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
-  '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
+  '0x17412CC654a49Cdd5cE6965359d190F100Cf24d9'
 ///////////////////////////// IMPORTANT /////////////////////
 /// Change this address for Arb Sepolia Token Bridge ////////
 /////////////////////////////////////////////////////////////
 const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
-  '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
+  '0x0025E5A25D64e02Fa711cfAEdf83987dac917eaC'
 
 /**
  * Steps:
