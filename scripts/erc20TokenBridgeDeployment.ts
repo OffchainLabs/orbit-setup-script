@@ -64,12 +64,11 @@ const L1AtomicTokenBridgeCreator__factory = NamedFactoryInstance(
 const L2CustomGateway__factory = NamedFactoryInstance(L2CustomGateway)
 import L2WethGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2WethGateway.sol/L2WethGateway.json'
 const L2WethGateway__factory = NamedFactoryInstance(L2WethGateway)
-
 import AeWETH from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/aeWETH.sol/aeWETH.json'
 const AeWETH__factory = NamedFactoryInstance(AeWETH)
+import ArbMulticall2 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/rpc-utils/MulticallV2.sol/ArbMulticall2.json'
 
 // import from nitro-contracts directly to make sure the bytecode is the same
-
 import IInbox from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IInbox.sol/IInbox.json'
 const IInbox__factory = NamedFactoryInstance(IInbox)
 import IERC20Bridge from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IERC20Bridge.sol/IERC20Bridge.json'
@@ -106,29 +105,27 @@ export const createTokenBridge = async (
   rollupAddress: string
 ) => {
   const gasPrice = await l2Provider.getGasPrice()
-
   //// run retryable estimate for deploying L2 factory
   const deployFactoryGasParams = await getEstimateForDeployingFactory(
     l1Signer,
     l2Provider
   )
-
   const maxGasForFactory =
     await l1TokenBridgeCreator.gasLimitForL2FactoryDeployment()
   const maxSubmissionCostForFactory = deployFactoryGasParams.maxSubmissionCost
-
   //// run retryable estimate for deploying L2 contracts
   //// we do this estimate using L2 factory template on L1 because on L2 factory does not yet exist
   const l2FactoryTemplate = L2AtomicTokenBridgeFactory__factory.attach(
     await l1TokenBridgeCreator.l2TokenBridgeFactoryTemplate()
   ).connect(l1Signer)
   const l2Code = {
-    router: L2GatewayRouter__factory.bytecode,
-    standardGateway: L2ERC20Gateway__factory.bytecode,
-    customGateway: L2CustomGateway__factory.bytecode,
-    wethGateway: L2WethGateway__factory.bytecode,
-    aeWeth: AeWETH__factory.bytecode,
-    upgradeExecutor: UpgradeExecutor__factory.bytecode,
+    router: L2GatewayRouter.bytecode,
+    standardGateway: L2ERC20Gateway.bytecode,
+    customGateway: L2CustomGateway.bytecode,
+    wethGateway: L2WethGateway.bytecode,
+    aeWeth: AeWETH.bytecode,
+    upgradeExecutor: UpgradeExecutor.bytecode,
+    multicall: ArbMulticall2.bytecode
   }
   const gasEstimateToDeployContracts =
     await l2FactoryTemplate.estimateGas.deployL2Contracts(
@@ -145,7 +142,6 @@ export const createTokenBridge = async (
   const maxGasForContracts = gasEstimateToDeployContracts.mul(2)
   const maxSubmissionCostForContracts =
     deployFactoryGasParams.maxSubmissionCost.mul(2)
-
   let retryableFee = maxSubmissionCostForFactory
     .add(maxSubmissionCostForContracts)
     .add(maxGasForFactory.mul(gasPrice))
@@ -156,29 +152,27 @@ export const createTokenBridge = async (
     rollupAddress,
     l1Signer.provider!
   ).inbox()
-
   // if fee token is used approve the fee
   const feeToken = await _getFeeToken(inbox, l1Signer.provider!)
   if (feeToken != ethers.constants.AddressZero) {
     await (
-      await IERC20__factory.attach(l1TokenBridgeCreator.address)
+      await IERC20__factory.attach(feeToken)
         .connect(l1Signer)
         .attach(feeToken)
-        .approve(retryableFee)
+        .approve(l1TokenBridgeCreator.address, retryableFee)
     ).wait()
     retryableFee = BigNumber.from(0)
   }
-
   /// do it - create token bridge
   const receipt = await (
     await l1TokenBridgeCreator.createTokenBridge(
       inbox,
+      await l1Signer.getAddress(),
       maxGasForContracts,
       gasPrice,
       { value: retryableFee }
     )
   ).wait()
-
   console.log('Deployment TX:', receipt.transactionHash)
 
   /// wait for execution of both tickets
