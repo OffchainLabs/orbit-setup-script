@@ -4,15 +4,15 @@ import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/
 import { createTokenBridge, getSigner } from './erc20TokenBridgeDeployment'
 import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
 import * as fs from 'fs'
-import ethers from 'ethers'
+import { ethers } from 'ethers'
 
 const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
-  '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
+  '0x17412CC654a49Cdd5cE6965359d190F100Cf24d9'
 ///////////////////////////// IMPORTANT /////////////////////
 /// Change this address for Arb Sepolia Token Bridge ////////
 /////////////////////////////////////////////////////////////
 const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
-  '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
+  '0x0025E5A25D64e02Fa711cfAEdf83987dac917eaC'
 
 /**
  * Steps:
@@ -31,7 +31,8 @@ export const createTokenBridgeOnGoerli = async (
   baseChainRpc: string,
   baseChainDeployerKey: string,
   childChainRpc: string,
-  rollupAddress: string
+  rollupAddress: string,
+  childChainId: number
 ) => {
   const l1Provider = new JsonRpcProvider(baseChainRpc)
   const l1Deployer = getSigner(l1Provider, baseChainDeployerKey)
@@ -67,7 +68,8 @@ export const createTokenBridgeOnGoerli = async (
     l1Deployer,
     l2Provider,
     l1TokenBridgeCreator,
-    rollupAddress
+    rollupAddress,
+    childChainId
   )
 
   const l2Network = {
@@ -168,11 +170,12 @@ const registerGoerliNetworks = async (
   }
 }
 
-export const createERC2oBridge = async (
+export const createERC20Bridge = async (
   baseChainRpc: string,
   baseChainDeployerKey: string,
   childChainRpc: string,
-  rollupAddress: string
+  rollupAddress: string,
+  childChainId: number
 ) => {
   console.log('Creating token bridge for rollup', rollupAddress)
 
@@ -180,7 +183,8 @@ export const createERC2oBridge = async (
     baseChainRpc,
     baseChainDeployerKey,
     childChainRpc,
-    rollupAddress
+    rollupAddress,
+    childChainId
   )
   const NETWORK_FILE = 'network.json'
   fs.writeFileSync(
