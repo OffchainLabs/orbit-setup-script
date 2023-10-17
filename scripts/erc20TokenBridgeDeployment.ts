@@ -239,7 +239,7 @@ export const createTokenBridge = async (
   const l2Weth = isUsingFeeToken
     ? ethers.constants.AddressZero
     : await l1TokenBridgeCreator.getCanonicalL2WethAddress(childChainId)
-  const l2ProxyAdmin = await l1TokenBridgeCreator.canonicalL2ProxyAdminAddress(childChainId)
+  const l2ProxyAdmin = await l1TokenBridgeCreator.getCanonicalL2ProxyAdminAddress(childChainId)
 
   return {
     l1Router,
