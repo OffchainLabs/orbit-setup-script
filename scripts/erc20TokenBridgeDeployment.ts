@@ -27,45 +27,20 @@ const NamedFactoryInstance = (contractJson: {
 ///////////////////
 ///////////////////
 // import from token-bridge-contracts directly to make sure the bytecode is the same
-import L1GatewayRouter from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1GatewayRouter.sol/L1GatewayRouter.json'
-const L1GatewayRouter__factory = NamedFactoryInstance(L1GatewayRouter)
 
-import L1ERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1ERC20Gateway.sol/L1ERC20Gateway.json'
-const L1ERC20Gateway__factory = NamedFactoryInstance(L1ERC20Gateway)
-
-import L1CustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1CustomGateway.sol/L1CustomGateway.json'
-const L1CustomGateway__factory = NamedFactoryInstance(L1CustomGateway)
-import L1WethGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1WethGateway.sol/L1WethGateway.json'
-const L1WethGateway__factory = NamedFactoryInstance(L1WethGateway)
 import L2AtomicTokenBridgeFactory from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/L2AtomicTokenBridgeFactory.sol/L2AtomicTokenBridgeFactory.json'
 const L2AtomicTokenBridgeFactory__factory = NamedFactoryInstance(
   L2AtomicTokenBridgeFactory
 )
-import L1TokenBridgeRetryableSender from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1TokenBridgeRetryableSender.sol/L1TokenBridgeRetryableSender.json'
-const L1TokenBridgeRetryableSender__factory = NamedFactoryInstance(
-  L1TokenBridgeRetryableSender
-)
-import L1OrbitERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1OrbitERC20Gateway.sol/L1OrbitERC20Gateway.json'
-const L1OrbitERC20Gateway__factory = NamedFactoryInstance(L1OrbitERC20Gateway)
-import L1OrbitCustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1OrbitCustomGateway.sol/L1OrbitCustomGateway.json'
-const L1OrbitCustomGateway__factory = NamedFactoryInstance(L1OrbitCustomGateway)
-import L1OrbitGatewayRouter from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/gateway/L1OrbitGatewayRouter.sol/L1OrbitGatewayRouter.json'
-const L1OrbitGatewayRouter__factory = NamedFactoryInstance(L1OrbitGatewayRouter)
 
 import L2GatewayRouter from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2GatewayRouter.sol/L2GatewayRouter.json'
-const L2GatewayRouter__factory = NamedFactoryInstance(L2GatewayRouter)
 import L2ERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2ERC20Gateway.sol/L2ERC20Gateway.json'
 const L2ERC20Gateway__factory = NamedFactoryInstance(L2ERC20Gateway)
 import L2CustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2CustomGateway.sol/L2CustomGateway.json'
-import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
-const L1AtomicTokenBridgeCreator__factory = NamedFactoryInstance(
-  L1AtomicTokenBridgeCreator
-)
-const L2CustomGateway__factory = NamedFactoryInstance(L2CustomGateway)
+
 import L2WethGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2WethGateway.sol/L2WethGateway.json'
 const L2WethGateway__factory = NamedFactoryInstance(L2WethGateway)
 import AeWETH from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/aeWETH.sol/aeWETH.json'
-const AeWETH__factory = NamedFactoryInstance(AeWETH)
 import ArbMulticall2 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/rpc-utils/MulticallV2.sol/ArbMulticall2.json'
 
 // import from nitro-contracts directly to make sure the bytecode is the same
@@ -73,14 +48,8 @@ import IInbox from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IInbox.
 const IInbox__factory = NamedFactoryInstance(IInbox)
 import IERC20Bridge from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IERC20Bridge.sol/IERC20Bridge.json'
 const IERC20Bridge__factory = NamedFactoryInstance(IERC20Bridge)
-import TransparentUpgradeableProxy from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol/TransparentUpgradeableProxy.json'
-const TransparentUpgradeableProxy__factory = NamedFactoryInstance(
-  TransparentUpgradeableProxy
-)
+
 import UpgradeExecutor from '@arbitrum/nitro-contracts/build/contracts/src/mocks/UpgradeExecutorMock.sol/UpgradeExecutorMock.json'
-const UpgradeExecutor__factory = NamedFactoryInstance(UpgradeExecutor)
-import ProxyAdmin from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol/ProxyAdmin.json'
-const ProxyAdmin__factory = NamedFactoryInstance(ProxyAdmin)
 import IERC20 from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json'
 const IERC20__factory = NamedFactoryInstance(IERC20)
 
@@ -263,143 +232,6 @@ export const createTokenBridge = async (
     beaconProxyFactory,
     l2ProxyAdmin,
   }
-}
-
-/**
- * Deploy token bridge creator contract to base chain and set all the templates
- * @param l1Deployer
- * @param l2Provider
- * @param l1WethAddress
- * @returns
- */
-export const deployL1TokenBridgeCreator = async (
-  l1Deployer: Signer,
-  l2Provider: ethers.providers.Provider,
-  l1WethAddress: string
-) => {
-  /// deploy creator behind proxy
-  const l1TokenBridgeCreatorProxyAdmin = await ProxyAdmin__factory.deploy()
-  await l1TokenBridgeCreatorProxyAdmin.deployed()
-
-  const l1TokenBridgeCreatorLogic =
-    await L1AtomicTokenBridgeCreator__factory.deploy()
-  await l1TokenBridgeCreatorLogic.deployed()
-
-  const l1TokenBridgeCreatorProxy =
-    await TransparentUpgradeableProxy__factory.deploy(
-      l1TokenBridgeCreatorLogic.address,
-      l1TokenBridgeCreatorProxyAdmin.address,
-      '0x'
-    )
-  await l1TokenBridgeCreatorProxy.deployed()
-
-  const l1TokenBridgeCreator = L1AtomicTokenBridgeCreator__factory.attach(
-    l1TokenBridgeCreatorProxy.address
-  ).connect(l1Deployer)
-
-  /// deploy retryable sender behind proxy
-  const retryableSenderLogic =
-    await L1TokenBridgeRetryableSender__factory.deploy()
-  await retryableSenderLogic.deployed()
-
-  const retryableSenderProxy =
-    await TransparentUpgradeableProxy__factory.deploy(
-      retryableSenderLogic.address,
-      l1TokenBridgeCreatorProxyAdmin.address,
-      '0x'
-    )
-  await retryableSenderProxy.deployed()
-
-  const retryableSender = L1TokenBridgeRetryableSender__factory.attach(
-    retryableSenderProxy.address
-  ).connect(l1Deployer)
-
-  /// init creator
-  await (await l1TokenBridgeCreator.initialize(retryableSender.address)).wait()
-
-  /// deploy L1 logic contracts
-  const routerTemplate = await L1GatewayRouter__factory.deploy()
-  await routerTemplate.deployed()
-
-  const standardGatewayTemplate = await L1ERC20Gateway__factory.deploy()
-  await standardGatewayTemplate.deployed()
-
-  const customGatewayTemplate = await L1CustomGateway__factory.deploy()
-  await customGatewayTemplate.deployed()
-
-  const wethGatewayTemplate = await L1WethGateway__factory.deploy()
-  await wethGatewayTemplate.deployed()
-
-  const feeTokenBasedRouterTemplate =
-    await L1OrbitGatewayRouter__factory.deploy()
-  await feeTokenBasedRouterTemplate.deployed()
-
-  const feeTokenBasedStandardGatewayTemplate =
-    await L1OrbitERC20Gateway__factory.deploy()
-  await feeTokenBasedStandardGatewayTemplate.deployed()
-
-  const feeTokenBasedCustomGatewayTemplate =
-    await L1OrbitCustomGateway__factory.deploy()
-  await feeTokenBasedCustomGatewayTemplate.deployed()
-
-  const upgradeExecutor = await UpgradeExecutor__factory.deploy()
-  await upgradeExecutor.deployed()
-
-  const l1Templates = {
-    routerTemplate: routerTemplate.address,
-    standardGatewayTemplate: standardGatewayTemplate.address,
-    customGatewayTemplate: customGatewayTemplate.address,
-    wethGatewayTemplate: wethGatewayTemplate.address,
-    feeTokenBasedRouterTemplate: feeTokenBasedRouterTemplate.address,
-    feeTokenBasedStandardGatewayTemplate:
-      feeTokenBasedStandardGatewayTemplate.address,
-    feeTokenBasedCustomGatewayTemplate:
-      feeTokenBasedCustomGatewayTemplate.address,
-    upgradeExecutor: upgradeExecutor.address,
-  }
-
-  /// deploy L2 contracts as placeholders on L1
-
-  const l2TokenBridgeFactoryOnL1 =
-    await L2AtomicTokenBridgeFactory__factory.deploy()
-  await l2TokenBridgeFactoryOnL1.deployed()
-
-  const l2GatewayRouterOnL1 = await L2GatewayRouter__factory.deploy()
-  await l2GatewayRouterOnL1.deployed()
-
-  const l2StandardGatewayAddressOnL1 = await L2ERC20Gateway__factory.deploy()
-  await l2StandardGatewayAddressOnL1.deployed()
-
-  const l2CustomGatewayAddressOnL1 = await L2CustomGateway__factory.deploy()
-  await l2CustomGatewayAddressOnL1.deployed()
-
-  const l2WethGatewayAddressOnL1 = await L2WethGateway__factory.deploy()
-  await l2WethGatewayAddressOnL1.deployed()
-
-  const l2WethAddressOnL1 = await AeWETH__factory.deploy()
-  await l2WethAddressOnL1.deployed()
-
-  //// run retryable estimate for deploying L2 factory
-  const deployFactoryGasParams = await getEstimateForDeployingFactory(
-    l1Deployer,
-    l2Provider
-  )
-
-  await (
-    await l1TokenBridgeCreator.setTemplates(
-      l1Templates,
-      l2TokenBridgeFactoryOnL1.address,
-      l2GatewayRouterOnL1.address,
-      l2StandardGatewayAddressOnL1.address,
-      l2CustomGatewayAddressOnL1.address,
-      l2WethGatewayAddressOnL1.address,
-      l2WethAddressOnL1.address,
-      l1WethAddress,
-      deployFactoryGasParams.gasLimit
-    )
-  ).wait()
-
-  return l1TokenBridgeCreator
 }
 
 export const getEstimateForDeployingFactory = async (
