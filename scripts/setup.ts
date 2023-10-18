@@ -12,20 +12,14 @@ function delay(ms: number) {
 }
 
 function checkRuntimeStateIntegrity(rs: RuntimeState) {
-  if (!rs.l3) {
-    rs.l3 = defaultRunTimeState.l3
-  }
-  if (!rs.l2) {
-    rs.l2 = defaultRunTimeState.l2
-  }
   if (!rs.etherSent) {
     rs.etherSent = defaultRunTimeState.etherSent
   }
-  if (!rs.initializedState) {
-    rs.initializedState = defaultRunTimeState.initializedState
-  }
   if (!rs.nativeTokenDeposit) {
     rs.nativeTokenDeposit = defaultRunTimeState.nativeTokenDeposit
+  }
+  if (!rs.tokenBridgeDeployed) {
+    rs.tokenBridgeDeployed = defaultRunTimeState.tokenBridgeDeployed
   }
 }
 
@@ -139,19 +133,22 @@ async function main() {
       rs.nativeTokenDeposit = true
     }
 
-    ////////////////////////////////
-    /// Token Bridge Deployment ///
-    //////////////////////////////
-    console.log(
-      'Running tokenBridgeDeployment or erc20TokenBridge script to deploy token bridge contracts on parent chain and your Orbit chain 🌉🌉🌉🌉🌉'
-    )
-    await createERC20Bridge(
-      L2_RPC_URL,
-      privateKey,
-      L3_RPC_URL,
-      config.rollup,
-      config.chainId
-    )
+    if (!rs.tokenBridgeDeployed) {
+      ////////////////////////////////
+      /// Token Bridge Deployment ///
+      //////////////////////////////
+      console.log(
+        'Running tokenBridgeDeployment or erc20TokenBridge script to deploy token bridge contracts on parent chain and your Orbit chain 🌉🌉🌉🌉🌉'
+      )
+      await createERC20Bridge(
+        L2_RPC_URL,
+        privateKey,
+        L3_RPC_URL,
+        config.rollup,
+        config.chainId
+      )
+      rs.tokenBridgeDeployed = true
+    }
     ////////////////////////////////
     /// L3 Chain Configuration ///
     //////////////////////////////
