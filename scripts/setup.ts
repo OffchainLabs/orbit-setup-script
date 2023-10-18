@@ -149,7 +149,13 @@ async function main() {
     if (config.nativeToken === ethers.constants.AddressZero) {
       await tokenBridgeDeployment(privateKey, L2_RPC_URL, L3_RPC_URL, rs)
     } else {
-      await createERC20Bridge(L2_RPC_URL, privateKey, L3_RPC_URL, config.rollup, config.chainId)
+      await createERC20Bridge(
+        L2_RPC_URL,
+        privateKey,
+        L3_RPC_URL,
+        config.rollup,
+        config.chainId
+      )
     }
     ////////////////////////////////
     /// L3 Chain Configuration ///

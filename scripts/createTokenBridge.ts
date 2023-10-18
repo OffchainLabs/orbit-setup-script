@@ -27,7 +27,7 @@ const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
  * @param l2Url
  * @returns
  */
-export const createTokenBridgeOnGoerli = async (
+export const createNewTokenBridge = async (
   baseChainRpc: string,
   baseChainDeployerKey: string,
   childChainRpc: string,
@@ -38,7 +38,7 @@ export const createTokenBridgeOnGoerli = async (
   const l1Deployer = getSigner(l1Provider, baseChainDeployerKey)
   const l2Provider = new JsonRpcProvider(childChainRpc)
 
-  const { l1Network, l2Network: corel2Network } = await registerGoerliNetworks(
+  const { l1Network, l2Network: corel2Network } = await registerNewNetwork(
     l1Provider,
     l2Provider,
     rollupAddress
@@ -99,7 +99,7 @@ export const createTokenBridgeOnGoerli = async (
   }
 }
 
-const registerGoerliNetworks = async (
+const registerNewNetwork = async (
   l1Provider: JsonRpcProvider,
   l2Provider: JsonRpcProvider,
   rollupAddress: string
@@ -179,7 +179,7 @@ export const createERC20Bridge = async (
 ) => {
   console.log('Creating token bridge for rollup', rollupAddress)
 
-  const { l1Network, l2Network } = await createTokenBridgeOnGoerli(
+  const { l1Network, l2Network } = await createNewTokenBridge(
     baseChainRpc,
     baseChainDeployerKey,
     childChainRpc,

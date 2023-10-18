@@ -126,7 +126,7 @@ export const createTokenBridge = async (
     wethGateway: L2WethGateway.bytecode,
     aeWeth: AeWETH.bytecode,
     upgradeExecutor: UpgradeExecutor.bytecode,
-    multicall: ArbMulticall2.bytecode
+    multicall: ArbMulticall2.bytecode,
   }
   const gasEstimateToDeployContracts =
     await l2FactoryTemplate.estimateGas.deployL2Contracts(
@@ -221,9 +221,13 @@ export const createTokenBridge = async (
   )[0].args
 
   /// pick up L2 contracts
-  const l2Router = await l1TokenBridgeCreator.getCanonicalL2RouterAddress(childChainId)
+  const l2Router = await l1TokenBridgeCreator.getCanonicalL2RouterAddress(
+    childChainId
+  )
   const l2StandardGateway = L2ERC20Gateway__factory.attach(
-    await l1TokenBridgeCreator.getCanonicalL2StandardGatewayAddress(childChainId)
+    await l1TokenBridgeCreator.getCanonicalL2StandardGatewayAddress(
+      childChainId
+    )
   ).connect(l2Provider)
   const beaconProxyFactory = await l2StandardGateway.beaconProxyFactory()
   const l2CustomGateway =
@@ -233,13 +237,16 @@ export const createTokenBridge = async (
   const l2WethGateway = isUsingFeeToken
     ? ethers.constants.AddressZero
     : L2WethGateway__factory.attach(
-        await l1TokenBridgeCreator.getCanonicalL2WethGatewayAddress(childChainId)
+        await l1TokenBridgeCreator.getCanonicalL2WethGatewayAddress(
+          childChainId
+        )
       ).connect(l2Provider).address
   const l1Weth = await l1TokenBridgeCreator.l1Weth()
   const l2Weth = isUsingFeeToken
     ? ethers.constants.AddressZero
     : await l1TokenBridgeCreator.getCanonicalL2WethAddress(childChainId)
-  const l2ProxyAdmin = await l1TokenBridgeCreator.getCanonicalL2ProxyAdminAddress(childChainId)
+  const l2ProxyAdmin =
+    await l1TokenBridgeCreator.getCanonicalL2ProxyAdminAddress(childChainId)
 
   return {
     l1Router,
