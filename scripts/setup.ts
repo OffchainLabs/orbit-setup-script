@@ -5,7 +5,7 @@ import { ethOrERC20Deposit } from './nativeTokenDeposit'
 import { createERC20Bridge } from './createTokenBridge'
 import { l3Configuration } from './l3Configuration'
 import { defaultRunTimeState, RuntimeState } from './runTimeState'
-
+import { transferOwner } from './transferOwnership'
 // Delay function
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -20,6 +20,12 @@ function checkRuntimeStateIntegrity(rs: RuntimeState) {
   }
   if (!rs.tokenBridgeDeployed) {
     rs.tokenBridgeDeployed = defaultRunTimeState.tokenBridgeDeployed
+  }
+  if (!rs.l3config) {
+    rs.l3config = defaultRunTimeState.l3config
+  }
+  if (!rs.transferOwnership) {
+    rs.transferOwnership = defaultRunTimeState.transferOwnership
   }
 }
 
@@ -152,10 +158,23 @@ async function main() {
     ////////////////////////////////
     /// L3 Chain Configuration ///
     //////////////////////////////
-    console.log(
-      'Running l3Configuration script to configure your Orbit chain 📝📝📝📝📝'
-    )
-    await l3Configuration(privateKey, L2_RPC_URL, L3_RPC_URL)
+    if (!rs.l3config) {
+      console.log(
+        'Running l3Configuration script to configure your Orbit chain 📝📝📝📝📝'
+      )
+      await l3Configuration(privateKey, L2_RPC_URL, L3_RPC_URL)
+      rs.l3config = true
+    }
+    ////////////////////////////////
+    /// Transfering ownership /////
+    //////////////////////////////
+    if (!rs.transferOwnership) {
+      console.log(
+        'Transferring ownership on L3, from rollup owner to upgrade executor 🔃🔃🔃'
+      )
+      await transferOwner(privateKey, L2Provider, L3Provider)
+      rs.transferOwnership = true
+    }
   } catch (error) {
     console.error('Error occurred:', error)
     const runtimeString = JSON.stringify(rs)
