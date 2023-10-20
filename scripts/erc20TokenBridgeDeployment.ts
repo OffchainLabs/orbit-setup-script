@@ -219,6 +219,11 @@ export const createTokenBridge = async (
   const l2ProxyAdmin =
     await l1TokenBridgeCreator.getCanonicalL2ProxyAdminAddress(childChainId)
 
+  const l1MultiCall = await l1TokenBridgeCreator.l1MultiCall()
+  const l2Multicall = await l1TokenBridgeCreator.getCanonicalL2Multicall(
+    childChainId
+  )
+
   return {
     l1Router,
     l1StandardGateway,
@@ -233,6 +238,8 @@ export const createTokenBridge = async (
     l2Weth,
     beaconProxyFactory,
     l2ProxyAdmin,
+    l1MultiCall,
+    l2Multicall,
   }
 }
 
