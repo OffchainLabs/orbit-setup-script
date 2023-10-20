@@ -39,7 +39,6 @@ const L2ERC20Gateway__factory = NamedFactoryInstance(L2ERC20Gateway)
 import L2CustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2CustomGateway.sol/L2CustomGateway.json'
 
 import L2WethGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2WethGateway.sol/L2WethGateway.json'
-const L2WethGateway__factory = NamedFactoryInstance(L2WethGateway)
 import AeWETH from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/aeWETH.sol/aeWETH.json'
 import ArbMulticall2 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/rpc-utils/MulticallV2.sol/ArbMulticall2.json'
 
@@ -205,11 +204,7 @@ export const createTokenBridge = async (
   const isUsingFeeToken = feeToken != ethers.constants.AddressZero
   const l2WethGateway = isUsingFeeToken
     ? ethers.constants.AddressZero
-    : L2WethGateway__factory.attach(
-        await l1TokenBridgeCreator.getCanonicalL2WethGatewayAddress(
-          childChainId
-        )
-      ).connect(l2Provider).address
+    : await l1TokenBridgeCreator.getCanonicalL2WethGatewayAddress(childChainId)
   const l1Weth = await l1TokenBridgeCreator.l1Weth()
   const l2Weth = isUsingFeeToken
     ? ethers.constants.AddressZero
