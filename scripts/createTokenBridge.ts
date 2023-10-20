@@ -7,12 +7,12 @@ import * as fs from 'fs'
 import { ethers } from 'ethers'
 
 const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
-  '0x17412CC654a49Cdd5cE6965359d190F100Cf24d9'
+  '0x1C608642d0944e95957a7ac3a478EC17FA191E9A'
 ///////////////////////////// IMPORTANT /////////////////////
 /// Change this address for Arb Sepolia Token Bridge ////////
 /////////////////////////////////////////////////////////////
 const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
-  '0x0025E5A25D64e02Fa711cfAEdf83987dac917eaC'
+  '0xC35800028e31044173d37291F425DCc42D068c84'
 
 /**
  * Steps:
