@@ -2,16 +2,17 @@ import { JsonRpcProvider } from '@ethersproject/providers'
 import { L1Network, L2Network, addCustomNetwork } from '@arbitrum/sdk'
 import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/RollupAdminLogic__factory'
 import { createTokenBridge, getSigner } from './erc20TokenBridgeDeployment'
-import { L1AtomicTokenBridgeCreator__factory } from '../toekn-bridge-contracts'
+import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
 import * as fs from 'fs'
+import { ethers } from 'ethers'
 
 const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
-  '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
+  '0x17412CC654a49Cdd5cE6965359d190F100Cf24d9'
 ///////////////////////////// IMPORTANT /////////////////////
 /// Change this address for Arb Sepolia Token Bridge ////////
 /////////////////////////////////////////////////////////////
 const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
-  '0xc9CDf2425961e232FdBA51650A729710de7bfa69'
+  '0x0025E5A25D64e02Fa711cfAEdf83987dac917eaC'
 
 /**
  * Steps:
@@ -26,17 +27,18 @@ const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
  * @param l2Url
  * @returns
  */
-export const createTokenBridgeOnGoerli = async (
+export const createNewTokenBridge = async (
   baseChainRpc: string,
   baseChainDeployerKey: string,
   childChainRpc: string,
-  rollupAddress: string
+  rollupAddress: string,
+  childChainId: number
 ) => {
   const l1Provider = new JsonRpcProvider(baseChainRpc)
   const l1Deployer = getSigner(l1Provider, baseChainDeployerKey)
   const l2Provider = new JsonRpcProvider(childChainRpc)
 
-  const { l1Network, l2Network: corel2Network } = await registerGoerliNetworks(
+  const { l1Network, l2Network: corel2Network } = await registerNewNetwork(
     l1Provider,
     l2Provider,
     rollupAddress
@@ -53,17 +55,21 @@ export const createTokenBridgeOnGoerli = async (
     )
   }
 
-  const l1TokenBridgeCreator = L1AtomicTokenBridgeCreator__factory.connect(
+  const L1AtomicTokenBridgeCreator__factory = new ethers.Contract(
     TOKEN_BRIDGE_CREATOR,
+    L1AtomicTokenBridgeCreator.abi,
     l1Deployer
   )
+  const l1TokenBridgeCreator =
+    L1AtomicTokenBridgeCreator__factory.connect(l1Deployer)
 
   // create token bridge
   const deployedContracts = await createTokenBridge(
     l1Deployer,
     l2Provider,
     l1TokenBridgeCreator,
-    rollupAddress
+    rollupAddress,
+    childChainId
   )
 
   const l2Network = {
@@ -93,7 +99,7 @@ export const createTokenBridgeOnGoerli = async (
   }
 }
 
-const registerGoerliNetworks = async (
+const registerNewNetwork = async (
   l1Provider: JsonRpcProvider,
   l2Provider: JsonRpcProvider,
   rollupAddress: string
@@ -164,19 +170,21 @@ const registerGoerliNetworks = async (
   }
 }
 
-export const createERC2oBridge = async (
+export const createERC20Bridge = async (
   baseChainRpc: string,
   baseChainDeployerKey: string,
   childChainRpc: string,
-  rollupAddress: string
+  rollupAddress: string,
+  childChainId: number
 ) => {
   console.log('Creating token bridge for rollup', rollupAddress)
 
-  const { l1Network, l2Network } = await createTokenBridgeOnGoerli(
+  const { l1Network, l2Network } = await createNewTokenBridge(
     baseChainRpc,
     baseChainDeployerKey,
     childChainRpc,
-    rollupAddress
+    rollupAddress,
+    childChainId
   )
   const NETWORK_FILE = 'network.json'
   fs.writeFileSync(

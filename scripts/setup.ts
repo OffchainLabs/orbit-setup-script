@@ -2,9 +2,8 @@ import { ethers } from 'ethers'
 import { L3Config } from './l3ConfigType'
 import fs from 'fs'
 import { ethOrERC20Deposit } from './nativeTokenDeposit'
-import { createERC2oBridge } from './createTokenBridge'
+import { createERC20Bridge } from './createTokenBridge'
 import { l3Configuration } from './l3Configuration'
-import { tokenBridgeDeployment } from './tokenBridgeDeployment'
 import { defaultRunTimeState, RuntimeState } from './runTimeState'
 
 // Delay function
@@ -13,6 +12,7 @@ function delay(ms: number) {
 }
 
 function checkRuntimeStateIntegrity(rs: RuntimeState) {
+<<<<<<< HEAD
   if (!rs.chainId) {
     rs.chainId = defaultRunTimeState.chainId
   }
@@ -22,11 +22,16 @@ function checkRuntimeStateIntegrity(rs: RuntimeState) {
   if (!rs.l2) {
     rs.l2 = defaultRunTimeState.l2
   }
+=======
+>>>>>>> erc20-token-bridge
   if (!rs.etherSent) {
     rs.etherSent = defaultRunTimeState.etherSent
   }
-  if (!rs.initializedState) {
-    rs.initializedState = defaultRunTimeState.initializedState
+  if (!rs.nativeTokenDeposit) {
+    rs.nativeTokenDeposit = defaultRunTimeState.nativeTokenDeposit
+  }
+  if (!rs.tokenBridgeDeployed) {
+    rs.tokenBridgeDeployed = defaultRunTimeState.tokenBridgeDeployed
   }
 }
 
@@ -114,7 +119,7 @@ async function main() {
       rs.etherSent.staker = true
     }
 
-    if (!rs.etherSent.deposit) {
+    if (!rs.nativeTokenDeposit) {
       ////////////////////////////////
       /// ETH deposit to L3 /////////
       //////////////////////////////
@@ -146,19 +151,24 @@ async function main() {
         )
         await delay(30 * 1000)
       }
-      rs.etherSent.deposit = true
+      rs.nativeTokenDeposit = true
     }
 
-    ////////////////////////////////
-    /// Token Bridge Deployment ///
-    //////////////////////////////
-    console.log(
-      'Running tokenBridgeDeployment or erc20TokenBridge script to deploy token bridge contracts on parent chain and your Orbit chain 🌉🌉🌉🌉🌉'
-    )
-    if (config.nativeToken === ethers.constants.AddressZero) {
-      await tokenBridgeDeployment(privateKey, L2_RPC_URL, L3_RPC_URL, rs)
-    } else {
-      await createERC2oBridge(L2_RPC_URL, privateKey, L3_RPC_URL, config.rollup)
+    if (!rs.tokenBridgeDeployed) {
+      ////////////////////////////////
+      /// Token Bridge Deployment ///
+      //////////////////////////////
+      console.log(
+        'Running tokenBridgeDeployment or erc20TokenBridge script to deploy token bridge contracts on parent chain and your Orbit chain 🌉🌉🌉🌉🌉'
+      )
+      await createERC20Bridge(
+        L2_RPC_URL,
+        privateKey,
+        L3_RPC_URL,
+        config.rollup,
+        config.chainId
+      )
+      rs.tokenBridgeDeployed = true
     }
     ////////////////////////////////
     /// L3 Chain Configuration ///
