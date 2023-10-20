@@ -122,7 +122,6 @@ async function main() {
         'Running Orbit Chain Native token deposit to Deposit ETH or native ERC20 token from parent chain to your account on Orbit chain ... 💰💰💰💰💰💰'
       )
       const oldBalance = await L3Provider.getBalance(config.chainOwner)
-
       await ethOrERC20Deposit(privateKey, L2_RPC_URL)
       let depositCheckTime = 0
 
