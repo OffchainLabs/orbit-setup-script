@@ -9,9 +9,7 @@ import { L3Config } from './l3ConfigType'
 
 const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
   '0x17412CC654a49Cdd5cE6965359d190F100Cf24d9'
-///////////////////////////// IMPORTANT /////////////////////
-/// Change this address for Arb Sepolia Token Bridge ////////
-/////////////////////////////////////////////////////////////
+
 const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
   '0x0025E5A25D64e02Fa711cfAEdf83987dac917eaC'
 
@@ -180,19 +178,13 @@ export const createERC20Bridge = async (
 ) => {
   console.log('Creating token bridge for rollup', rollupAddress)
 
-  const { l1Network, l2Network } = await createNewTokenBridge(
+  const { l2Network } = await createNewTokenBridge(
     baseChainRpc,
     baseChainDeployerKey,
     childChainRpc,
     rollupAddress,
     childChainId
   )
-  const NETWORK_FILE = 'network.json'
-  fs.writeFileSync(
-    NETWORK_FILE,
-    JSON.stringify({ l1Network, l2Network }, null, 2)
-  )
-  console.log(NETWORK_FILE + ' updated')
   // Read the JSON configuration
   const configRaw = fs.readFileSync(
     './config/orbitSetupScriptConfig.json',
