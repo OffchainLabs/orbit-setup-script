@@ -1,6 +1,7 @@
 import { Contract } from 'ethers'
 
 export interface RuntimeState {
+  chainId: number
   l2: L2_Address
   l3: L3_Address
   initializedState: InitializedState
@@ -27,6 +28,7 @@ interface InitializedState {
 }
 
 export const defaultRunTimeState: RuntimeState = {
+  chainId: 0,
   l2: {
     proxyAdmin: null,
     router: null,
