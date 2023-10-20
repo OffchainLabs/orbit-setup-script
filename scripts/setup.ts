@@ -12,18 +12,9 @@ function delay(ms: number) {
 }
 
 function checkRuntimeStateIntegrity(rs: RuntimeState) {
-<<<<<<< HEAD
   if (!rs.chainId) {
     rs.chainId = defaultRunTimeState.chainId
   }
-  if (!rs.l3) {
-    rs.l3 = defaultRunTimeState.l3
-  }
-  if (!rs.l2) {
-    rs.l2 = defaultRunTimeState.l2
-  }
-=======
->>>>>>> erc20-token-bridge
   if (!rs.etherSent) {
     rs.etherSent = defaultRunTimeState.etherSent
   }
