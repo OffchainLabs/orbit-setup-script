@@ -45,10 +45,10 @@
     "@ethersproject/bytes" "^5.0.8"
     ethers "^5.1.0"
 
-"@arbitrum/token-bridge-contracts@v1.1.0-beta.1":
-  version "1.1.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@arbitrum/token-bridge-contracts/-/token-bridge-contracts-1.1.0-beta.1.tgz#dc002c4b187f6827c0d8dc02fc45b2f77085528f"
-  integrity sha512-QUCIDbcInA7U2NgBdSfN1tOlZSPowc108VBkulDyk/nM4uJHIr2Fbht6E9KZyP6OkyP3jwp9Gc0sz0a/ePl01w==
+"@arbitrum/token-bridge-contracts@v1.1.0-beta.2":
+  version "1.1.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@arbitrum/token-bridge-contracts/-/token-bridge-contracts-1.1.0-beta.2.tgz#8f16e2143ce6d329650788fce055f4d2bfcc212f"
+  integrity sha512-+gYIdYx+1WnFQCcFP7Ns8h5JZsdAuZAYd4L08gjfdqTTNuRI5o0gaB9s5Vemzp1P6wLFN+cRvHAL/txIlaByww==
   dependencies:
     "@arbitrum/nitro-contracts" "^1.0.0-beta.8"
     "@offchainlabs/upgrade-executor" "1.1.0-beta.0"
