@@ -30,24 +30,14 @@ import L2AtomicTokenBridgeFactory from '@arbitrum/token-bridge-contracts/build/c
 const L2AtomicTokenBridgeFactory__factory = NamedFactoryInstance(
   L2AtomicTokenBridgeFactory
 )
-
-import L2GatewayRouter from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2GatewayRouter.sol/L2GatewayRouter.json'
 import L2ERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2ERC20Gateway.sol/L2ERC20Gateway.json'
 const L2ERC20Gateway__factory = NamedFactoryInstance(L2ERC20Gateway)
-import L2CustomGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2CustomGateway.sol/L2CustomGateway.json'
-
-import L2WethGateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2WethGateway.sol/L2WethGateway.json'
-const L2WethGateway__factory = NamedFactoryInstance(L2WethGateway)
-import AeWETH from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/libraries/aeWETH.sol/aeWETH.json'
-import ArbMulticall2 from '@arbitrum/token-bridge-contracts/build/contracts/contracts/rpc-utils/MulticallV2.sol/ArbMulticall2.json'
 
 // import from nitro-contracts directly to make sure the bytecode is the same
 import IInbox from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IInbox.sol/IInbox.json'
 const IInbox__factory = NamedFactoryInstance(IInbox)
 import IERC20Bridge from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IERC20Bridge.sol/IERC20Bridge.json'
 const IERC20Bridge__factory = NamedFactoryInstance(IERC20Bridge)
-
-import UpgradeExecutor from '@arbitrum/nitro-contracts/build/contracts/src/mocks/UpgradeExecutorMock.sol/UpgradeExecutorMock.json'
 import IERC20 from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json'
 const IERC20__factory = NamedFactoryInstance(IERC20)
 
@@ -85,13 +75,29 @@ export const createTokenBridge = async (
     await l1TokenBridgeCreator.l2TokenBridgeFactoryTemplate()
   ).connect(l1Signer)
   const l2Code = {
-    router: L2GatewayRouter.bytecode,
-    standardGateway: L2ERC20Gateway.bytecode,
-    customGateway: L2CustomGateway.bytecode,
-    wethGateway: L2WethGateway.bytecode,
-    aeWeth: AeWETH.bytecode,
-    upgradeExecutor: UpgradeExecutor.bytecode,
-    multicall: ArbMulticall2.bytecode,
+    router: await l1Signer.provider?.getCode(
+      await l1TokenBridgeCreator.l2RouterTemplate()
+    ),
+    standardGateway: await l1Signer.provider?.getCode(
+      await l1TokenBridgeCreator.l2StandardGatewayTemplate()
+    ),
+    customGateway: await l1Signer.provider?.getCode(
+      await l1TokenBridgeCreator.l2CustomGatewayTemplate()
+    ),
+    wethGateway: await l1Signer.provider?.getCode(
+      await l1TokenBridgeCreator.l2WethGatewayTemplate()
+    ),
+    aeWeth: await l1Signer.provider?.getCode(
+      await l1TokenBridgeCreator.l2WethTemplate()
+    ),
+    upgradeExecutor: await l1Signer.provider?.getCode(
+      (
+        await l1TokenBridgeCreator.l1Templates()
+      ).upgradeExecutor
+    ),
+    multicall: await l1Signer.provider?.getCode(
+      await l1TokenBridgeCreator.l2MulticallTemplate()
+    ),
   }
   const gasEstimateToDeployContracts =
     await l2FactoryTemplate.estimateGas.deployL2Contracts(
@@ -201,17 +207,18 @@ export const createTokenBridge = async (
   const isUsingFeeToken = feeToken != ethers.constants.AddressZero
   const l2WethGateway = isUsingFeeToken
     ? ethers.constants.AddressZero
-    : L2WethGateway__factory.attach(
-        await l1TokenBridgeCreator.getCanonicalL2WethGatewayAddress(
-          childChainId
-        )
-      ).connect(l2Provider).address
+    : await l1TokenBridgeCreator.getCanonicalL2WethGatewayAddress(childChainId)
   const l1Weth = await l1TokenBridgeCreator.l1Weth()
   const l2Weth = isUsingFeeToken
     ? ethers.constants.AddressZero
     : await l1TokenBridgeCreator.getCanonicalL2WethAddress(childChainId)
   const l2ProxyAdmin =
     await l1TokenBridgeCreator.getCanonicalL2ProxyAdminAddress(childChainId)
+
+  const l1MultiCall = await l1TokenBridgeCreator.l1MultiCall()
+  const l2Multicall = await l1TokenBridgeCreator.getCanonicalL2Multicall(
+    childChainId
+  )
 
   return {
     l1Router,
@@ -227,6 +234,8 @@ export const createTokenBridge = async (
     l2Weth,
     beaconProxyFactory,
     l2ProxyAdmin,
+    l1MultiCall,
+    l2Multicall,
   }
 }
 

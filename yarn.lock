@@ -23,10 +23,10 @@
   optionalDependencies:
     sol2uml "2.2.0"
 
-"@arbitrum/nitro-contracts@v1.1.0-beta.0":
-  version "1.1.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@arbitrum/nitro-contracts/-/nitro-contracts-1.1.0-beta.0.tgz#3b7031684f9ce550d7e4550cbd784043cf1226e4"
-  integrity sha512-ym/tf+mOTzs/wOjpK6sJEGhHKuPbBXYh+SyfrDST85eEKmHpYd99vfB5YXDJ1ub5fzTMD/PypUjbQqM5wQuoVA==
+"@arbitrum/nitro-contracts@v1.1.0-beta.1":
+  version "1.1.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@arbitrum/nitro-contracts/-/nitro-contracts-1.1.0-beta.1.tgz#dce94707028918ee63f1fa2d4e5bffc6c2deef0c"
+  integrity sha512-+TQ21Z/nb+VM3lalHLy9cb6ZiCdNLP6EKdZ7DcAhNQZldX77V2za85dcejvM/qqyblykCYzr9GSu8bHK6yc/sQ==
   dependencies:
     "@offchainlabs/upgrade-executor" "1.1.0-beta.0"
     "@openzeppelin/contracts" "4.5.0"
@@ -45,10 +45,10 @@
     "@ethersproject/bytes" "^5.0.8"
     ethers "^5.1.0"
 
-"@arbitrum/token-bridge-contracts@v1.1.0-beta.1":
-  version "1.1.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@arbitrum/token-bridge-contracts/-/token-bridge-contracts-1.1.0-beta.1.tgz#dc002c4b187f6827c0d8dc02fc45b2f77085528f"
-  integrity sha512-QUCIDbcInA7U2NgBdSfN1tOlZSPowc108VBkulDyk/nM4uJHIr2Fbht6E9KZyP6OkyP3jwp9Gc0sz0a/ePl01w==
+"@arbitrum/token-bridge-contracts@v1.1.0-beta.2":
+  version "1.1.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@arbitrum/token-bridge-contracts/-/token-bridge-contracts-1.1.0-beta.2.tgz#8f16e2143ce6d329650788fce055f4d2bfcc212f"
+  integrity sha512-+gYIdYx+1WnFQCcFP7Ns8h5JZsdAuZAYd4L08gjfdqTTNuRI5o0gaB9s5Vemzp1P6wLFN+cRvHAL/txIlaByww==
   dependencies:
     "@arbitrum/nitro-contracts" "^1.0.0-beta.8"
     "@offchainlabs/upgrade-executor" "1.1.0-beta.0"

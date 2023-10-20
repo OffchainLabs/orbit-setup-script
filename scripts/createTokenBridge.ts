@@ -8,10 +8,9 @@ import { ethers } from 'ethers'
 import { L3Config } from './l3ConfigType'
 
 const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
-  '0x17412CC654a49Cdd5cE6965359d190F100Cf24d9'
-
+  '0x1C608642d0944e95957a7ac3a478EC17FA191E9A'
 const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
-  '0x0025E5A25D64e02Fa711cfAEdf83987dac917eaC'
+  '0xC35800028e31044173d37291F425DCc42D068c84'
 
 /**
  * Steps:
@@ -77,7 +76,7 @@ export const createNewTokenBridge = async (
       l1CustomGateway: deployedContracts.l1CustomGateway,
       l1ERC20Gateway: deployedContracts.l1StandardGateway,
       l1GatewayRouter: deployedContracts.l1Router,
-      l1MultiCall: '',
+      l1MultiCall: deployedContracts.l1MultiCall,
       l1ProxyAdmin: deployedContracts.l1ProxyAdmin,
       l1Weth: deployedContracts.l1Weth,
       l1WethGateway: deployedContracts.l1WethGateway,
@@ -85,7 +84,7 @@ export const createNewTokenBridge = async (
       l2CustomGateway: deployedContracts.l2CustomGateway,
       l2ERC20Gateway: deployedContracts.l2StandardGateway,
       l2GatewayRouter: deployedContracts.l2Router,
-      l2Multicall: '',
+      l2Multicall: deployedContracts.l2Multicall,
       l2ProxyAdmin: deployedContracts.l2ProxyAdmin,
       l2Weth: deployedContracts.l2Weth,
       l2WethGateway: deployedContracts.l2WethGateway,
