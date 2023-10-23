@@ -234,7 +234,7 @@ export const createERC20Bridge = async (
         router: l2Network.tokenBridge.l2GatewayRouter,
         standardGateway: l2Network.tokenBridge.l2ERC20Gateway,
         weth: l2Network.tokenBridge.l2Weth,
-        wethGateway: l2Network.tokenBridge.l1WethGateway,
+        wethGateway: l2Network.tokenBridge.l2WethGateway,
       },
     },
   }
