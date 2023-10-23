@@ -12,6 +12,9 @@ function delay(ms: number) {
 }
 
 function checkRuntimeStateIntegrity(rs: RuntimeState) {
+  if (!rs.chainId) {
+    rs.chainId = defaultRunTimeState.chainId
+  }
   if (!rs.etherSent) {
     rs.etherSent = defaultRunTimeState.etherSent
   }
@@ -51,9 +54,18 @@ async function main() {
     rs = JSON.parse(stateRaw)
     //check integrity
     checkRuntimeStateIntegrity(rs)
-    console.log(
-      'resumeState file found, will restart from where it failed last time.'
-    )
+
+    //check if there is a new chain config
+    if(rs.chainId !== config.chainId) {
+      rs = defaultRunTimeState
+      console.log(
+        'A different chain config than last time was detected.'
+      )
+    } else {
+      console.log(
+        'resumeState file found, will restart from where it failed last time.'
+      )
+    }
   } else {
     rs = defaultRunTimeState
   }

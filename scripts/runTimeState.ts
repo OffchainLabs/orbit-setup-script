@@ -1,4 +1,5 @@
 export interface RuntimeState {
+  chainId: number
   etherSent: EtherSent
   nativeTokenDeposit: boolean
   tokenBridgeDeployed: boolean
@@ -12,6 +13,7 @@ interface EtherSent {
 }
 
 export const defaultRunTimeState: RuntimeState = {
+  chainId: 0,
   etherSent: {
     batchPoster: false,
     staker: false,
