@@ -56,11 +56,9 @@ async function main() {
     checkRuntimeStateIntegrity(rs)
 
     //check if there is a new chain config
-    if(rs.chainId !== config.chainId) {
+    if (rs.chainId !== config.chainId) {
       rs = defaultRunTimeState
-      console.log(
-        'A different chain config than last time was detected.'
-      )
+      console.log('A different chain config than last time was detected.')
     } else {
       console.log(
         'resumeState file found, will restart from where it failed last time.'
