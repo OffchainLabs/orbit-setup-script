@@ -7,9 +7,9 @@ import * as fs from 'fs'
 import { ethers } from 'ethers'
 import { L3Config } from './l3ConfigType'
 
-const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
+export const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
   '0x1C608642d0944e95957a7ac3a478EC17FA191E9A'
-const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
+export const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
   '0xC35800028e31044173d37291F425DCc42D068c84'
 
 /**

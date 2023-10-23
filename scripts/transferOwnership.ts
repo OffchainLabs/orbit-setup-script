@@ -3,12 +3,11 @@ import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/c
 import UpgradeExecutor from '@arbitrum/nitro-contracts/build/contracts/src/mocks/UpgradeExecutorMock.sol/UpgradeExecutorMock.json'
 import { getSigner } from './erc20TokenBridgeDeployment'
 import ArbOwner from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbOwner.sol/ArbOwner.json'
+import {
+  TOKEN_BRIDGE_CREATOR_Arb_Goerli,
+  TOKEN_BRIDGE_CREATOR_Arb_Sepolia,
+} from './createTokenBridge'
 
-const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
-  '0x17412CC654a49Cdd5cE6965359d190F100Cf24d9'
-
-const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
-  '0x0025E5A25D64e02Fa711cfAEdf83987dac917eaC'
 const ARB_OWNER_ADDRESS = '0x0000000000000000000000000000000000000070'
 export async function transferOwner(
   privateKey: string,
