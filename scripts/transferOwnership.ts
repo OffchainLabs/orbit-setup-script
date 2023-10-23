@@ -19,6 +19,8 @@ export async function transferOwner(
   const l3Deployer = getSigner(l3Provider, privateKey)
   //fetching chain id of parent chain
   const l2ChainId = (await l2Provider.getNetwork()).chainId
+  const l3ChainId = (await l3Provider.getNetwork()).chainId
+
   let TOKEN_BRIDGE_CREATOR: string
   if (l2ChainId === 421613) {
     TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Goerli
@@ -38,7 +40,7 @@ export async function transferOwner(
     L1AtomicTokenBridgeCreator__factory.connect(l2Deployer)
   //fetching L3 upgrade executor address
   const executorContractAddress =
-    await l1TokenBridgeCreator.getCanonicalL2UpgradeExecutorAddress(l2ChainId)
+    await l1TokenBridgeCreator.getCanonicalL2UpgradeExecutorAddress(l3ChainId)
   //Defining Arb Owner Precompile
   const ArbOwner__factory = new ethers.Contract(
     ARB_OWNER_ADDRESS,
