@@ -219,7 +219,7 @@ export const createTokenBridge = async (
   const l2ProxyAdmin =
     await l1TokenBridgeCreator.getCanonicalL2ProxyAdminAddress(childChainId)
 
-  const l1MultiCall = await l1TokenBridgeCreator.l1MultiCall()
+  const l1MultiCall = await l1TokenBridgeCreator.l1Multicall()
   const l2Multicall = await l1TokenBridgeCreator.getCanonicalL2Multicall(
     childChainId
   )
