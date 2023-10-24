@@ -24,8 +24,6 @@ const NamedFactoryInstance = (contractJson: {
   return factory
 }
 
-///////////////////
-///////////////////
 // import from token-bridge-contracts directly to make sure the bytecode is the same
 
 import L2AtomicTokenBridgeFactory from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/L2AtomicTokenBridgeFactory.sol/L2AtomicTokenBridgeFactory.json'
@@ -43,8 +41,6 @@ const IERC20Bridge__factory = NamedFactoryInstance(IERC20Bridge)
 import IERC20 from '@arbitrum/nitro-contracts/build/contracts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json'
 const IERC20__factory = NamedFactoryInstance(IERC20)
 
-///////////////////
-///////////////////
 /**
  * Use already deployed L1TokenBridgeCreator to create and init token bridge contracts.
  * Function first gets estimates for 2 retryable tickets - one for deploying L2 factory and

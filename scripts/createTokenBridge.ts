@@ -5,13 +5,11 @@ import { createTokenBridge, getSigner } from './erc20TokenBridgeDeployment'
 import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
 import * as fs from 'fs'
 import { ethers } from 'ethers'
+import { L3Config } from './l3ConfigType'
 
-const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
+export const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
   '0x1C608642d0944e95957a7ac3a478EC17FA191E9A'
-///////////////////////////// IMPORTANT /////////////////////
-/// Change this address for Arb Sepolia Token Bridge ////////
-/////////////////////////////////////////////////////////////
-const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
+export const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
   '0xC35800028e31044173d37291F425DCc42D068c84'
 
 /**
@@ -192,5 +190,62 @@ export const createERC20Bridge = async (
     JSON.stringify({ l1Network, l2Network }, null, 2)
   )
   console.log(NETWORK_FILE + ' updated')
+
+  // Read the JSON configuration
+  const configRaw = fs.readFileSync(
+    './config/orbitSetupScriptConfig.json',
+    'utf-8'
+  )
+  const config: L3Config = JSON.parse(configRaw)
+
+  const outputInfo = {
+    chainInfo: {
+      minL2BaseFee: config.minL2BaseFee,
+      networkFeeReceiver: config.networkFeeReceiver,
+      infrastructureFeeCollector: config.infrastructureFeeCollector,
+      batchPoster: config.batchPoster,
+      staker: config.staker,
+      chainOwner: config.chainOwner,
+      chainName: config.chainName,
+      chainId: config.chainId,
+      parentChainId: config.parentChainId,
+      rpcUrl: 'http://localhost:8449',
+      explorerUrl: 'http://localhost:4000',
+      nativeToken: config.nativeToken,
+    },
+    coreContracts: {
+      rollup: config.rollup,
+      inbox: config.inbox,
+      outbox: config.outbox,
+      adminProxy: config.adminProxy,
+      sequencerInbox: config.sequencerInbox,
+      bridge: config.bridge,
+      utils: config.utils,
+      validatorWalletCreator: config.validatorWalletCreator,
+    },
+
+    tokenBridgeContracts: {
+      l2Contracts: {
+        customGateway: l2Network.tokenBridge.l1CustomGateway,
+        multicall: l2Network.tokenBridge.l1MultiCall,
+        proxyAdmin: l2Network.tokenBridge.l1ProxyAdmin,
+        router: l2Network.tokenBridge.l1GatewayRouter,
+        standardGateway: l2Network.tokenBridge.l1ERC20Gateway,
+        weth: l2Network.tokenBridge.l1Weth,
+        wethGateway: l2Network.tokenBridge.l1WethGateway,
+      },
+      l3Contracts: {
+        customGateway: l2Network.tokenBridge.l2CustomGateway,
+        multicall: l2Network.tokenBridge.l2Multicall,
+        proxyAdmin: l2Network.tokenBridge.l2ProxyAdmin,
+        router: l2Network.tokenBridge.l2GatewayRouter,
+        standardGateway: l2Network.tokenBridge.l2ERC20Gateway,
+        weth: l2Network.tokenBridge.l2Weth,
+        wethGateway: l2Network.tokenBridge.l2WethGateway,
+      },
+    },
+  }
+  fs.writeFileSync('outputInfo.json', JSON.stringify(outputInfo, null, 2))
+
   console.log('Done!')
 }
