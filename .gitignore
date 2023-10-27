@@ -6,3 +6,4 @@ config/*
 outputInfo.json
 config/.DS_Store
 !config/keys
+network.json

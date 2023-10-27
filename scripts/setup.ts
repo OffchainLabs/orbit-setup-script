@@ -1,28 +1,34 @@
 import { ethers } from 'ethers'
 import { L3Config } from './l3ConfigType'
 import fs from 'fs'
-import { ethDeposit } from './ethDeposit'
+import { ethOrERC20Deposit } from './nativeTokenDeposit'
+import { createERC20Bridge } from './createTokenBridge'
 import { l3Configuration } from './l3Configuration'
-import { tokenBridgeDeployment } from './tokenBridgeDeployment'
 import { defaultRunTimeState, RuntimeState } from './runTimeState'
-
+import { transferOwner } from './transferOwnership'
 // Delay function
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 function checkRuntimeStateIntegrity(rs: RuntimeState) {
-  if (!rs.l3) {
-    rs.l3 = defaultRunTimeState.l3
-  }
-  if (!rs.l2) {
-    rs.l2 = defaultRunTimeState.l2
+  if (!rs.chainId) {
+    rs.chainId = defaultRunTimeState.chainId
   }
   if (!rs.etherSent) {
     rs.etherSent = defaultRunTimeState.etherSent
   }
-  if (!rs.initializedState) {
-    rs.initializedState = defaultRunTimeState.initializedState
+  if (!rs.nativeTokenDeposit) {
+    rs.nativeTokenDeposit = defaultRunTimeState.nativeTokenDeposit
+  }
+  if (!rs.tokenBridgeDeployed) {
+    rs.tokenBridgeDeployed = defaultRunTimeState.tokenBridgeDeployed
+  }
+  if (!rs.l3config) {
+    rs.l3config = defaultRunTimeState.l3config
+  }
+  if (!rs.transferOwnership) {
+    rs.transferOwnership = defaultRunTimeState.transferOwnership
   }
 }
 
@@ -48,13 +54,21 @@ async function main() {
     rs = JSON.parse(stateRaw)
     //check integrity
     checkRuntimeStateIntegrity(rs)
-    console.log(
-      'resumeState file found, will restart from where it failed last time.'
-    )
+
+    //check if there is a new chain config
+    if (rs.chainId !== config.chainId) {
+      rs = defaultRunTimeState
+      console.log('A different chain config than last time was detected.')
+    } else {
+      console.log(
+        'resumeState file found, will restart from where it failed last time.'
+      )
+    }
   } else {
     rs = defaultRunTimeState
   }
 
+  rs.chainId = config.chainId
   // Generating providers from RPCs
   const L2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL)
   const L3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL)
@@ -101,15 +115,15 @@ async function main() {
       rs.etherSent.staker = true
     }
 
-    if (!rs.etherSent.deposit) {
+    if (!rs.nativeTokenDeposit) {
       ////////////////////////////////
       /// ETH deposit to L3 /////////
       //////////////////////////////
       console.log(
-        'Running ethDeposit Script to Deposit ETH from parent chain to your account on Orbit chain ... 💰💰💰💰💰💰'
+        'Running Orbit Chain Native token deposit to Deposit ETH or native ERC20 token from parent chain to your account on Orbit chain ... 💰💰💰💰💰💰'
       )
       const oldBalance = await L3Provider.getBalance(config.chainOwner)
-      await ethDeposit(privateKey, L2_RPC_URL, L3_RPC_URL)
+      await ethOrERC20Deposit(privateKey, L2_RPC_URL)
       let depositCheckTime = 0
 
       // Waiting for 30 secs to be sure that ETH deposited is received on L3
@@ -119,7 +133,7 @@ async function main() {
         const newBalance = await L3Provider.getBalance(config.chainOwner)
         if (newBalance.sub(oldBalance).gte(ethers.utils.parseEther('0.4'))) {
           console.log(
-            'Balance of your account on Orbit chain increased by 0.4 Ether.'
+            'Balance of your account on Orbit chain increased by the native token you have just sent.'
           )
           break
         }
@@ -133,24 +147,45 @@ async function main() {
         )
         await delay(30 * 1000)
       }
-      rs.etherSent.deposit = true
+      rs.nativeTokenDeposit = true
     }
 
-    ////////////////////////////////
-    /// Token Bridge Deployment ///
-    //////////////////////////////
-    console.log(
-      'Running tokenBridgeDeployment script to deploy token bridge contracts on parent chain and your Orbit chain 🌉🌉🌉🌉🌉'
-    )
-    await tokenBridgeDeployment(privateKey, L2_RPC_URL, L3_RPC_URL, rs)
-
+    if (!rs.tokenBridgeDeployed) {
+      ////////////////////////////////
+      /// Token Bridge Deployment ///
+      //////////////////////////////
+      console.log(
+        'Running tokenBridgeDeployment or erc20TokenBridge script to deploy token bridge contracts on parent chain and your Orbit chain 🌉🌉🌉🌉🌉'
+      )
+      await createERC20Bridge(
+        L2_RPC_URL,
+        privateKey,
+        L3_RPC_URL,
+        config.rollup,
+        config.chainId
+      )
+      rs.tokenBridgeDeployed = true
+    }
     ////////////////////////////////
     /// L3 Chain Configuration ///
     //////////////////////////////
-    console.log(
-      'Running l3Configuration script to configure your Orbit chain 📝📝📝📝📝'
-    )
-    await l3Configuration(privateKey, L2_RPC_URL, L3_RPC_URL)
+    if (!rs.l3config) {
+      console.log(
+        'Running l3Configuration script to configure your Orbit chain 📝📝📝📝📝'
+      )
+      await l3Configuration(privateKey, L2_RPC_URL, L3_RPC_URL)
+      rs.l3config = true
+    }
+    ////////////////////////////////
+    /// Transfering ownership /////
+    //////////////////////////////
+    if (!rs.transferOwnership) {
+      console.log(
+        'Transferring ownership on L3, from rollup owner to upgrade executor 🔃🔃🔃'
+      )
+      await transferOwner(privateKey, L2Provider, L3Provider)
+      rs.transferOwnership = true
+    }
   } catch (error) {
     console.error('Error occurred:', error)
     const runtimeString = JSON.stringify(rs)
