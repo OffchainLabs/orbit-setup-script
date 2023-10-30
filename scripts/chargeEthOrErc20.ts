@@ -70,6 +70,7 @@ async function main() {
     console.log('Transaction hash on parent chain: ', tx.hash)
     await tx.wait()
     console.log('Transaction has been mined')
+    console.log(amount + ' native tokens are deposited to your account')
   }
 
   while (true) {
