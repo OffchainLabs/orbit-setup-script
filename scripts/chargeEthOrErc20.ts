@@ -44,6 +44,7 @@ async function main() {
   )
   const config = JSON.parse(configRaw)
   const nativeToken = config.nativeToken
+  const oldBalance = await l3Provider.getBalance(config.chainOwner)
   let tx
   if (nativeToken === ethers.constants.AddressZero) {
     const inboxAddress = config.inbox
@@ -66,13 +67,12 @@ async function main() {
     console.log('0.4 ETHs are deposited to your account')
   } else {
     tx = await erc20Inbox.depositERC20(ethers.utils.parseEther(amount))
+    console.log('Transaction hash on parent chain: ', tx.hash)
+    await tx.wait()
+    console.log('Transaction has been mined')
+    console.log(amount + ' native tokens are deposited to your account')
   }
 
-  console.log('Transaction hash on parent chain: ', tx.hash)
-  await tx.wait()
-  console.log('Transaction has been mined')
-
-  const oldBalance = await l3Provider.getBalance(config.chainOwner)
   while (true) {
     const newBalance = await l3Provider.getBalance(config.chainOwner)
     if (newBalance.gt(oldBalance)) {
