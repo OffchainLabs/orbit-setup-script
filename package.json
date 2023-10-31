@@ -22,7 +22,7 @@
   },
   "scripts": {
     "setup": "ts-node scripts/setup.ts",
-    "deposit": "ts-node scripts/chargeEth.ts",
+    "deposit": "ts-node scripts/chargeEthOrErc20.ts",
     "format": "prettier './**/*.{js,json,md,ts,yml}' '!./src/lib/abi' --write && yarn run lint --fix",
     "lint": "eslint ."
   }
