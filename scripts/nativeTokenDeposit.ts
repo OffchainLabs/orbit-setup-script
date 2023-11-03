@@ -44,8 +44,8 @@ async function sendEthOrDepositERC20(
       approveTxReceipt.transactionHash
     )
 
-    // Call depositERC20 with 2 tokens if nativeToken is not zero address.
-    const amount = ethers.utils.parseEther('2.0')
+    // Call depositERC20 with 0.4 tokens if nativeToken is not zero address.
+    const amount = ethers.utils.parseEther('0.4')
     const tx = await erc20Inbox.depositERC20(amount)
     console.log('Transaction hash for depositERC20: ', tx.hash)
     await tx.wait()
