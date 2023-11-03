@@ -116,9 +116,9 @@ async function main() {
     }
 
     if (!rs.nativeTokenDeposit) {
-      ////////////////////////////////
-      /// ETH deposit to L3 /////////
-      //////////////////////////////
+      ////////////////////////////////////////////
+      /// ETH/Native token deposit to L3 /////////
+      ////////////////////////////////////////////
       console.log(
         'Running Orbit Chain Native token deposit to Deposit ETH or native ERC20 token from parent chain to your account on Orbit chain ... 💰💰💰💰💰💰'
       )
@@ -126,8 +126,8 @@ async function main() {
       await ethOrERC20Deposit(privateKey, L2_RPC_URL)
       let depositCheckTime = 0
 
-      // Waiting for 30 secs to be sure that ETH deposited is received on L3
-      // Repeatedly check the balance until it changes by 1 Ether
+      // Waiting for 30 secs to be sure that ETH/Native token deposited is received on L3
+      // Repeatedly check the balance until it changes by 0.4 native tokens
       while (true) {
         depositCheckTime++
         const newBalance = await L3Provider.getBalance(config.chainOwner)
