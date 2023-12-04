@@ -1,4 +1,5 @@
 import { ethers } from 'ethers'
+import { ERC20__factory } from '@arbitrum/sdk/dist/lib/abi/factories/ERC20__factory'
 import fs from 'fs'
 
 // Delay function
@@ -66,7 +67,9 @@ async function main() {
     console.log('Transaction has been mined')
     console.log('0.4 ETHs are deposited to your account')
   } else {
-    tx = await erc20Inbox.depositERC20(ethers.utils.parseEther(amount))
+    const nativeTokenContract = ERC20__factory.connect(nativeToken, l2Provider)
+    const decimals = await nativeTokenContract.decimals()
+    tx = await erc20Inbox.depositERC20(ethers.utils.parseUnits(amount, decimals))
     console.log('Transaction hash on parent chain: ', tx.hash)
     await tx.wait()
     console.log('Transaction has been mined')
