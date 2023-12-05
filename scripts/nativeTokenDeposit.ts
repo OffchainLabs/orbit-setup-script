@@ -46,7 +46,7 @@ async function sendEthOrDepositERC20(
 
     // Call depositERC20 with 2 tokens if nativeToken is not zero address.
     const decimals = await nativeTokenContract.decimals()
-    const amount = ethers.utils.parseUnits('2.0', decimals)
+    const amount = ethers.utils.parseUnits('0.4', decimals)
     const tx = await erc20Inbox.depositERC20(amount)
     console.log('Transaction hash for depositERC20: ', tx.hash)
     await tx.wait()
