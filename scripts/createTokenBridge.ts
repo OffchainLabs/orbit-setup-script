@@ -8,9 +8,9 @@ import { ethers } from 'ethers'
 import { L3Config } from './l3ConfigType'
 
 export const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
-  '0x1C608642d0944e95957a7ac3a478EC17FA191E9A'
+  '0x4e1c81E5cabf7100D744d72758194E6b04449518'
 export const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
-  '0xC35800028e31044173d37291F425DCc42D068c84'
+  '0xb462C69f8f638d2954c9618B03765FC1770190cF'
 
 /**
  * Steps:
