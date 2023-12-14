@@ -37,19 +37,21 @@ services:
       POSTGRES_HOST_AUTH_METHOD: 'trust'
 
   nitro:
-    image: offchainlabs/nitro-node:v2.1.3-e815395
+    image: ghcr.io/fhenixprotocol/nitro/fhenix-node:v0.0.5-beta1
     ports:
       - "127.0.0.1:8449:8449"
     volumes:
       - "./config:/home/user/.arbitrum"
+      - "./keys:/home/user/keys"
     command: --conf.file /home/user/.arbitrum/nodeConfig.json
 
   das-server:
-    image: offchainlabs/nitro-node:v2.1.0-beta.15-38ad1f1
+    image: ghcr.io/fhenixprotocol/nitro/fhenix-node:v0.0.5-beta1
     entrypoint: [ "/bin/bash", "/das-server.sh" ]
     volumes:
       - "./config:/home/user/.arbitrum"
       - "./das-server.sh:/das-server.sh"
+      - "./fhe_keys:/home/user/keys"
     ports:
       - "9876:9876"
       - "9877:9877"
