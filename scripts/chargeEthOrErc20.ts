@@ -60,19 +60,21 @@ async function main() {
     )
     // deposit 0.4 ETH
     const tx = await contract.depositEth({
-      value: ethers.utils.parseEther('0.4'),
+      value: ethers.utils.parseEther(amount),
     })
     console.log('Transaction hash on parent chain: ', tx.hash)
     await tx.wait()
     console.log('Transaction has been mined')
-    console.log('0.4 ETHs are deposited to your account')
+    console.log(amount + ' ETHs are deposited to your account')
   } else {
     const nativeTokenContract = ERC20__factory.connect(nativeToken, l2Provider)
     const decimals = await nativeTokenContract.decimals()
-    if(decimals !== 18) {
-      throw new Error("We currently only support 18 decimals token")
+    if (decimals !== 18) {
+      throw new Error('We currently only support 18 decimals token')
     }
-    tx = await erc20Inbox.depositERC20(ethers.utils.parseUnits(amount, decimals))
+    tx = await erc20Inbox.depositERC20(
+      ethers.utils.parseUnits(amount, decimals)
+    )
     console.log('Transaction hash on parent chain: ', tx.hash)
     await tx.wait()
     console.log('Transaction has been mined')
