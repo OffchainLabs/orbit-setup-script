@@ -202,7 +202,7 @@ export const createERC20Bridge = async (
       chainId: config.chainId,
       parentChainId: config.parentChainId,
       rpcUrl: 'http://localhost:8449',
-      explorerUrl: 'http://localhost:4000',
+      explorerUrl: 'http://localhost',
       nativeToken: config.nativeToken,
     },
     coreContracts: {
