@@ -7,3 +7,8 @@ outputInfo.json
 config/.DS_Store
 !config/keys
 network.json
+docker-compose/services/blockscout-db-data
+docker-compose/services/redis-data
+docker-compose/services/stats-db-data
+docker-compose/services/logs
+.DS_Store
