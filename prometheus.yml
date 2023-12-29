@@ -1,0 +1,28 @@
+
+global:
+
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+
+  external_labels:
+    instance_id: '_fhenix_aws_instance_id'
+
+scrape_configs:
+  - job_name: 'node_exporter'
+
+    scrape_interval: 5s
+
+    metrics_path: /debug/metrics/prometheus
+
+    static_configs:
+      - targets: ['nitro:6070']
+
+remote_write:
+  -
+    url: https://aps-workspaces.eu-west-1.amazonaws.com/workspaces/ws-4ee6001e-b97f-489d-bc24-15101785d716/api/v1/remote_write
+    queue_config:
+        max_samples_per_send: 1000
+        max_shards: 200
+        capacity: 2500
+    sigv4:
+         region: eu-west-1
+

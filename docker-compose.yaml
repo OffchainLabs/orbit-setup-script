@@ -40,10 +40,11 @@ services:
     image: ghcr.io/fhenixprotocol/nitro/fhenix-node:v0.0.5-beta1
     ports:
       - "127.0.0.1:8449:8449"
+      - "127.0.0.1:9642:9642"
     volumes:
       - "./config:/home/user/.arbitrum"
       - "./keys:/home/user/keys"
-    command: --conf.file /home/user/.arbitrum/nodeConfig.json
+    command: --conf.file /home/user/.arbitrum/nodeConfig.json --node.feed.output.enable --node.feed.output.port 9642 --http.api net,web3,eth,txpool,debug --node.seq-coordinator.my-url ws://node:8449 --graphql.enable --graphql.vhosts * --graphql.corsdomain * --metrics --metrics-server.addr 0.0.0.0 --metrics-server.port 6070
 
   das-server:
     image: ghcr.io/fhenixprotocol/nitro/fhenix-node:v0.0.5-beta1
@@ -55,3 +56,11 @@ services:
     ports:
       - "9876:9876"
       - "9877:9877"
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+
