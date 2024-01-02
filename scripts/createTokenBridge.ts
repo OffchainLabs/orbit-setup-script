@@ -7,10 +7,8 @@ import * as fs from 'fs'
 import { ethers } from 'ethers'
 import { L3Config } from './l3ConfigType'
 
-export const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
-  '0x4e1c81E5cabf7100D744d72758194E6b04449518'
 export const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
-  '0xb462C69f8f638d2954c9618B03765FC1770190cF'
+  '0x56C486D3786fA26cc61473C499A36Eb9CC1FbD8E'
 
 /**
  * Steps:
@@ -43,9 +41,7 @@ export const createNewTokenBridge = async (
   )
 
   let TOKEN_BRIDGE_CREATOR: string
-  if ((await l1Provider.getNetwork()).chainId === 421613) {
-    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Goerli
-  } else if ((await l1Provider.getNetwork()).chainId === 421614) {
+  if ((await l1Provider.getNetwork()).chainId === 421614) {
     TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
   } else {
     throw new Error(
