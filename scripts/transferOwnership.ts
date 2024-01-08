@@ -4,7 +4,6 @@ import UpgradeExecutor from '@arbitrum/nitro-contracts/build/contracts/src/mocks
 import { getSigner } from './erc20TokenBridgeDeployment'
 import ArbOwner from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbOwner.sol/ArbOwner.json'
 import {
-  TOKEN_BRIDGE_CREATOR_Arb_Goerli,
   TOKEN_BRIDGE_CREATOR_Arb_Sepolia,
 } from './createTokenBridge'
 
@@ -22,9 +21,7 @@ export async function transferOwner(
   const l3ChainId = (await l3Provider.getNetwork()).chainId
 
   let TOKEN_BRIDGE_CREATOR: string
-  if (l2ChainId === 421613) {
-    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Goerli
-  } else if (l2ChainId === 421614) {
+  if (l2ChainId === 421614) {
     TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
   } else {
     throw new Error(
