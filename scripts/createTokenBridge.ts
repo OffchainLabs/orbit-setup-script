@@ -85,6 +85,7 @@ export const createNewTokenBridge = async (
       l2Weth: deployedContracts.l2Weth,
       l2WethGateway: deployedContracts.l2WethGateway,
     },
+    l2UpgradeExecutor: deployedContracts.l2upgradeExecutor,
   }
 
   return {
@@ -218,6 +219,7 @@ export const createERC20Bridge = async (
       bridge: config.bridge,
       utils: config.utils,
       validatorWalletCreator: config.validatorWalletCreator,
+      l3UpgradeExecutor: l2Network.l2UpgradeExecutor,
     },
 
     tokenBridgeContracts: {

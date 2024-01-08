@@ -1,12 +1,8 @@
 import { ethers } from 'ethers'
-import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
 import UpgradeExecutor from '@arbitrum/nitro-contracts/build/contracts/src/mocks/UpgradeExecutorMock.sol/UpgradeExecutorMock.json'
 import { getSigner } from './erc20TokenBridgeDeployment'
 import ArbOwner from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbOwner.sol/ArbOwner.json'
-import {
-  TOKEN_BRIDGE_CREATOR_Arb_Goerli,
-  TOKEN_BRIDGE_CREATOR_Arb_Sepolia,
-} from './createTokenBridge'
+import fs from 'fs'
 
 const ARB_OWNER_ADDRESS = '0x0000000000000000000000000000000000000070'
 export async function transferOwner(
@@ -15,32 +11,22 @@ export async function transferOwner(
   l3Provider: ethers.providers.JsonRpcProvider
 ) {
   //Generating l2 and l3 deployer signers from privatekey and providers
-  const l2Deployer = getSigner(l2Provider, privateKey)
   const l3Deployer = getSigner(l3Provider, privateKey)
   //fetching chain id of parent chain
   const l2ChainId = (await l2Provider.getNetwork()).chainId
-  const l3ChainId = (await l3Provider.getNetwork()).chainId
 
-  let TOKEN_BRIDGE_CREATOR: string
-  if (l2ChainId === 421613) {
-    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Goerli
-  } else if (l2ChainId === 421614) {
-    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
-  } else {
+  if (l2ChainId !== 421614) {
     throw new Error(
       'The Base Chain you have provided is not supported, please put RPC for Arb Goerli or Arb Sepolia'
     )
   }
-  const L1AtomicTokenBridgeCreator__factory = new ethers.Contract(
-    TOKEN_BRIDGE_CREATOR,
-    L1AtomicTokenBridgeCreator.abi,
-    l2Deployer
-  )
-  const l1TokenBridgeCreator =
-    L1AtomicTokenBridgeCreator__factory.connect(l2Deployer)
+
+  // Read the JSON configuration
+  const configRaw = fs.readFileSync('outputInfo.json', 'utf-8')
+  const config = JSON.parse(configRaw)
+
   //fetching L3 upgrade executor address
-  const executorContractAddress =
-    await l1TokenBridgeCreator.getCanonicalL2UpgradeExecutorAddress(l3ChainId)
+  const executorContractAddress = config.coreContracts.l3UpgradeExecutor
   //Defining Arb Owner Precompile
   const ArbOwner__factory = new ethers.Contract(
     ARB_OWNER_ADDRESS,
