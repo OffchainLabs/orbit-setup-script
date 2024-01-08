@@ -62,8 +62,7 @@ export const createNewTokenBridge = async (
     l1Deployer,
     l2Provider,
     l1TokenBridgeCreator,
-    rollupAddress,
-    childChainId
+    rollupAddress
   )
 
   const l2Network = {
