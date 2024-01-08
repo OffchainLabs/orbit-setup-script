@@ -187,8 +187,6 @@ export const createTokenBridge = async (
 
   /// pick up L1 contracts from events
   const {
-    // router: l1Router,
-    // standardGateway: l1StandardGateway,
     l2Deployment: l2Deployment,
     l1Deployment: l1Deployment,
     proxyAdmin: l1ProxyAdmin,
