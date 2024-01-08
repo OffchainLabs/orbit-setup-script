@@ -31,9 +31,6 @@ import L2AtomicTokenBridgeFactory from '@arbitrum/token-bridge-contracts/build/c
 const L2AtomicTokenBridgeFactory__factory = NamedFactoryInstance(
   L2AtomicTokenBridgeFactory
 )
-import L2ERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2ERC20Gateway.sol/L2ERC20Gateway.json'
-const L2ERC20Gateway__factory = NamedFactoryInstance(L2ERC20Gateway)
-
 // import from nitro-contracts directly to make sure the bytecode is the same
 import IInbox from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IInbox.sol/IInbox.json'
 const IInbox__factory = NamedFactoryInstance(IInbox)
@@ -58,8 +55,7 @@ export const createTokenBridge = async (
   l1Signer: Signer,
   l2Provider: ethers.providers.Provider,
   l1TokenBridgeCreator: ethers.Contract,
-  rollupAddress: string,
-  childChainId: number
+  rollupAddress: string
 ) => {
   const gasPrice = await l2Provider.getGasPrice()
   //// run retryable estimate for deploying L2 factory

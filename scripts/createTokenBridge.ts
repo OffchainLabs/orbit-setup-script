@@ -27,8 +27,7 @@ export const createNewTokenBridge = async (
   baseChainRpc: string,
   baseChainDeployerKey: string,
   childChainRpc: string,
-  rollupAddress: string,
-  childChainId: number
+  rollupAddress: string
 ) => {
   const l1Provider = new JsonRpcProvider(baseChainRpc)
   const l1Deployer = getSigner(l1Provider, baseChainDeployerKey)
@@ -168,8 +167,7 @@ export const createERC20Bridge = async (
   baseChainRpc: string,
   baseChainDeployerKey: string,
   childChainRpc: string,
-  rollupAddress: string,
-  childChainId: number
+  rollupAddress: string
 ) => {
   console.log('Creating token bridge for rollup', rollupAddress)
 
@@ -177,8 +175,7 @@ export const createERC20Bridge = async (
     baseChainRpc,
     baseChainDeployerKey,
     childChainRpc,
-    rollupAddress,
-    childChainId
+    rollupAddress
   )
   const NETWORK_FILE = 'network.json'
   fs.writeFileSync(
