@@ -18,7 +18,10 @@ export async function transferOwner(
   //fetching chain id of parent chain
   const l2ChainId = (await l2Provider.getNetwork()).chainId
 
-  if (l2ChainId !== 421614) {
+  let TOKEN_BRIDGE_CREATOR
+  if (l2ChainId === 421614) {
+    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
+  } else {
     throw new Error(
       'The Base Chain you have provided is not supported, please put RPC for Arb Goerli or Arb Sepolia'
     )
@@ -30,14 +33,6 @@ export async function transferOwner(
     'utf-8'
   )
   const config: L3Config = JSON.parse(configRaw)
-  let TOKEN_BRIDGE_CREATOR
-  if ((await l2Provider.getNetwork()).chainId === 421614) {
-    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
-  } else {
-    throw new Error(
-      'The Base Chain you have provided is not supported, please put RPC for Arb Goerli or Arb Sepolia'
-    )
-  }
 
   const L1AtomicTokenBridgeCreator__factory = new ethers.Contract(
     TOKEN_BRIDGE_CREATOR,
