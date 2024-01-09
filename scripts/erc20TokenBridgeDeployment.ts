@@ -11,6 +11,7 @@ import { getBaseFee } from '@arbitrum/sdk/dist/lib/utils/lib'
 import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/RollupAdminLogic__factory'
 
 type NamedFactory = ContractFactory & { contractName: string }
+
 const NamedFactoryInstance = (contractJson: {
   abi: any
   bytecode: string
@@ -30,9 +31,6 @@ import L2AtomicTokenBridgeFactory from '@arbitrum/token-bridge-contracts/build/c
 const L2AtomicTokenBridgeFactory__factory = NamedFactoryInstance(
   L2AtomicTokenBridgeFactory
 )
-import L2ERC20Gateway from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/arbitrum/gateway/L2ERC20Gateway.sol/L2ERC20Gateway.json'
-const L2ERC20Gateway__factory = NamedFactoryInstance(L2ERC20Gateway)
-
 // import from nitro-contracts directly to make sure the bytecode is the same
 import IInbox from '@arbitrum/nitro-contracts/build/contracts/src/bridge/IInbox.sol/IInbox.json'
 const IInbox__factory = NamedFactoryInstance(IInbox)
@@ -57,8 +55,7 @@ export const createTokenBridge = async (
   l1Signer: Signer,
   l2Provider: ethers.providers.Provider,
   l1TokenBridgeCreator: ethers.Contract,
-  rollupAddress: string,
-  childChainId: number
+  rollupAddress: string
 ) => {
   const gasPrice = await l2Provider.getGasPrice()
   //// run retryable estimate for deploying L2 factory
@@ -178,47 +175,45 @@ export const createTokenBridge = async (
   ).connect(l2Provider)
   console.log('L2AtomicTokenBridgeFactory', l2AtomicTokenBridgeFactory.address)
 
-  /// pick up L1 contracts from events
-  const {
-    router: l1Router,
-    standardGateway: l1StandardGateway,
-    customGateway: l1CustomGateway,
-    wethGateway: l1WethGateway,
-    proxyAdmin: l1ProxyAdmin,
-  } = getParsedLogs(
+  const res = getParsedLogs(
     receipt.logs,
     l1TokenBridgeCreator.interface,
     'OrbitTokenBridgeCreated'
   )[0].args
 
+  /// pick up L1 contracts from events
+  const {
+    l2Deployment: l2Deployment,
+    l1Deployment: l1Deployment,
+    proxyAdmin: l1ProxyAdmin,
+  } = res
+
   /// pick up L2 contracts
-  const l2Router = await l1TokenBridgeCreator.getCanonicalL2RouterAddress(
-    childChainId
-  )
-  const l2StandardGateway = L2ERC20Gateway__factory.attach(
-    await l1TokenBridgeCreator.getCanonicalL2StandardGatewayAddress(
-      childChainId
-    )
-  ).connect(l2Provider)
-  const beaconProxyFactory = await l2StandardGateway.beaconProxyFactory()
-  const l2CustomGateway =
-    await l1TokenBridgeCreator.getCanonicalL2CustomGatewayAddress(childChainId)
+  const l2Router = l2Deployment.router
+
+  const l2StandardGateway = l2Deployment.standardGateway
+
+  const beaconProxyFactory = l2Deployment.beaconProxyFactory
+  const l2CustomGateway = l2Deployment.customGateway
 
   const isUsingFeeToken = feeToken != ethers.constants.AddressZero
   const l2WethGateway = isUsingFeeToken
     ? ethers.constants.AddressZero
-    : await l1TokenBridgeCreator.getCanonicalL2WethGatewayAddress(childChainId)
-  const l1Weth = await l1TokenBridgeCreator.l1Weth()
+    : l2Deployment.wethGateway
+
+  const l1Weth = l1Deployment.weth
   const l2Weth = isUsingFeeToken
     ? ethers.constants.AddressZero
-    : await l1TokenBridgeCreator.getCanonicalL2WethAddress(childChainId)
-  const l2ProxyAdmin =
-    await l1TokenBridgeCreator.getCanonicalL2ProxyAdminAddress(childChainId)
+    : l2Deployment.weth
+  const l2ProxyAdmin = l2Deployment.proxyAdmin
 
   const l1MultiCall = await l1TokenBridgeCreator.l1Multicall()
-  const l2Multicall = await l1TokenBridgeCreator.getCanonicalL2Multicall(
-    childChainId
-  )
+  const l2Multicall = l2Deployment.multicall
+
+  const l1Router = l1Deployment.router
+  const l1StandardGateway = l1Deployment.standardGateway
+  const l1CustomGateway = l1Deployment.customGateway
+  const l1WethGateway = l1Deployment.wethGateway
 
   return {
     l1Router,
