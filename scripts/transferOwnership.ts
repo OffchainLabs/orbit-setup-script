@@ -3,6 +3,9 @@ import UpgradeExecutor from '@arbitrum/nitro-contracts/build/contracts/src/mocks
 import { getSigner } from './erc20TokenBridgeDeployment'
 import ArbOwner from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbOwner.sol/ArbOwner.json'
 import fs from 'fs'
+import { L3Config } from './l3ConfigType'
+import { TOKEN_BRIDGE_CREATOR_Arb_Sepolia } from './createTokenBridge'
+import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
 
 const ARB_OWNER_ADDRESS = '0x0000000000000000000000000000000000000070'
 export async function transferOwner(
@@ -22,11 +25,33 @@ export async function transferOwner(
   }
 
   // Read the JSON configuration
-  const configRaw = fs.readFileSync('outputInfo.json', 'utf-8')
-  const config = JSON.parse(configRaw)
+  const configRaw = fs.readFileSync(
+    './config/orbitSetupScriptConfig.json',
+    'utf-8'
+  )
+  const config: L3Config = JSON.parse(configRaw)
+  let TOKEN_BRIDGE_CREATOR
+  if ((await l2Provider.getNetwork()).chainId === 421614) {
+    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
+  } else {
+    throw new Error(
+      'The Base Chain you have provided is not supported, please put RPC for Arb Goerli or Arb Sepolia'
+    )
+  }
+
+  const L1AtomicTokenBridgeCreator__factory = new ethers.Contract(
+    TOKEN_BRIDGE_CREATOR,
+    L1AtomicTokenBridgeCreator.abi,
+    l2Provider
+  )
+  const l1TokenBridgeCreator =
+    L1AtomicTokenBridgeCreator__factory.connect(l2Provider)
 
   //fetching L3 upgrade executor address
-  const executorContractAddress = config.coreContracts.l3UpgradeExecutor
+  const executorContractAddress = (
+    await l1TokenBridgeCreator.inboxToL2Deployment(config.inbox)
+  ).upgradeExecutor
+
   //Defining Arb Owner Precompile
   const ArbOwner__factory = new ethers.Contract(
     ARB_OWNER_ADDRESS,

@@ -215,8 +215,6 @@ export const createTokenBridge = async (
   const l1CustomGateway = l1Deployment.customGateway
   const l1WethGateway = l1Deployment.wethGateway
 
-  const l2upgradeExecutor = l2Deployment.upgradeExecutor
-
   return {
     l1Router,
     l1StandardGateway,
@@ -233,7 +231,6 @@ export const createTokenBridge = async (
     l2ProxyAdmin,
     l1MultiCall,
     l2Multicall,
-    l2upgradeExecutor,
   }
 }
 
