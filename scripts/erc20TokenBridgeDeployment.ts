@@ -222,7 +222,7 @@ export const createTokenBridge = async (
     l1WethGateway,
     l1ProxyAdmin,
     l2Router,
-    l2StandardGateway: l2StandardGateway.address,
+    l2StandardGateway,
     l2CustomGateway,
     l2WethGateway,
     l1Weth,
