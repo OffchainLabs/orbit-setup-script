@@ -43,6 +43,7 @@ services:
     volumes:
       - "./config:/home/user/.arbitrum"
       - "./keys:/home/user/keys"
+      - "./fhenix:/home/user/fhenix"
     command: --conf.file /home/user/.arbitrum/nodeConfig.json
 
   das-server:
