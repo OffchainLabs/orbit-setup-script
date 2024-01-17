@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   frontend:
-    image: ghcr.io/blockscout/frontend:${FRONTEND_DOCKER_TAG:-v1.20.0}
+    image: ghcr.io/blockscout/frontend:${FRONTEND_DOCKER_TAG:-v1.21.2}
     pull_policy: always
     platform: linux/amd64
     restart: always
