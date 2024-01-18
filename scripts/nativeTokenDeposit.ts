@@ -46,8 +46,8 @@ async function sendEthOrDepositERC20(
 
     // Call depositERC20 with 2 tokens if nativeToken is not zero address.
     const decimals = await nativeTokenContract.decimals()
-    if(decimals !== 18) {
-      throw new Error("We currently only support 18 decimals token")
+    if (decimals !== 18) {
+      throw new Error('We currently only support 18 decimals token')
     }
     const amount = ethers.utils.parseUnits('0.4', decimals)
     const tx = await erc20Inbox.depositERC20(amount)
