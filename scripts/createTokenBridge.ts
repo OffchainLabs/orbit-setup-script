@@ -44,7 +44,7 @@ export const createNewTokenBridge = async (
     TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
   } else {
     throw new Error(
-      'The Base Chain you have provided is not supported, please put RPC for Arb Goerli or Arb Sepolia'
+      'The Base Chain you have provided is not supported, please put RPC for Arb Sepolia'
     )
   }
 
