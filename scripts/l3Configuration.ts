@@ -52,7 +52,7 @@ export async function l3Configuration(
     throw new Error('The address you have provided is not the chain owner')
   }
 
-  // Set the network fee receiver
+  // Set the network base fee
   console.log('Setting the Minimum Base Fee for the Orbit chain')
   const tx = await ArbOwner.setMinimumL2BaseFee(minL2BaseFee)
 
