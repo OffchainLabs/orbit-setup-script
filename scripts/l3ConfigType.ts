@@ -18,4 +18,5 @@ export interface L3Config {
   chainName: string
   parentChainId: number
   'parent-chain-node-url': string
+  nativeToken: string
 }
