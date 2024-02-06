@@ -45,6 +45,8 @@ services:
     extends:
       file: ./docker-compose/services/frontend.yml
       service: frontend
+    ports:
+      - "127.0.0.1:3000:3000"
     environment:
       NEXT_PUBLIC_NETWORK_NAME: "Arbitrum Local"
       NEXT_PUBLIC_NETWORK_SHORT_NAME: "Arbitrum Local"
