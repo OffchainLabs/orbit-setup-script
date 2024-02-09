@@ -94,10 +94,7 @@ services:
     volumes:
       - "./config:/home/user/.arbitrum"
       - "./das-server.sh:/das-server.sh"
-      - "das-data:/home/user/das-data"
+      - "./das-data:/home/user/das-data"
     ports:
       - "9876:9876"
       - "9877:9877"
-
-volumes:
-  das-data:
