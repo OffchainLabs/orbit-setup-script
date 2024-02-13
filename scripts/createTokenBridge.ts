@@ -1,12 +1,58 @@
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { L1Network, L2Network, addCustomNetwork } from '@arbitrum/sdk'
 import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/RollupAdminLogic__factory'
-import { createTokenBridge, getSigner } from './erc20TokenBridgeDeployment'
-import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
 import * as fs from 'fs'
-import { ethers } from 'ethers'
+import { constants } from 'ethers'
+import { defineChain, createPublicClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import {
+  createTokenBridgePrepareTransactionRequest,
+  createTokenBridgePrepareTransactionReceipt,
+} from '@arbitrum/orbit-sdk'
+
 import { L3Config } from './l3ConfigType'
 
+<<<<<<< HEAD
+=======
+function sanitizePrivateKey(privateKey: string): `0x${string}` {
+  if (!privateKey.startsWith('0x')) {
+    return `0x${privateKey}`
+  }
+
+  return privateKey as `0x${string}`
+}
+
+function createPublicClientFromChainInfo({
+  id,
+  name,
+  rpcUrl,
+}: {
+  id: number
+  name: string
+  rpcUrl: string
+}) {
+  const chain = defineChain({
+    id: id,
+    network: name,
+    name: name,
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: {
+      default: {
+        http: [rpcUrl],
+      },
+      public: {
+        http: [rpcUrl],
+      },
+    },
+    testnet: true,
+  })
+
+  return createPublicClient({ chain, transport: http() })
+}
+
+export const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
+  '0x1C608642d0944e95957a7ac3a478EC17FA191E9A'
+>>>>>>> 3124f7b (use orbit sdk for token bridge deployment)
 export const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
   '0x56C486D3786fA26cc61473C499A36Eb9CC1FbD8E'
 
@@ -29,9 +75,58 @@ export const createNewTokenBridge = async (
   childChainRpc: string,
   rollupAddress: string
 ) => {
+  const deployer = privateKeyToAccount(sanitizePrivateKey(baseChainDeployerKey))
+
   const l1Provider = new JsonRpcProvider(baseChainRpc)
-  const l1Deployer = getSigner(l1Provider, baseChainDeployerKey)
+  const l1EthersNetwork = await l1Provider.getNetwork()
   const l2Provider = new JsonRpcProvider(childChainRpc)
+  const l2EthersNetwork = await l2Provider.getNetwork()
+
+  const parentChainPublicClient = createPublicClientFromChainInfo({
+    id: l1EthersNetwork.chainId,
+    name: l1EthersNetwork.name,
+    rpcUrl: baseChainRpc,
+  })
+
+  const orbitChainPublicClient = createPublicClientFromChainInfo({
+    id: l2EthersNetwork.chainId,
+    name: l2EthersNetwork.name,
+    rpcUrl: childChainRpc,
+  })
+
+  const txRequest = await createTokenBridgePrepareTransactionRequest({
+    params: {
+      rollup: rollupAddress as `0x${string}`,
+      rollupOwner: deployer.address,
+    },
+    parentChainPublicClient,
+    orbitChainPublicClient,
+    account: deployer.address,
+  })
+
+  // submit tx
+  const txHash = await parentChainPublicClient.sendRawTransaction({
+    serializedTransaction: await deployer.signTransaction(txRequest),
+  })
+
+  // get the transaction receipt after waiting for the transaction to complete
+  const txReceipt = createTokenBridgePrepareTransactionReceipt(
+    await parentChainPublicClient.waitForTransactionReceipt({ hash: txHash })
+  )
+  console.log(`Deployed in transaction: ${txReceipt.transactionHash}`)
+
+  console.log(`Waiting for retryables...`)
+  // wait for retryables to execute
+  const retryables = await txReceipt.waitForRetryables({
+    orbitPublicClient: orbitChainPublicClient,
+  })
+  console.log(`Retryable #1: ${retryables[0].transactionHash}`)
+  console.log(`Retryable #2: ${retryables[1].transactionHash}`)
+
+  const { parentChainContracts, orbitChainContracts } =
+    await txReceipt.getTokenBridgeContracts({
+      parentChainPublicClient,
+    })
 
   const { l1Network, l2Network: corel2Network } = await registerNewNetwork(
     l1Provider,
@@ -39,6 +134,7 @@ export const createNewTokenBridge = async (
     rollupAddress
   )
 
+<<<<<<< HEAD
   let TOKEN_BRIDGE_CREATOR: string
   if ((await l1Provider.getNetwork()).chainId === 421614) {
     TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
@@ -64,24 +160,27 @@ export const createNewTokenBridge = async (
     rollupAddress
   )
 
+=======
+>>>>>>> 3124f7b (use orbit sdk for token bridge deployment)
   const l2Network = {
     ...corel2Network,
     tokenBridge: {
-      l1CustomGateway: deployedContracts.l1CustomGateway,
-      l1ERC20Gateway: deployedContracts.l1StandardGateway,
-      l1GatewayRouter: deployedContracts.l1Router,
-      l1MultiCall: deployedContracts.l1MultiCall,
-      l1ProxyAdmin: deployedContracts.l1ProxyAdmin,
-      l1Weth: deployedContracts.l1Weth,
-      l1WethGateway: deployedContracts.l1WethGateway,
+      l1CustomGateway: parentChainContracts.customGateway,
+      l1ERC20Gateway: parentChainContracts.standardGateway,
+      l1GatewayRouter: parentChainContracts.router,
+      l1MultiCall: parentChainContracts.multicall,
+      // todo: fix
+      l1ProxyAdmin: constants.AddressZero,
+      l1Weth: parentChainContracts.weth,
+      l1WethGateway: parentChainContracts.wethGateway,
 
-      l2CustomGateway: deployedContracts.l2CustomGateway,
-      l2ERC20Gateway: deployedContracts.l2StandardGateway,
-      l2GatewayRouter: deployedContracts.l2Router,
-      l2Multicall: deployedContracts.l2Multicall,
-      l2ProxyAdmin: deployedContracts.l2ProxyAdmin,
-      l2Weth: deployedContracts.l2Weth,
-      l2WethGateway: deployedContracts.l2WethGateway,
+      l2CustomGateway: orbitChainContracts.customGateway,
+      l2ERC20Gateway: orbitChainContracts.standardGateway,
+      l2GatewayRouter: orbitChainContracts.router,
+      l2Multicall: orbitChainContracts.multicall,
+      l2ProxyAdmin: orbitChainContracts.proxyAdmin,
+      l2Weth: orbitChainContracts.weth,
+      l2WethGateway: orbitChainContracts.wethGateway,
     },
   }
 
