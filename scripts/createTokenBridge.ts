@@ -131,34 +131,6 @@ export const createNewTokenBridge = async (
     rollupAddress
   )
 
-<<<<<<< HEAD
-  let TOKEN_BRIDGE_CREATOR: string
-  if ((await l1Provider.getNetwork()).chainId === 421614) {
-    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
-  } else {
-    throw new Error(
-      'The Base Chain you have provided is not supported, please put RPC for Arb Sepolia'
-    )
-  }
-
-  const L1AtomicTokenBridgeCreator__factory = new ethers.Contract(
-    TOKEN_BRIDGE_CREATOR,
-    L1AtomicTokenBridgeCreator.abi,
-    l1Deployer
-  )
-  const l1TokenBridgeCreator =
-    L1AtomicTokenBridgeCreator__factory.connect(l1Deployer)
-
-  // create token bridge
-  const deployedContracts = await createTokenBridge(
-    l1Deployer,
-    l2Provider,
-    l1TokenBridgeCreator,
-    rollupAddress
-  )
-
-=======
->>>>>>> 3124f7b (use orbit sdk for token bridge deployment)
   const l2Network = {
     ...corel2Network,
     tokenBridge: {
