@@ -12,8 +12,6 @@ import {
 
 import { L3Config } from './l3ConfigType'
 
-<<<<<<< HEAD
-=======
 function sanitizePrivateKey(privateKey: string): `0x${string}` {
   if (!privateKey.startsWith('0x')) {
     return `0x${privateKey}`
@@ -52,7 +50,6 @@ function createPublicClientFromChainInfo({
 
 export const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
   '0x1C608642d0944e95957a7ac3a478EC17FA191E9A'
->>>>>>> 3124f7b (use orbit sdk for token bridge deployment)
 export const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
   '0x56C486D3786fA26cc61473C499A36Eb9CC1FbD8E'
 
