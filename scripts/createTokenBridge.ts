@@ -7,7 +7,7 @@ import {
 import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/RollupAdminLogic__factory'
 import * as fs from 'fs'
 import { constants } from 'ethers'
-import { defineChain, createPublicClient, http } from 'viem'
+import { defineChain, createPublicClient, http, Address } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import {
   createRollupFetchTransactionHash,
@@ -92,7 +92,7 @@ export const createNewTokenBridge = async (
 
   const txRequest = await createTokenBridgePrepareTransactionRequest({
     params: {
-      rollup: rollupAddress as `0x${string}`,
+      rollup: rollupAddress as Address,
       rollupOwner: deployer.address,
     },
     parentChainPublicClient,
@@ -127,7 +127,7 @@ export const createNewTokenBridge = async (
 
   // fetch core contracts
   const createRollupTxHash = await createRollupFetchTransactionHash({
-    rollup: rollupAddress as `0x${string}`,
+    rollup: rollupAddress as Address,
     publicClient: parentChainPublicClient,
   })
 
