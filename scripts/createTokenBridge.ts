@@ -4,6 +4,7 @@ import {
   L2Network,
   constants as arbitrumSdkConstants,
 } from '@arbitrum/sdk'
+import { IERC20Bridge__factory } from '@arbitrum/sdk/dist/lib/abi/factories/IERC20Bridge__factory'
 import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/RollupAdminLogic__factory'
 import * as fs from 'fs'
 import { constants } from 'ethers'
@@ -12,6 +13,8 @@ import { privateKeyToAccount } from 'viem/accounts'
 import {
   createRollupFetchTransactionHash,
   createRollupPrepareTransactionReceipt,
+  createTokenBridgeEnoughCustomFeeTokenAllowance,
+  createTokenBridgePrepareCustomFeeTokenApprovalTransactionRequest,
   createTokenBridgePrepareTransactionRequest,
   createTokenBridgePrepareTransactionReceipt,
 } from '@arbitrum/orbit-sdk'
@@ -49,6 +52,28 @@ function createPublicClientFromChainInfo({
 
 export const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
   '0x56C486D3786fA26cc61473C499A36Eb9CC1FbD8E'
+
+async function getNativeToken({
+  rollup,
+  provider,
+}: {
+  rollup: string
+  provider: JsonRpcProvider
+}): Promise<`0x${string}`> {
+  const bridge = await RollupAdminLogic__factory.connect(
+    rollup,
+    provider
+  ).bridge()
+
+  try {
+    return (await IERC20Bridge__factory.connect(
+      bridge,
+      provider
+    ).nativeToken()) as `0x${string}`
+  } catch (error) {
+    return constants.AddressZero
+  }
+}
 
 /**
  * Steps:
@@ -90,6 +115,53 @@ export const createNewTokenBridge = async (
     rpcUrl: childChainRpc,
   })
 
+  const nativeToken = await getNativeToken({
+    rollup: rollupAddress,
+    provider: l1Provider,
+  })
+
+  // custom gas token
+  if (nativeToken !== constants.AddressZero) {
+    console.log(
+      `Detected custom gas token chain with native token ${nativeToken}`
+    )
+
+    const allowanceParams = {
+      nativeToken,
+      owner: deployer.address,
+      publicClient: parentChainPublicClient,
+    }
+
+    const enoughCustomFeeTokenAllowance =
+      await createTokenBridgeEnoughCustomFeeTokenAllowance(allowanceParams)
+
+    if (!enoughCustomFeeTokenAllowance) {
+      console.log('Not enough allowance for custom gas token')
+      const approvalTxRequest =
+        await createTokenBridgePrepareCustomFeeTokenApprovalTransactionRequest(
+          allowanceParams
+        )
+
+      console.log(`Sending tx to approve custom gas token`)
+      // sign and send the transaction
+      const approvalTxHash = await parentChainPublicClient.sendRawTransaction({
+        serializedTransaction: await deployer.signTransaction(
+          approvalTxRequest
+        ),
+      })
+
+      // get the transaction receipt after waiting for the transaction to complete
+      const approvalTxReceipt =
+        await parentChainPublicClient.waitForTransactionReceipt({
+          hash: approvalTxHash,
+        })
+
+      console.log(
+        `Done! Custom gas token approved in tx ${approvalTxReceipt.transactionHash}`
+      )
+    }
+  }
+
   const txRequest = await createTokenBridgePrepareTransactionRequest({
     params: {
       rollup: rollupAddress as Address,
@@ -109,7 +181,9 @@ export const createNewTokenBridge = async (
   const txReceipt = createTokenBridgePrepareTransactionReceipt(
     await parentChainPublicClient.waitForTransactionReceipt({ hash: txHash })
   )
-  console.log(`Created in transaction ${txReceipt.transactionHash}`)
+  console.log(
+    `Token bridge deployed in transaction ${txReceipt.transactionHash}`
+  )
 
   console.log(`Waiting for retryables...`)
   // wait for retryables to execute
@@ -118,7 +192,7 @@ export const createNewTokenBridge = async (
   })
   console.log(`Retryable #1: ${retryables[0].transactionHash}`)
   console.log(`Retryable #2: ${retryables[1].transactionHash}`)
-  console.log(`Done`)
+  console.log(`Done!`)
 
   const { parentChainContracts, orbitChainContracts } =
     await txReceipt.getTokenBridgeContracts({
