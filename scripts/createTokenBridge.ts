@@ -9,16 +9,9 @@ import {
   createTokenBridgePrepareTransactionRequest,
   createTokenBridgePrepareTransactionReceipt,
 } from '@arbitrum/orbit-sdk'
+import { sanitizePrivateKey } from '@arbitrum/orbit-sdk/utils'
 
 import { L3Config } from './l3ConfigType'
-
-function sanitizePrivateKey(privateKey: string): `0x${string}` {
-  if (!privateKey.startsWith('0x')) {
-    return `0x${privateKey}`
-  }
-
-  return privateKey as `0x${string}`
-}
 
 function createPublicClientFromChainInfo({
   id,
