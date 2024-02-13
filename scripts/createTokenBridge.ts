@@ -48,8 +48,6 @@ function createPublicClientFromChainInfo({
   return createPublicClient({ chain, transport: http() })
 }
 
-export const TOKEN_BRIDGE_CREATOR_Arb_Goerli =
-  '0x1C608642d0944e95957a7ac3a478EC17FA191E9A'
 export const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
   '0x56C486D3786fA26cc61473C499A36Eb9CC1FbD8E'
 
