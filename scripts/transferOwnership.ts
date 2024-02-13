@@ -1,11 +1,19 @@
-import { ethers } from 'ethers'
+import { ethers, Wallet } from 'ethers'
+import { JsonRpcProvider } from '@ethersproject/providers'
 import UpgradeExecutor from '@arbitrum/nitro-contracts/build/contracts/src/mocks/UpgradeExecutorMock.sol/UpgradeExecutorMock.json'
-import { getSigner } from './erc20TokenBridgeDeployment'
+
 import ArbOwner from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbOwner.sol/ArbOwner.json'
 import fs from 'fs'
 import { L3Config } from './l3ConfigType'
 import { TOKEN_BRIDGE_CREATOR_Arb_Sepolia } from './createTokenBridge'
 import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
+
+export const getSigner = (provider: JsonRpcProvider, key?: string) => {
+  if (!key && !provider)
+    throw new Error('Provide at least one of key or provider.')
+  if (key) return new Wallet(key).connect(provider)
+  else return provider.getSigner(0)
+}
 
 const ARB_OWNER_ADDRESS = '0x0000000000000000000000000000000000000070'
 export async function transferOwner(
