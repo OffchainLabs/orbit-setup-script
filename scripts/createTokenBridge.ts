@@ -1,14 +1,79 @@
 import { JsonRpcProvider } from '@ethersproject/providers'
-import { L1Network, L2Network, addCustomNetwork } from '@arbitrum/sdk'
+import {
+  L1Network,
+  L2Network,
+  constants as arbitrumSdkConstants,
+} from '@arbitrum/sdk'
+import { IERC20Bridge__factory } from '@arbitrum/sdk/dist/lib/abi/factories/IERC20Bridge__factory'
 import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/RollupAdminLogic__factory'
-import { createTokenBridge, getSigner } from './erc20TokenBridgeDeployment'
-import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
 import * as fs from 'fs'
-import { ethers } from 'ethers'
+import { constants } from 'ethers'
+import { defineChain, createPublicClient, http, Address } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import {
+  createRollupFetchTransactionHash,
+  createRollupPrepareTransactionReceipt,
+  createTokenBridgeEnoughCustomFeeTokenAllowance,
+  createTokenBridgePrepareCustomFeeTokenApprovalTransactionRequest,
+  createTokenBridgePrepareTransactionRequest,
+  createTokenBridgePrepareTransactionReceipt,
+} from '@arbitrum/orbit-sdk'
+import { sanitizePrivateKey } from '@arbitrum/orbit-sdk/utils'
+
 import { L3Config } from './l3ConfigType'
+
+function createPublicClientFromChainInfo({
+  id,
+  name,
+  rpcUrl,
+}: {
+  id: number
+  name: string
+  rpcUrl: string
+}) {
+  const chain = defineChain({
+    id: id,
+    network: name,
+    name: name,
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: {
+      default: {
+        http: [rpcUrl],
+      },
+      public: {
+        http: [rpcUrl],
+      },
+    },
+    testnet: true,
+  })
+
+  return createPublicClient({ chain, transport: http() })
+}
 
 export const TOKEN_BRIDGE_CREATOR_Arb_Sepolia =
   '0x56C486D3786fA26cc61473C499A36Eb9CC1FbD8E'
+
+async function getNativeToken({
+  rollup,
+  provider,
+}: {
+  rollup: string
+  provider: JsonRpcProvider
+}): Promise<`0x${string}`> {
+  const bridge = await RollupAdminLogic__factory.connect(
+    rollup,
+    provider
+  ).bridge()
+
+  try {
+    return (await IERC20Bridge__factory.connect(
+      bridge,
+      provider
+    ).nativeToken()) as `0x${string}`
+  } catch (error) {
+    return constants.AddressZero
+  }
+}
 
 /**
  * Steps:
@@ -30,77 +95,121 @@ export const createNewTokenBridge = async (
   rollupAddress: string
 ) => {
   const l1Provider = new JsonRpcProvider(baseChainRpc)
-  const l1Deployer = getSigner(l1Provider, baseChainDeployerKey)
-  const l2Provider = new JsonRpcProvider(childChainRpc)
-
-  const { l1Network, l2Network: corel2Network } = await registerNewNetwork(
-    l1Provider,
-    l2Provider,
-    rollupAddress
-  )
-
-  let TOKEN_BRIDGE_CREATOR: string
-  if ((await l1Provider.getNetwork()).chainId === 421614) {
-    TOKEN_BRIDGE_CREATOR = TOKEN_BRIDGE_CREATOR_Arb_Sepolia
-  } else {
-    throw new Error(
-      'The Base Chain you have provided is not supported, please put RPC for Arb Sepolia'
-    )
-  }
-
-  const L1AtomicTokenBridgeCreator__factory = new ethers.Contract(
-    TOKEN_BRIDGE_CREATOR,
-    L1AtomicTokenBridgeCreator.abi,
-    l1Deployer
-  )
-  const l1TokenBridgeCreator =
-    L1AtomicTokenBridgeCreator__factory.connect(l1Deployer)
-
-  // create token bridge
-  const deployedContracts = await createTokenBridge(
-    l1Deployer,
-    l2Provider,
-    l1TokenBridgeCreator,
-    rollupAddress
-  )
-
-  const l2Network = {
-    ...corel2Network,
-    tokenBridge: {
-      l1CustomGateway: deployedContracts.l1CustomGateway,
-      l1ERC20Gateway: deployedContracts.l1StandardGateway,
-      l1GatewayRouter: deployedContracts.l1Router,
-      l1MultiCall: deployedContracts.l1MultiCall,
-      l1ProxyAdmin: deployedContracts.l1ProxyAdmin,
-      l1Weth: deployedContracts.l1Weth,
-      l1WethGateway: deployedContracts.l1WethGateway,
-
-      l2CustomGateway: deployedContracts.l2CustomGateway,
-      l2ERC20Gateway: deployedContracts.l2StandardGateway,
-      l2GatewayRouter: deployedContracts.l2Router,
-      l2Multicall: deployedContracts.l2Multicall,
-      l2ProxyAdmin: deployedContracts.l2ProxyAdmin,
-      l2Weth: deployedContracts.l2Weth,
-      l2WethGateway: deployedContracts.l2WethGateway,
-    },
-  }
-
-  return {
-    l1Network,
-    l2Network,
-  }
-}
-
-const registerNewNetwork = async (
-  l1Provider: JsonRpcProvider,
-  l2Provider: JsonRpcProvider,
-  rollupAddress: string
-): Promise<{
-  l1Network: L1Network
-  l2Network: Omit<L2Network, 'tokenBridge'>
-}> => {
   const l1NetworkInfo = await l1Provider.getNetwork()
+
+  const l2Provider = new JsonRpcProvider(childChainRpc)
   const l2NetworkInfo = await l2Provider.getNetwork()
+
+  const deployer = privateKeyToAccount(sanitizePrivateKey(baseChainDeployerKey))
+  const rollup = RollupAdminLogic__factory.connect(rollupAddress, l1Provider)
+
+  const parentChainPublicClient = createPublicClientFromChainInfo({
+    id: l1NetworkInfo.chainId,
+    name: l1NetworkInfo.name,
+    rpcUrl: baseChainRpc,
+  })
+
+  const orbitChainPublicClient = createPublicClientFromChainInfo({
+    id: l2NetworkInfo.chainId,
+    name: l2NetworkInfo.name,
+    rpcUrl: childChainRpc,
+  })
+
+  const nativeToken = await getNativeToken({
+    rollup: rollupAddress,
+    provider: l1Provider,
+  })
+
+  // custom gas token
+  if (nativeToken !== constants.AddressZero) {
+    console.log(
+      `Detected custom gas token chain with native token ${nativeToken}`
+    )
+
+    const allowanceParams = {
+      nativeToken,
+      owner: deployer.address,
+      publicClient: parentChainPublicClient,
+    }
+
+    const enoughCustomFeeTokenAllowance =
+      await createTokenBridgeEnoughCustomFeeTokenAllowance(allowanceParams)
+
+    if (!enoughCustomFeeTokenAllowance) {
+      console.log('Not enough allowance for custom gas token')
+      const approvalTxRequest =
+        await createTokenBridgePrepareCustomFeeTokenApprovalTransactionRequest(
+          allowanceParams
+        )
+
+      console.log(`Sending tx to approve custom gas token`)
+      // sign and send the transaction
+      const approvalTxHash = await parentChainPublicClient.sendRawTransaction({
+        serializedTransaction: await deployer.signTransaction(
+          approvalTxRequest
+        ),
+      })
+
+      // get the transaction receipt after waiting for the transaction to complete
+      const approvalTxReceipt =
+        await parentChainPublicClient.waitForTransactionReceipt({
+          hash: approvalTxHash,
+        })
+
+      console.log(
+        `Done! Custom gas token approved in tx ${approvalTxReceipt.transactionHash}`
+      )
+    }
+  }
+
+  const txRequest = await createTokenBridgePrepareTransactionRequest({
+    params: {
+      rollup: rollupAddress as Address,
+      rollupOwner: deployer.address,
+    },
+    parentChainPublicClient,
+    orbitChainPublicClient,
+    account: deployer.address,
+  })
+
+  // submit tx
+  const txHash = await parentChainPublicClient.sendRawTransaction({
+    serializedTransaction: await deployer.signTransaction(txRequest),
+  })
+
+  // get the transaction receipt after waiting for the transaction to complete
+  const txReceipt = createTokenBridgePrepareTransactionReceipt(
+    await parentChainPublicClient.waitForTransactionReceipt({ hash: txHash })
+  )
+  console.log(
+    `Token bridge deployed in transaction ${txReceipt.transactionHash}`
+  )
+
+  console.log(`Waiting for retryables...`)
+  // wait for retryables to execute
+  const retryables = await txReceipt.waitForRetryables({
+    orbitPublicClient: orbitChainPublicClient,
+  })
+  console.log(`Retryable #1: ${retryables[0].transactionHash}`)
+  console.log(`Retryable #2: ${retryables[1].transactionHash}`)
+  console.log(`Done!`)
+
+  const { parentChainContracts, orbitChainContracts } =
+    await txReceipt.getTokenBridgeContracts({
+      parentChainPublicClient,
+    })
+
+  // fetch core contracts
+  const createRollupTxHash = await createRollupFetchTransactionHash({
+    rollup: rollupAddress as Address,
+    publicClient: parentChainPublicClient,
+  })
+
+  const coreContracts = createRollupPrepareTransactionReceipt(
+    await parentChainPublicClient.getTransactionReceipt({
+      hash: createRollupTxHash,
+    })
+  ).getCoreContracts()
 
   const l1Network: L1Network = {
     blockTime: 10,
@@ -112,49 +221,46 @@ const registerNewNetwork = async (
     isArbitrum: false,
   }
 
-  const rollup = RollupAdminLogic__factory.connect(rollupAddress, l1Provider)
   const l2Network: L2Network = {
     chainID: l2NetworkInfo.chainId,
     confirmPeriodBlocks: (await rollup.confirmPeriodBlocks()).toNumber(),
     ethBridge: {
-      bridge: await rollup.bridge(),
-      inbox: await rollup.inbox(),
-      outbox: await rollup.outbox(),
+      bridge: coreContracts.bridge,
+      inbox: coreContracts.inbox,
+      outbox: coreContracts.outbox,
       rollup: rollup.address,
-      sequencerInbox: await rollup.sequencerInbox(),
+      sequencerInbox: coreContracts.sequencerInbox,
     },
     explorerUrl: '',
     isArbitrum: true,
     isCustom: true,
     name: 'OrbitChain',
     partnerChainID: l1NetworkInfo.chainId,
+    partnerChainIDs: [],
     retryableLifetimeSeconds: 7 * 24 * 60 * 60,
     nitroGenesisBlock: 0,
     nitroGenesisL1Block: 0,
     depositTimeout: 900000,
     tokenBridge: {
-      l1CustomGateway: '',
-      l1ERC20Gateway: '',
-      l1GatewayRouter: '',
-      l1MultiCall: '',
-      l1ProxyAdmin: '',
-      l1Weth: '',
-      l1WethGateway: '',
-      l2CustomGateway: '',
-      l2ERC20Gateway: '',
-      l2GatewayRouter: '',
-      l2Multicall: '',
-      l2ProxyAdmin: '',
-      l2Weth: '',
-      l2WethGateway: '',
-    },
-  }
+      l1CustomGateway: parentChainContracts.customGateway,
+      l1ERC20Gateway: parentChainContracts.standardGateway,
+      l1GatewayRouter: parentChainContracts.router,
+      l1MultiCall: parentChainContracts.multicall,
+      // todo: fix
+      l1ProxyAdmin: constants.AddressZero,
+      l1Weth: parentChainContracts.weth,
+      l1WethGateway: parentChainContracts.wethGateway,
 
-  // register - needed for retryables
-  addCustomNetwork({
-    customL1Network: l1Network,
-    customL2Network: l2Network,
-  })
+      l2CustomGateway: orbitChainContracts.customGateway,
+      l2ERC20Gateway: orbitChainContracts.standardGateway,
+      l2GatewayRouter: orbitChainContracts.router,
+      l2Multicall: orbitChainContracts.multicall,
+      l2ProxyAdmin: orbitChainContracts.proxyAdmin,
+      l2Weth: orbitChainContracts.weth,
+      l2WethGateway: orbitChainContracts.wethGateway,
+    },
+    blockTime: arbitrumSdkConstants.ARB_MINIMUM_BLOCK_TIME_IN_SECONDS,
+  }
 
   return {
     l1Network,
