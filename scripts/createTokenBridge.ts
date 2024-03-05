@@ -17,6 +17,8 @@ import {
   createTokenBridgePrepareCustomFeeTokenApprovalTransactionRequest,
   createTokenBridgePrepareTransactionRequest,
   createTokenBridgePrepareTransactionReceipt,
+  createTokenBridgePrepareSetWethGatewayTransactionRequest,
+  createTokenBridgePrepareSetWethGatewayTransactionReceipt,
 } from '@arbitrum/orbit-sdk'
 import { sanitizePrivateKey } from '@arbitrum/orbit-sdk/utils'
 
@@ -198,6 +200,58 @@ export const createNewTokenBridge = async (
     await txReceipt.getTokenBridgeContracts({
       parentChainPublicClient,
     })
+
+  // set weth gateway (only for eth-based chains)
+  if (nativeToken === constants.AddressZero) {
+    const setWethGatewayTxRequest =
+      await createTokenBridgePrepareSetWethGatewayTransactionRequest({
+        rollup: rollupAddress as Address,
+        parentChainPublicClient,
+        orbitChainPublicClient,
+        account: deployer.address,
+        retryableGasOverrides: {
+          gasLimit: {
+            percentIncrease: 200n,
+          },
+        },
+      })
+
+    // sign and send the transaction
+    const setWethGatewayTxHash =
+      await parentChainPublicClient.sendRawTransaction({
+        serializedTransaction: await deployer.signTransaction(
+          setWethGatewayTxRequest
+        ),
+      })
+
+    // get the transaction receipt after waiting for the transaction to complete
+    const setWethGatewayTxReceipt =
+      createTokenBridgePrepareSetWethGatewayTransactionReceipt(
+        await parentChainPublicClient.waitForTransactionReceipt({
+          hash: setWethGatewayTxHash,
+        })
+      )
+
+    console.log(
+      `Weth gateway set in tx ${setWethGatewayTxReceipt.transactionHash}`
+    )
+
+    // Wait for retryables to execute
+    console.log(`Waiting for retryables...`)
+    const orbitChainSetWethGatewayRetryableReceipt =
+      await setWethGatewayTxReceipt.waitForRetryables({
+        orbitPublicClient: orbitChainPublicClient,
+      })
+    console.log(
+      `Retryable #1: ${orbitChainSetWethGatewayRetryableReceipt[0].transactionHash}`
+    )
+    if (orbitChainSetWethGatewayRetryableReceipt[0].status !== 'success') {
+      console.error(
+        `Retryable status is not success: ${orbitChainSetWethGatewayRetryableReceipt[0].status}. The process will continue, but you'll have to register the Weth gateway later again.`
+      )
+    }
+    console.log(`Done!`)
+  }
 
   // fetch core contracts
   const createRollupTxHash = await createRollupFetchTransactionHash({
