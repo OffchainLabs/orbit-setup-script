@@ -167,7 +167,7 @@ async function main() {
       console.log(
         'Running l3Configuration script to configure your Orbit chain 📝📝📝📝📝'
       )
-      await l3Configuration(privateKey, L2_RPC_URL, L3_RPC_URL)
+      await l3Configuration(privateKey, L3_RPC_URL)
       rs.l3config = true
     }
     ////////////////////////////////

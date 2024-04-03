@@ -1,25 +1,62 @@
-import { abi as ArbOwner__abi } from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbOwner.sol/ArbOwner.json'
-import { abi as ArbGasInfo__abi } from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbGasInfo.sol/ArbGasInfo.json'
-import { ethers } from 'ethers'
 import { L3Config } from './l3ConfigType'
 import fs from 'fs'
+import { JsonRpcProvider } from '@ethersproject/providers'
+
+import { createPublicClient, defineChain, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+
+import { arbOwnerPublicActions } from '@arbitrum/orbit-sdk/dist/decorators/arbOwnerPublicActions'
+import { arbGasInfoPublicActions } from '@arbitrum/orbit-sdk/dist/decorators/arbGasInfoPublicActions'
+
+import { sanitizePrivateKey } from '@arbitrum/orbit-sdk/utils'
+
+function createPublicClientFromChainInfo({
+  id,
+  name,
+  rpcUrl,
+}: {
+  id: number
+  name: string
+  rpcUrl: string
+}) {
+  const chain = defineChain({
+    id: id,
+    network: name,
+    name: name,
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: {
+      default: {
+        http: [rpcUrl],
+      },
+      public: {
+        http: [rpcUrl],
+      },
+    },
+    testnet: true,
+  })
+  return createPublicClient({ chain, transport: http() })
+}
 
 export async function l3Configuration(
-  privateKey: string,
-  L2_RPC_URL: string,
-  L3_RPC_URL: string
+  baseChainDeployerKey: string,
+  childChainRpc: string
 ) {
-  if (!privateKey || !L2_RPC_URL || !L3_RPC_URL) {
+  if (!baseChainDeployerKey || !childChainRpc) {
     throw new Error('Required environment variable not found')
   }
 
-  // Generating providers from RPCs
-  const L2Provider = new ethers.providers.JsonRpcProvider(L2_RPC_URL)
-  const L3Provider = new ethers.providers.JsonRpcProvider(L3_RPC_URL)
+  const l2Provider = new JsonRpcProvider(childChainRpc)
+  const l2NetworkInfo = await l2Provider.getNetwork()
 
-  // Creating the wallet and signer
-  const l2signer = new ethers.Wallet(privateKey).connect(L2Provider)
-  const l3signer = new ethers.Wallet(privateKey).connect(L3Provider)
+  const deployer = privateKeyToAccount(sanitizePrivateKey(baseChainDeployerKey))
+
+  const orbitChainPublicClient = createPublicClientFromChainInfo({
+    id: l2NetworkInfo.chainId,
+    name: l2NetworkInfo.name,
+    rpcUrl: childChainRpc,
+  })
+    .extend(arbOwnerPublicActions)
+    .extend(arbGasInfoPublicActions)
 
   // Read the JSON configuration
   const configRaw = fs.readFileSync(
@@ -35,101 +72,147 @@ export async function l3Configuration(
   const chainOwner = config.chainOwner
 
   // Check if the Private Key provided is the chain owner:
-  if (l3signer.address !== chainOwner) {
+  if (deployer.address !== chainOwner) {
     throw new Error('The Private Key you have provided is not the chain owner')
   }
 
-  // ArbOwner precompile setup
-  const arbOwnerABI = ArbOwner__abi
-
-  // Arb Owner precompile address
-  const arbOwnerAddress = '0x0000000000000000000000000000000000000070'
-  const ArbOwner = new ethers.Contract(arbOwnerAddress, arbOwnerABI, l3signer)
-
   // Call the isChainOwner function and check the response
-  const isSignerChainOwner = await ArbOwner.isChainOwner(l3signer.address)
-  if (!isSignerChainOwner) {
+  const isOwnerInitially = await orbitChainPublicClient.arbOwnerReadContract({
+    functionName: 'isChainOwner',
+    args: [deployer.address],
+  })
+
+  // assert account is not already an owner
+  if (!isOwnerInitially) {
     throw new Error('The address you have provided is not the chain owner')
   }
 
-  // Set the network base fee
+  // Set the network base fee     setMinimumL2BaseFee    minL2BaseFee
   console.log('Setting the Minimum Base Fee for the Orbit chain')
-  const tx = await ArbOwner.setMinimumL2BaseFee(minL2BaseFee)
 
-  // Wait for the transaction to be mined
-  const receipt = await tx.wait()
-  console.log(
-    `Minimum Base Fee is set on the block number ${await receipt.blockNumber} on the Orbit chain`
-  )
+  const transactionRequest1 =
+    await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
+      functionName: 'setMinimumL2BaseFee',
+      args: [BigInt(minL2BaseFee)],
+      upgradeExecutor: false,
+      account: deployer.address,
+    })
 
-  // Check the status of the transaction: 1 is successful, 0 is failure
-  if (receipt.status === 0) {
-    throw new Error('Transaction failed, could not set the Minimum base fee')
+  // submit tx to update infra fee receiver
+  await orbitChainPublicClient.sendRawTransaction({
+    serializedTransaction: await deployer.signTransaction(transactionRequest1),
+  })
+
+  const networkFeeAccount = await orbitChainPublicClient.arbOwnerReadContract({
+    functionName: 'getNetworkFeeAccount',
+  })
+
+  if (networkFeeAccount === infrastructureFeeCollector) {
+    console.log('network fee receiver is set')
+  } else {
+    throw new Error(
+      'network fee receiver Setting network fee receiver transaction failed'
+    )
   }
 
   // Set the network fee receiver
-  console.log('Setting the  network fee receiver for the Orbit chain')
-  const tx2 = await ArbOwner.setNetworkFeeAccount(networkFeeReceiver)
+  const initialNetworkFeeReceiver =
+    await orbitChainPublicClient.arbOwnerReadContract({
+      functionName: 'getInfraFeeAccount',
+    })
 
-  // Wait for the transaction to be mined
-  const receipt2 = await tx2.wait()
-  console.log(
-    `network fee receiver is set on the block number ${await receipt2.blockNumber} on the Orbit chain`
-  )
+  // assert account is not already infra fee receiver
+  if (initialNetworkFeeReceiver !== networkFeeReceiver) {
+    throw new Error('The network fee receiver is set before')
+  }
 
-  // Check the status of the transaction: 1 is successful, 0 is failure
-  if (receipt2.status === 0) {
+  const transactionRequest2 =
+    await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
+      functionName: 'setNetworkFeeAccount',
+      args: [networkFeeReceiver],
+      upgradeExecutor: false,
+      account: deployer.address,
+    })
+
+  // submit tx to update infra fee receiver
+  await orbitChainPublicClient.sendRawTransaction({
+    serializedTransaction: await deployer.signTransaction(transactionRequest2),
+  })
+
+  const networkFeeRecieverAccount =
+    await orbitChainPublicClient.arbOwnerReadContract({
+      functionName: 'getNetworkFeeAccount',
+    })
+
+  if (networkFeeRecieverAccount === networkFeeReceiver) {
+    console.log('network fee receiver is set')
+  } else {
     throw new Error(
       'network fee receiver Setting network fee receiver transaction failed'
     )
   }
 
   // Set the infrastructure fee collector
-  console.log(
-    'Setting the infrastructure fee collector address for the Orbit chain'
-  )
-  const tx3 = await ArbOwner.setInfraFeeAccount(infrastructureFeeCollector)
+  const initialInfraFeeReceiver =
+    await orbitChainPublicClient.arbOwnerReadContract({
+      functionName: 'getInfraFeeAccount',
+    })
 
-  // Wait for the transaction to be mined
-  const receipt3 = await tx3.wait()
-  console.log(
-    `infrastructure fee collector address is set on the block number ${await receipt3.blockNumber} on the Orbit chain`
-  )
-
-  // Check the status of the transaction: 1 is successful, 0 is failure
-  if (receipt3.status === 0) {
+  // assert account is not already infra fee receiver
+  if (initialInfraFeeReceiver !== infrastructureFeeCollector) {
     throw new Error(
-      'Setting Set the infrastructure fee collector transaction failed'
+      'Setting Set the infrastructure fee collector is set before'
     )
   }
 
-  // Setting L1 basefee on L3
-  const arbGasInfoAbi = ArbGasInfo__abi
-  const arbGasInfoAddress = '0x000000000000000000000000000000000000006c'
-  const ArbOGasInfo = new ethers.Contract(
-    arbGasInfoAddress,
-    arbGasInfoAbi,
-    l2signer
-  )
+  const transactionRequest3 =
+    await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
+      functionName: 'setInfraFeeAccount',
+      args: [infrastructureFeeCollector],
+      upgradeExecutor: false,
+      account: deployer.address,
+    })
 
-  console.log('Getting L1 base fee estimate')
-  const l1BaseFeeEstimate = await ArbOGasInfo.getL1BaseFeeEstimate()
-  console.log(`L1 Base Fee estimate on L2 is ${l1BaseFeeEstimate.toNumber()}`)
-  const l2Basefee = await L2Provider.getGasPrice()
-  const totalGasPrice = await l1BaseFeeEstimate.add(l2Basefee)
-  console.log(`Setting L1 base fee estimate on L3 to ${totalGasPrice}`)
-  const tx4 = await ArbOwner.setL1PricePerUnit(totalGasPrice)
+  // submit tx to update infra fee receiver
+  await orbitChainPublicClient.sendRawTransaction({
+    serializedTransaction: await deployer.signTransaction(transactionRequest3),
+  })
 
-  // Wait for the transaction to be mined
-  const receipt4 = await tx4.wait()
-  console.log(
-    `L1 base fee estimate is set on the block number ${await receipt4.blockNumber} on the Orbit chain`
-  )
+  const infraFeeReceiver = await orbitChainPublicClient.arbOwnerReadContract({
+    functionName: 'getInfraFeeAccount',
+  })
 
   // Check the status of the transaction: 1 is successful, 0 is failure
-  if (receipt4.status === 0) {
-    throw new Error('Base Fee Setting failed')
+  if (infraFeeReceiver === infrastructureFeeCollector) {
+    console.log('Infra Fee Collector changed successfully')
+  } else {
+    throw new Error('Infra Fee Collector Setting transaction failed')
   }
+
+  // Setting L1 basefee on L3
+  console.log('Getting L1 base fee estimate')
+  const l1BaseFeeEstimate = await orbitChainPublicClient.arbGasInfoReadContract(
+    {
+      functionName: 'getL1BaseFeeEstimate',
+    }
+  )
+  console.log(`L1 Base Fee estimate on L2 is ${Number(l1BaseFeeEstimate)}`)
+  const l2Basefee = await l2Provider.getGasPrice()
+  const totalGasPrice = l2Basefee.add(l1BaseFeeEstimate)
+  console.log(`Setting L1 base fee estimate on L3 to ${totalGasPrice}`)
+
+  const transactionRequest4 =
+    await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
+      functionName: 'setL1PricePerUnit',
+      args: [BigInt(totalGasPrice.toString())],
+      upgradeExecutor: false,
+      account: deployer.address,
+    })
+
+  // submit tx to update infra fee receiver
+  await orbitChainPublicClient.sendRawTransaction({
+    serializedTransaction: await deployer.signTransaction(transactionRequest4),
+  })
 
   console.log('All things done! Enjoy your Orbit chain. LFG 🚀🚀🚀🚀')
 }
