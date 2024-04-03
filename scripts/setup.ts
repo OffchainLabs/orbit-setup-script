@@ -177,7 +177,7 @@ async function main() {
       console.log(
         'Transferring ownership on L3, from rollup owner to upgrade executor 🔃🔃🔃'
       )
-      await transferOwner(privateKey, L2Provider, L3Provider)
+      await transferOwner(privateKey, L2Provider, L3_RPC_URL)
       rs.transferOwnership = true
     }
   } catch (error) {
@@ -189,7 +189,6 @@ async function main() {
     )
   }
 }
-
 // Run the script
 main().catch(error => {
   console.error(error)

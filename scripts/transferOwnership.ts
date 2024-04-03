@@ -1,12 +1,41 @@
 import { ethers, Wallet } from 'ethers'
 import { JsonRpcProvider } from '@ethersproject/providers'
-import UpgradeExecutor from '@arbitrum/nitro-contracts/build/contracts/src/mocks/UpgradeExecutorMock.sol/UpgradeExecutorMock.json'
 
-import ArbOwner from '@arbitrum/nitro-contracts/build/contracts/src/precompiles/ArbOwner.sol/ArbOwner.json'
 import fs from 'fs'
 import { L3Config } from './l3ConfigType'
 import { TOKEN_BRIDGE_CREATOR_Arb_Sepolia } from './createTokenBridge'
 import L1AtomicTokenBridgeCreator from '@arbitrum/token-bridge-contracts/build/contracts/contracts/tokenbridge/ethereum/L1AtomicTokenBridgeCreator.sol/L1AtomicTokenBridgeCreator.json'
+import { arbOwnerPublicActions } from '@arbitrum/orbit-sdk/dist/decorators/arbOwnerPublicActions'
+import { createPublicClient, defineChain, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { sanitizePrivateKey } from '@arbitrum/orbit-sdk/utils'
+
+function createPublicClientFromChainInfo({
+  id,
+  name,
+  rpcUrl,
+}: {
+  id: number
+  name: string
+  rpcUrl: string
+}) {
+  const chain = defineChain({
+    id: id,
+    network: name,
+    name: name,
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: {
+      default: {
+        http: [rpcUrl],
+      },
+      public: {
+        http: [rpcUrl],
+      },
+    },
+    testnet: true,
+  })
+  return createPublicClient({ chain, transport: http() })
+}
 
 export const getSigner = (provider: JsonRpcProvider, key?: string) => {
   if (!key && !provider)
@@ -15,14 +44,14 @@ export const getSigner = (provider: JsonRpcProvider, key?: string) => {
   else return provider.getSigner(0)
 }
 
-const ARB_OWNER_ADDRESS = '0x0000000000000000000000000000000000000070'
 export async function transferOwner(
   privateKey: string,
   l2Provider: ethers.providers.JsonRpcProvider,
-  l3Provider: ethers.providers.JsonRpcProvider
+  childChainRpc: string
 ) {
   //Generating l2 and l3 deployer signers from privatekey and providers
-  const l3Deployer = getSigner(l3Provider, privateKey)
+  const deployer = privateKeyToAccount(sanitizePrivateKey(privateKey))
+
   //fetching chain id of parent chain
   const l2ChainId = (await l2Provider.getNetwork()).chainId
 
@@ -34,7 +63,12 @@ export async function transferOwner(
       'The Base Chain you have provided is not supported, please put RPC for Arb Sepolia'
     )
   }
-
+  const l2NetworkInfo = await l2Provider.getNetwork()
+  const orbitChainPublicClient = createPublicClientFromChainInfo({
+    id: l2NetworkInfo.chainId,
+    name: l2NetworkInfo.name,
+    rpcUrl: childChainRpc,
+  }).extend(arbOwnerPublicActions)
   // Read the JSON configuration
   const configRaw = fs.readFileSync(
     './config/orbitSetupScriptConfig.json',
@@ -55,41 +89,48 @@ export async function transferOwner(
     await l1TokenBridgeCreator.inboxToL2Deployment(config.inbox)
   ).upgradeExecutor
 
-  //Defining Arb Owner Precompile
-  const ArbOwner__factory = new ethers.Contract(
-    ARB_OWNER_ADDRESS,
-    ArbOwner.abi,
-    l3Deployer
-  )
-  const ArbOwnerContract = ArbOwner__factory.connect(l3Deployer)
   console.log('Adding Upgrade Executor contract to the chain owners')
-  const receipt1 = await (
-    await ArbOwnerContract.addChainOwner(executorContractAddress)
-  ).wait()
-  console.log(
-    'Executor has been added to chain owners on TX:',
-    receipt1.transactionHash
-  )
-  //Defining upgrade executor contract
-  const executorContract__factory = new ethers.Contract(
-    executorContractAddress,
-    UpgradeExecutor.abi,
-    l3Deployer
-  )
-  const upgradeExecutor = executorContract__factory.connect(l3Deployer)
-  //Constructing call data for removing rollup owner from chain owners on L3
-  const arbOwnerInterface = new ethers.utils.Interface(ArbOwner.abi)
-  const targetCallData = arbOwnerInterface.encodeFunctionData(
-    'removeChainOwner',
-    [await l3Deployer.getAddress()]
-  )
+  const transactionRequest1 =
+    await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
+      functionName: 'addChainOwner',
+      args: [executorContractAddress],
+      upgradeExecutor: false,
+      account: deployer.address,
+    })
 
-  console.log('Executing removeChainOwner through the UpgradeExecutor contract')
-  const receipt2 = await (
-    await upgradeExecutor.executeCall(ARB_OWNER_ADDRESS, targetCallData)
-  ).wait()
-  console.log(
-    'Transaction complete, rollup owner removed from chain owners on TX:',
-    receipt2.transactionHash
-  )
+  // submit tx to add chain owner
+  await orbitChainPublicClient.sendRawTransaction({
+    serializedTransaction: await deployer.signTransaction(transactionRequest1),
+  })
+
+  const isOwner = await orbitChainPublicClient.arbOwnerReadContract({
+    functionName: 'isChainOwner',
+    args: [executorContractAddress],
+  })
+
+  // assert account is now owner
+  if (isOwner) {
+    console.log('Executor has been added to chain owners')
+  }
+  // Removing deployer as chain owner
+  const transactionRequest2 =
+    await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
+      functionName: 'removeChainOwner',
+      args: [deployer.address],
+      upgradeExecutor: executorContractAddress,
+      account: deployer.address,
+    })
+
+  // submit tx to remove chain owner
+  await orbitChainPublicClient.sendRawTransaction({
+    serializedTransaction: await deployer.signTransaction(transactionRequest2),
+  })
+
+  const isOwner2 = await orbitChainPublicClient.arbOwnerReadContract({
+    functionName: 'isChainOwner',
+    args: [deployer.address],
+  })
+  if (!isOwner2) {
+    console.log('Executor has been added to chain owners')
+  }
 }
