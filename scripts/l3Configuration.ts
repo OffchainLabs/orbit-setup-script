@@ -87,7 +87,7 @@ export async function l3Configuration(
     throw new Error('The address you have provided is not the chain owner')
   }
 
-  // Set the network base fee     setMinimumL2BaseFee    minL2BaseFee
+  // Set the network base fee
   console.log('Setting the Minimum Base Fee for the Orbit chain')
 
   const transactionRequest1 =
@@ -98,6 +98,14 @@ export async function l3Configuration(
       account: deployer.address,
     })
 
+  const minL3BaseFee = await orbitChainPublicClient.arbGasInfoReadContract({
+    functionName: 'getMinimumGasPrice',
+  })
+  if (Number(minL3BaseFee) === minL2BaseFee) {
+    console.log('Minimum L3 base fee is set')
+  } else {
+    throw new Error('Failed to set Minimum L3 base fee')
+  }
   // submit tx to update infra fee receiver
   await orbitChainPublicClient.sendRawTransaction({
     serializedTransaction: await deployer.signTransaction(transactionRequest1),
