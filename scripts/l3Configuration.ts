@@ -97,7 +97,13 @@ export async function l3Configuration(
       upgradeExecutor: false,
       account: deployer.address,
     })
-
+  // submit tx to update infra fee receiver
+  const txHash1 = await orbitChainPublicClient.sendRawTransaction({
+    serializedTransaction: await deployer.signTransaction(transactionRequest1),
+  })
+  await orbitChainPublicClient.waitForTransactionReceipt({
+    hash: txHash1,
+  })
   const minL3BaseFee = await orbitChainPublicClient.arbGasInfoReadContract({
     functionName: 'getMinimumGasPrice',
   })
@@ -106,10 +112,6 @@ export async function l3Configuration(
   } else {
     throw new Error('Failed to set Minimum L3 base fee')
   }
-  // submit tx to update infra fee receiver
-  await orbitChainPublicClient.sendRawTransaction({
-    serializedTransaction: await deployer.signTransaction(transactionRequest1),
-  })
 
   const networkFeeAccount = await orbitChainPublicClient.arbOwnerReadContract({
     functionName: 'getNetworkFeeAccount',
@@ -143,10 +145,12 @@ export async function l3Configuration(
     })
 
   // submit tx to update infra fee receiver
-  await orbitChainPublicClient.sendRawTransaction({
+  const txHash2 = await orbitChainPublicClient.sendRawTransaction({
     serializedTransaction: await deployer.signTransaction(transactionRequest2),
   })
-
+  await orbitChainPublicClient.waitForTransactionReceipt({
+    hash: txHash2,
+  })
   const networkFeeRecieverAccount =
     await orbitChainPublicClient.arbOwnerReadContract({
       functionName: 'getNetworkFeeAccount',
@@ -182,10 +186,12 @@ export async function l3Configuration(
     })
 
   // submit tx to update infra fee receiver
-  await orbitChainPublicClient.sendRawTransaction({
+  const txHash3 = await orbitChainPublicClient.sendRawTransaction({
     serializedTransaction: await deployer.signTransaction(transactionRequest3),
   })
-
+  await orbitChainPublicClient.waitForTransactionReceipt({
+    hash: txHash3,
+  })
   const infraFeeReceiver = await orbitChainPublicClient.arbOwnerReadContract({
     functionName: 'getInfraFeeAccount',
   })
@@ -217,10 +223,12 @@ export async function l3Configuration(
       account: deployer.address,
     })
 
-  // submit tx to update infra fee receiver
-  await orbitChainPublicClient.sendRawTransaction({
+  // setting L1PricePerUnit
+  const txHash4 = await orbitChainPublicClient.sendRawTransaction({
     serializedTransaction: await deployer.signTransaction(transactionRequest4),
   })
-
+  await orbitChainPublicClient.waitForTransactionReceipt({
+    hash: txHash4,
+  })
   console.log('All things done! Enjoy your Orbit chain. LFG 🚀🚀🚀🚀')
 }
