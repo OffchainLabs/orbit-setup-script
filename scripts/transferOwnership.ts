@@ -99,19 +99,16 @@ export async function transferOwner(
     })
 
   // submit tx to add chain owner
-  await orbitChainPublicClient.sendRawTransaction({
+  const txHash1 = await orbitChainPublicClient.sendRawTransaction({
     serializedTransaction: await deployer.signTransaction(transactionRequest1),
   })
-
-  const isOwner = await orbitChainPublicClient.arbOwnerReadContract({
-    functionName: 'isChainOwner',
-    args: [executorContractAddress],
+  const txReceipt1 = await orbitChainPublicClient.waitForTransactionReceipt({
+    hash: txHash1,
   })
+  console.log(
+    `UpgradeExecutor account has been added to chain owners in ${txReceipt1.transactionHash}`
+  )
 
-  // assert account is now owner
-  if (isOwner) {
-    console.log('Executor has been added to chain owners')
-  }
   // Removing deployer as chain owner
   const transactionRequest2 =
     await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
@@ -122,15 +119,23 @@ export async function transferOwner(
     })
 
   // submit tx to remove chain owner
-  await orbitChainPublicClient.sendRawTransaction({
+  const txHash2 = await orbitChainPublicClient.sendRawTransaction({
     serializedTransaction: await deployer.signTransaction(transactionRequest2),
   })
+  const txReceipt2 = await orbitChainPublicClient.waitForTransactionReceipt({
+    hash: txHash2,
+  })
+  console.log(
+    `Deployer account removed from chain owners in ${txReceipt2.transactionHash}`
+  )
 
   const isOwner2 = await orbitChainPublicClient.arbOwnerReadContract({
     functionName: 'isChainOwner',
     args: [deployer.address],
   })
   if (!isOwner2) {
-    console.log('Executor has been added to chain owners')
+    console.log(
+      'UpgradeExecutor contract has been added to chain owners successfully'
+    )
   }
 }
