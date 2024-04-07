@@ -5,8 +5,8 @@ import { JsonRpcProvider } from '@ethersproject/providers'
 import { createPublicClient, defineChain, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
-import { arbOwnerPublicActions } from '@arbitrum/orbit-sdk/dist/decorators/arbOwnerPublicActions'
-import { arbGasInfoPublicActions } from '@arbitrum/orbit-sdk/dist/decorators/arbGasInfoPublicActions'
+import { arbOwnerPublicActions } from '@arbitrum/orbit-sdk'
+import { arbGasInfoPublicActions } from '@arbitrum/orbit-sdk'
 
 import { sanitizePrivateKey } from '@arbitrum/orbit-sdk/utils'
 
@@ -223,7 +223,7 @@ export async function l3Configuration(
       account: deployer.address,
     })
 
-  // setting L1PricePerUnit
+  // setting setL1PricePerUnit
   const txHash4 = await orbitChainPublicClient.sendRawTransaction({
     serializedTransaction: await deployer.signTransaction(transactionRequest4),
   })
