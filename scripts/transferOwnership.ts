@@ -47,6 +47,7 @@ export const getSigner = (provider: JsonRpcProvider, key?: string) => {
 export async function transferOwner(
   privateKey: string,
   l2Provider: ethers.providers.JsonRpcProvider,
+  l3Provider: ethers.providers.JsonRpcProvider,
   childChainRpc: string
 ) {
   //Generating l2 and l3 deployer signers from privatekey and providers
@@ -63,10 +64,10 @@ export async function transferOwner(
       'The Base Chain you have provided is not supported, please put RPC for Arb Sepolia'
     )
   }
-  const l2NetworkInfo = await l2Provider.getNetwork()
+  const l3NetworkInfo = await l3Provider.getNetwork()
   const orbitChainPublicClient = createPublicClientFromChainInfo({
-    id: l2NetworkInfo.chainId,
-    name: l2NetworkInfo.name,
+    id: l3NetworkInfo.chainId,
+    name: l3NetworkInfo.name,
     rpcUrl: childChainRpc,
   }).extend(arbOwnerPublicActions)
   // Read the JSON configuration
@@ -97,7 +98,6 @@ export async function transferOwner(
       upgradeExecutor: false,
       account: deployer.address,
     })
-
   // submit tx to add chain owner
   const txHash1 = await orbitChainPublicClient.sendRawTransaction({
     serializedTransaction: await deployer.signTransaction(transactionRequest1),

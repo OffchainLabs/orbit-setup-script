@@ -177,8 +177,9 @@ async function main() {
       console.log(
         'Transferring ownership on L3, from rollup owner to upgrade executor 🔃🔃🔃'
       )
-      await transferOwner(privateKey, L2Provider, L3_RPC_URL)
+      await transferOwner(privateKey, L2Provider, L3Provider, L3_RPC_URL)
       rs.transferOwnership = true
+      console.log('All things done! Enjoy your Orbit chain. LFG 🚀🚀🚀🚀')
     }
   } catch (error) {
     console.error('Error occurred:', error)

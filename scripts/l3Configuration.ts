@@ -67,7 +67,7 @@ export async function l3Configuration(
 
   // Reading params for L3 Configuration
   const minL2BaseFee = config.minL2BaseFee
-  const networkFeeReceiver = config.networkFeeReceiver
+  const networkFeeReceiver = config.networkFeeReceiver as `0x${string}`
   const infrastructureFeeCollector = config.infrastructureFeeCollector
   const chainOwner = config.chainOwner
 
@@ -125,17 +125,6 @@ export async function l3Configuration(
     )
   }
 
-  // Set the network fee receiver
-  const initialNetworkFeeReceiver =
-    await orbitChainPublicClient.arbOwnerReadContract({
-      functionName: 'getInfraFeeAccount',
-    })
-
-  // assert account is not already infra fee receiver
-  if (initialNetworkFeeReceiver !== networkFeeReceiver) {
-    throw new Error('The network fee receiver is set before')
-  }
-
   const transactionRequest2 =
     await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
       functionName: 'setNetworkFeeAccount',
@@ -161,19 +150,6 @@ export async function l3Configuration(
   } else {
     throw new Error(
       'network fee receiver Setting network fee receiver transaction failed'
-    )
-  }
-
-  // Set the infrastructure fee collector
-  const initialInfraFeeReceiver =
-    await orbitChainPublicClient.arbOwnerReadContract({
-      functionName: 'getInfraFeeAccount',
-    })
-
-  // assert account is not already infra fee receiver
-  if (initialInfraFeeReceiver !== infrastructureFeeCollector) {
-    throw new Error(
-      'Setting Set the infrastructure fee collector is set before'
     )
   }
 
@@ -230,5 +206,4 @@ export async function l3Configuration(
   await orbitChainPublicClient.waitForTransactionReceipt({
     hash: txHash4,
   })
-  console.log('All things done! Enjoy your Orbit chain. LFG 🚀🚀🚀🚀')
 }
