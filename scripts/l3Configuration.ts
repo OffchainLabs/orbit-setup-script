@@ -45,11 +45,14 @@ export async function l3Configuration(
     throw new Error('Required environment variable not found')
   }
 
+  // Generation parent chain provider and network
   const l2Provider = new JsonRpcProvider(childChainRpc)
   const l2NetworkInfo = await l2Provider.getNetwork()
 
+  //Generating deployer signer
   const deployer = privateKeyToAccount(sanitizePrivateKey(baseChainDeployerKey))
 
+  // Creating Orbit chain client with arb owner and arb gas info extension
   const orbitChainPublicClient = createPublicClientFromChainInfo({
     id: l2NetworkInfo.chainId,
     name: l2NetworkInfo.name,
@@ -68,7 +71,8 @@ export async function l3Configuration(
   // Reading params for L3 Configuration
   const minL2BaseFee = config.minL2BaseFee
   const networkFeeReceiver = config.networkFeeReceiver as `0x${string}`
-  const infrastructureFeeCollector = config.infrastructureFeeCollector
+  const infrastructureFeeCollector =
+    config.infrastructureFeeCollector as `0x${string}`
   const chainOwner = config.chainOwner
 
   // Check if the Private Key provided is the chain owner:
@@ -87,7 +91,7 @@ export async function l3Configuration(
     throw new Error('The address you have provided is not the chain owner')
   }
 
-  // Set the network base fee
+  // Set the child chain base fee
   console.log('Setting the Minimum Base Fee for the Orbit chain')
 
   const transactionRequest1 =
@@ -97,34 +101,25 @@ export async function l3Configuration(
       upgradeExecutor: false,
       account: deployer.address,
     })
-  // submit tx to update infra fee receiver
+  // submit tx to update minimum child chain base fee
   const txHash1 = await orbitChainPublicClient.sendRawTransaction({
     serializedTransaction: await deployer.signTransaction(transactionRequest1),
   })
   await orbitChainPublicClient.waitForTransactionReceipt({
     hash: txHash1,
   })
+  // Get the updated minL2Basefee from arbGasInfo precompile on child chain
   const minL3BaseFee = await orbitChainPublicClient.arbGasInfoReadContract({
     functionName: 'getMinimumGasPrice',
   })
+  // Check if minL2BaseFee param is set correctly
   if (Number(minL3BaseFee) === minL2BaseFee) {
     console.log('Minimum L3 base fee is set')
   } else {
     throw new Error('Failed to set Minimum L3 base fee')
   }
 
-  const networkFeeAccount = await orbitChainPublicClient.arbOwnerReadContract({
-    functionName: 'getNetworkFeeAccount',
-  })
-
-  if (networkFeeAccount === infrastructureFeeCollector) {
-    console.log('network fee receiver is set')
-  } else {
-    throw new Error(
-      'network fee receiver Setting network fee receiver transaction failed'
-    )
-  }
-
+  // Set the network fee account
   const transactionRequest2 =
     await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
       functionName: 'setNetworkFeeAccount',
@@ -140,6 +135,8 @@ export async function l3Configuration(
   await orbitChainPublicClient.waitForTransactionReceipt({
     hash: txHash2,
   })
+
+  // check if network fee account is updated correctly
   const networkFeeRecieverAccount =
     await orbitChainPublicClient.arbOwnerReadContract({
       functionName: 'getNetworkFeeAccount',
@@ -153,6 +150,7 @@ export async function l3Configuration(
     )
   }
 
+  // Set the infra fee account
   const transactionRequest3 =
     await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
       functionName: 'setInfraFeeAccount',
@@ -172,14 +170,14 @@ export async function l3Configuration(
     functionName: 'getInfraFeeAccount',
   })
 
-  // Check the status of the transaction: 1 is successful, 0 is failure
+  // check if infra fee account is updated correctly
   if (infraFeeReceiver === infrastructureFeeCollector) {
     console.log('Infra Fee Collector changed successfully')
   } else {
     throw new Error('Infra Fee Collector Setting transaction failed')
   }
 
-  // Setting L1 basefee on L3
+  // Setting L1 basefee estimate on L3
   console.log('Getting L1 base fee estimate')
   const l1BaseFeeEstimate = await orbitChainPublicClient.arbGasInfoReadContract(
     {

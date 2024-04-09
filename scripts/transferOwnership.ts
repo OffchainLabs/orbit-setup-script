@@ -50,7 +50,7 @@ export async function transferOwner(
   l3Provider: ethers.providers.JsonRpcProvider,
   childChainRpc: string
 ) {
-  //Generating l2 and l3 deployer signers from privatekey and providers
+  //Generating deployer signer
   const deployer = privateKeyToAccount(sanitizePrivateKey(privateKey))
 
   //fetching chain id of parent chain
@@ -65,6 +65,7 @@ export async function transferOwner(
     )
   }
   const l3NetworkInfo = await l3Provider.getNetwork()
+  // Creating Orbit chain client
   const orbitChainPublicClient = createPublicClientFromChainInfo({
     id: l3NetworkInfo.chainId,
     name: l3NetworkInfo.name,
@@ -129,6 +130,7 @@ export async function transferOwner(
     `Deployer account removed from chain owners in ${txReceipt2.transactionHash}`
   )
 
+  // Checking chain onwers to see if deployer account is removed
   const isOwner2 = await orbitChainPublicClient.arbOwnerReadContract({
     functionName: 'isChainOwner',
     args: [deployer.address],
