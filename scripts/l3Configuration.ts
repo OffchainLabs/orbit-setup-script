@@ -38,25 +38,27 @@ function createPublicClientFromChainInfo({
 }
 
 export async function l3Configuration(
-  baseChainDeployerKey: string,
-  childChainRpc: string
+  parentChainDeployerKey: string,
+  orbitChainRpc: string
 ) {
-  if (!baseChainDeployerKey || !childChainRpc) {
+  if (!parentChainDeployerKey || !orbitChainRpc) {
     throw new Error('Required environment variable not found')
   }
 
   // Generation parent chain provider and network
-  const l2Provider = new JsonRpcProvider(childChainRpc)
+  const l2Provider = new JsonRpcProvider(orbitChainRpc)
   const l2NetworkInfo = await l2Provider.getNetwork()
 
   //Generating deployer signer
-  const deployer = privateKeyToAccount(sanitizePrivateKey(baseChainDeployerKey))
+  const deployer = privateKeyToAccount(
+    sanitizePrivateKey(parentChainDeployerKey)
+  )
 
   // Creating Orbit chain client with arb owner and arb gas info extension
   const orbitChainPublicClient = createPublicClientFromChainInfo({
     id: l2NetworkInfo.chainId,
     name: l2NetworkInfo.name,
-    rpcUrl: childChainRpc,
+    rpcUrl: orbitChainRpc,
   })
     .extend(arbOwnerPublicActions)
     .extend(arbGasInfoPublicActions)
