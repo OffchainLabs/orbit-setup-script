@@ -70,8 +70,8 @@ export async function l3Configuration(
   )
   const config: L3Config = JSON.parse(configRaw)
 
-  // Reading params for L3 Configuration
-  const minL2BaseFee = config.minL2BaseFee
+  // Reading params for Configuration
+  const minOrbitChainBaseFee = config.minL2BaseFee
   const networkFeeReceiver = config.networkFeeReceiver as `0x${string}`
   const infrastructureFeeCollector =
     config.infrastructureFeeCollector as `0x${string}`
@@ -93,32 +93,33 @@ export async function l3Configuration(
     throw new Error('The address you have provided is not the chain owner')
   }
 
-  // Set the child chain base fee
+  // Set the orbit chain base fee
   console.log('Setting the Minimum Base Fee for the Orbit chain')
 
-  const setMinimumL2BaseFeeTransactionRequest =
+  const setMinimumBaseFeeTransactionRequest =
     await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
       functionName: 'setMinimumL2BaseFee',
-      args: [BigInt(minL2BaseFee)],
+      args: [BigInt(minOrbitChainBaseFee)],
       upgradeExecutor: false,
       account: deployer.address,
     })
   // submit tx to update minimum child chain base fee
-  const setMinimumL2BaseFeeTransactionHash =
+  const setMinimumBaseFeeTransactionHash =
     await orbitChainPublicClient.sendRawTransaction({
       serializedTransaction: await deployer.signTransaction(
-        setMinimumL2BaseFeeTransactionRequest
+        setMinimumBaseFeeTransactionRequest
       ),
     })
   await orbitChainPublicClient.waitForTransactionReceipt({
-    hash: setMinimumL2BaseFeeTransactionHash,
+    hash: setMinimumBaseFeeTransactionHash,
   })
-  // Get the updated minL2Basefee from arbGasInfo precompile on child chain
-  const minL3BaseFee = await orbitChainPublicClient.arbGasInfoReadContract({
-    functionName: 'getMinimumGasPrice',
-  })
-  // Check if minL2BaseFee param is set correctly
-  if (Number(minL3BaseFee) === minL2BaseFee) {
+  // Get the updated minimum basefee on orbit chain from arbGasInfo precompile on child chain
+  const minOrbitChainBaseFeeRead =
+    await orbitChainPublicClient.arbGasInfoReadContract({
+      functionName: 'getMinimumGasPrice',
+    })
+  // Check if minimum basefee param is set correctly on orbit chain
+  if (Number(minOrbitChainBaseFeeRead) === minOrbitChainBaseFee) {
     console.log('Minimum L3 base fee is set')
   } else {
     throw new Error('Failed to set Minimum L3 base fee')
