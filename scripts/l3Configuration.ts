@@ -96,7 +96,7 @@ export async function l3Configuration(
   // Set the child chain base fee
   console.log('Setting the Minimum Base Fee for the Orbit chain')
 
-  const transactionRequest1 =
+  const setMinimumL2BaseFeeTransactionRequest =
     await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
       functionName: 'setMinimumL2BaseFee',
       args: [BigInt(minL2BaseFee)],
@@ -104,11 +104,14 @@ export async function l3Configuration(
       account: deployer.address,
     })
   // submit tx to update minimum child chain base fee
-  const txHash1 = await orbitChainPublicClient.sendRawTransaction({
-    serializedTransaction: await deployer.signTransaction(transactionRequest1),
-  })
+  const setMinimumL2BaseFeeTransactionHash =
+    await orbitChainPublicClient.sendRawTransaction({
+      serializedTransaction: await deployer.signTransaction(
+        setMinimumL2BaseFeeTransactionRequest
+      ),
+    })
   await orbitChainPublicClient.waitForTransactionReceipt({
-    hash: txHash1,
+    hash: setMinimumL2BaseFeeTransactionHash,
   })
   // Get the updated minL2Basefee from arbGasInfo precompile on child chain
   const minL3BaseFee = await orbitChainPublicClient.arbGasInfoReadContract({
@@ -122,7 +125,7 @@ export async function l3Configuration(
   }
 
   // Set the network fee account
-  const transactionRequest2 =
+  const setNetworkFeeAccountTransactionRequest =
     await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
       functionName: 'setNetworkFeeAccount',
       args: [networkFeeReceiver],
@@ -131,11 +134,14 @@ export async function l3Configuration(
     })
 
   // submit tx to update infra fee receiver
-  const txHash2 = await orbitChainPublicClient.sendRawTransaction({
-    serializedTransaction: await deployer.signTransaction(transactionRequest2),
-  })
+  const setNetworkFeeAccountTransactionHash =
+    await orbitChainPublicClient.sendRawTransaction({
+      serializedTransaction: await deployer.signTransaction(
+        setNetworkFeeAccountTransactionRequest
+      ),
+    })
   await orbitChainPublicClient.waitForTransactionReceipt({
-    hash: txHash2,
+    hash: setNetworkFeeAccountTransactionHash,
   })
 
   // check if network fee account is updated correctly
@@ -153,7 +159,7 @@ export async function l3Configuration(
   }
 
   // Set the infra fee account
-  const transactionRequest3 =
+  const setInfraFeeAccountTransactionRequest =
     await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
       functionName: 'setInfraFeeAccount',
       args: [infrastructureFeeCollector],
@@ -162,11 +168,14 @@ export async function l3Configuration(
     })
 
   // submit tx to update infra fee receiver
-  const txHash3 = await orbitChainPublicClient.sendRawTransaction({
-    serializedTransaction: await deployer.signTransaction(transactionRequest3),
-  })
+  const setInfraFeeAccountTransactionHash =
+    await orbitChainPublicClient.sendRawTransaction({
+      serializedTransaction: await deployer.signTransaction(
+        setInfraFeeAccountTransactionRequest
+      ),
+    })
   await orbitChainPublicClient.waitForTransactionReceipt({
-    hash: txHash3,
+    hash: setInfraFeeAccountTransactionHash,
   })
   const infraFeeReceiver = await orbitChainPublicClient.arbOwnerReadContract({
     functionName: 'getInfraFeeAccount',
@@ -191,7 +200,7 @@ export async function l3Configuration(
   const totalGasPrice = l2Basefee.add(l1BaseFeeEstimate)
   console.log(`Setting L1 base fee estimate on L3 to ${totalGasPrice}`)
 
-  const transactionRequest4 =
+  const setL1PricePerUnitTransactionRequest =
     await orbitChainPublicClient.arbOwnerPrepareTransactionRequest({
       functionName: 'setL1PricePerUnit',
       args: [BigInt(totalGasPrice.toString())],
@@ -200,10 +209,13 @@ export async function l3Configuration(
     })
 
   // setting setL1PricePerUnit
-  const txHash4 = await orbitChainPublicClient.sendRawTransaction({
-    serializedTransaction: await deployer.signTransaction(transactionRequest4),
-  })
+  const setL1PricePerUnitTransactionHash =
+    await orbitChainPublicClient.sendRawTransaction({
+      serializedTransaction: await deployer.signTransaction(
+        setL1PricePerUnitTransactionRequest
+      ),
+    })
   await orbitChainPublicClient.waitForTransactionReceipt({
-    hash: txHash4,
+    hash: setL1PricePerUnitTransactionHash,
   })
 }
