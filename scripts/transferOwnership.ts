@@ -48,7 +48,7 @@ export async function transferOwner(
   privateKey: string,
   l2Provider: ethers.providers.JsonRpcProvider,
   l3Provider: ethers.providers.JsonRpcProvider,
-  childChainRpc: string
+  orbitChainRpc: string
 ) {
   //Generating deployer signer
   const deployer = privateKeyToAccount(sanitizePrivateKey(privateKey))
@@ -69,7 +69,7 @@ export async function transferOwner(
   const orbitChainPublicClient = createPublicClientFromChainInfo({
     id: l3NetworkInfo.chainId,
     name: l3NetworkInfo.name,
-    rpcUrl: childChainRpc,
+    rpcUrl: orbitChainRpc,
   }).extend(arbOwnerPublicActions)
   // Read the JSON configuration
   const configRaw = fs.readFileSync(
