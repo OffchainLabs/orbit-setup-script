@@ -325,17 +325,17 @@ export const createNewTokenBridge = async (
 }
 
 export const createERC20Bridge = async (
-  baseChainRpc: string,
-  baseChainDeployerKey: string,
-  childChainRpc: string,
+  parentChainRpc: string,
+  parentChainDeployerKey: string,
+  orbitChainRpc: string,
   rollupAddress: string
 ) => {
   console.log('Creating token bridge for rollup', rollupAddress)
 
   const { l1Network, l2Network } = await createNewTokenBridge(
-    baseChainRpc,
-    baseChainDeployerKey,
-    childChainRpc,
+    parentChainRpc,
+    parentChainDeployerKey,
+    orbitChainRpc,
     rollupAddress
   )
   const NETWORK_FILE = 'network.json'
