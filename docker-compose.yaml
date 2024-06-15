@@ -89,6 +89,8 @@ services:
     image: offchainlabs/nitro-node:v2.3.3-6a1c1a7
     ports:
       - "127.0.0.1:8449:8449"
+      - "127.0.0.1:9876:9876"
+      - "127.0.0.1:9877:9877"
     volumes:
       - "./config:/home/user/.arbitrum"
     command: --conf.file /home/user/.arbitrum/nodeConfig.json
@@ -100,6 +102,4 @@ services:
       - "./config:/home/user/.arbitrum"
       - "./das-server.sh:/das-server.sh"
       - "./das-data:/home/user/das-data"
-    ports:
-      - "9876:9876"
-      - "9877:9877"
+    network_mode: "service:nitro"
