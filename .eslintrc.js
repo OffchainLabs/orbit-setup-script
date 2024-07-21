@@ -7,7 +7,7 @@ module.exports = {
   plugins: ['prettier'],
   extends: [
     'eslint:recommended',
-    'plugin:prettier/recommended', // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
+    'plugin:prettier/recommended', // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors. Make sure this is always the last configuration in the extended array.
   ],
   parserOptions: {
     ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
@@ -21,7 +21,7 @@ module.exports = {
   },
   overrides: [
     {
-      // this config is run against test files (same as the one bellow but not limited to `src` folder)
+      // this config is run against test files (same as the one below but not limited to `src` folder)
       files: ['*.ts', '*.tsx'],
       parser: '@typescript-eslint/parser',
       extends: [
