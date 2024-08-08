@@ -6,6 +6,9 @@ import { createERC20Bridge } from './createTokenBridge'
 import { l3Configuration } from './l3Configuration'
 import { defaultRunTimeState, RuntimeState } from './runTimeState'
 import { transferOwner } from './transferOwnership'
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 // Delay function
 function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
