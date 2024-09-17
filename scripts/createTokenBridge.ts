@@ -1,8 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers'
 import {
-  L1Network,
-  L2Network,
-  constants as arbitrumSdkConstants,
+  ArbitrumNetwork,
 } from '@arbitrum/sdk'
 import { IERC20Bridge__factory } from '@arbitrum/sdk/dist/lib/abi/factories/IERC20Bridge__factory'
 import { RollupAdminLogic__factory } from '@arbitrum/sdk/dist/lib/abi/factories/RollupAdminLogic__factory'
@@ -265,9 +263,9 @@ export const createNewTokenBridge = async (
     })
   ).getCoreContracts()
 
-  const l1Network: L1Network = {
+  const l1Network = {
     blockTime: 10,
-    chainID: l1NetworkInfo.chainId,
+    chainId: l1NetworkInfo.chainId,
     explorerUrl: '',
     isCustom: true,
     name: l1NetworkInfo.name,
@@ -275,8 +273,8 @@ export const createNewTokenBridge = async (
     isArbitrum: false,
   }
 
-  const l2Network: L2Network = {
-    chainID: l2NetworkInfo.chainId,
+  const l2Network: ArbitrumNetwork = {
+    chainId: l2NetworkInfo.chainId,
     confirmPeriodBlocks: (await rollup.confirmPeriodBlocks()).toNumber(),
     ethBridge: {
       bridge: coreContracts.bridge,
@@ -285,35 +283,28 @@ export const createNewTokenBridge = async (
       rollup: rollup.address,
       sequencerInbox: coreContracts.sequencerInbox,
     },
-    explorerUrl: '',
-    isArbitrum: true,
     isCustom: true,
     name: 'OrbitChain',
-    partnerChainID: l1NetworkInfo.chainId,
-    partnerChainIDs: [],
+    parentChainId: l1NetworkInfo.chainId,
     retryableLifetimeSeconds: 7 * 24 * 60 * 60,
-    nitroGenesisBlock: 0,
-    nitroGenesisL1Block: 0,
-    depositTimeout: 900000,
     tokenBridge: {
-      l1CustomGateway: parentChainContracts.customGateway,
-      l1ERC20Gateway: parentChainContracts.standardGateway,
-      l1GatewayRouter: parentChainContracts.router,
-      l1MultiCall: parentChainContracts.multicall,
+      parentCustomGateway: parentChainContracts.customGateway,
+      parentErc20Gateway: parentChainContracts.standardGateway,
+      parentGatewayRouter: parentChainContracts.router,
+      parentMultiCall: parentChainContracts.multicall,
       // todo: fix
-      l1ProxyAdmin: constants.AddressZero,
-      l1Weth: parentChainContracts.weth,
-      l1WethGateway: parentChainContracts.wethGateway,
+      parentProxyAdmin: constants.AddressZero,
+      parentWeth: parentChainContracts.weth,
+      parentWethGateway: parentChainContracts.wethGateway,
 
-      l2CustomGateway: orbitChainContracts.customGateway,
-      l2ERC20Gateway: orbitChainContracts.standardGateway,
-      l2GatewayRouter: orbitChainContracts.router,
-      l2Multicall: orbitChainContracts.multicall,
-      l2ProxyAdmin: orbitChainContracts.proxyAdmin,
-      l2Weth: orbitChainContracts.weth,
-      l2WethGateway: orbitChainContracts.wethGateway,
+      childCustomGateway: orbitChainContracts.customGateway,
+      childErc20Gateway: orbitChainContracts.standardGateway,
+      childGatewayRouter: orbitChainContracts.router,
+      childMultiCall: orbitChainContracts.multicall,
+      childProxyAdmin: orbitChainContracts.proxyAdmin,
+      childWeth: orbitChainContracts.weth,
+      childWethGateway: orbitChainContracts.wethGateway,
     },
-    blockTime: arbitrumSdkConstants.ARB_MINIMUM_BLOCK_TIME_IN_SECONDS,
   }
 
   return {
@@ -378,22 +369,22 @@ export const createERC20Bridge = async (
 
     tokenBridgeContracts: {
       l2Contracts: {
-        customGateway: l2Network.tokenBridge.l1CustomGateway,
-        multicall: l2Network.tokenBridge.l1MultiCall,
-        proxyAdmin: l2Network.tokenBridge.l1ProxyAdmin,
-        router: l2Network.tokenBridge.l1GatewayRouter,
-        standardGateway: l2Network.tokenBridge.l1ERC20Gateway,
-        weth: l2Network.tokenBridge.l1Weth,
-        wethGateway: l2Network.tokenBridge.l1WethGateway,
+        customGateway: l2Network!.tokenBridge!.parentCustomGateway,
+        multicall: l2Network!.tokenBridge!.parentMultiCall,
+        proxyAdmin: l2Network!.tokenBridge!.parentProxyAdmin,
+        router: l2Network!.tokenBridge!.parentGatewayRouter,
+        standardGateway: l2Network!.tokenBridge!.parentErc20Gateway,
+        weth: l2Network!.tokenBridge!.parentWeth,
+        wethGateway: l2Network!.tokenBridge!.parentWethGateway,
       },
       l3Contracts: {
-        customGateway: l2Network.tokenBridge.l2CustomGateway,
-        multicall: l2Network.tokenBridge.l2Multicall,
-        proxyAdmin: l2Network.tokenBridge.l2ProxyAdmin,
-        router: l2Network.tokenBridge.l2GatewayRouter,
-        standardGateway: l2Network.tokenBridge.l2ERC20Gateway,
-        weth: l2Network.tokenBridge.l2Weth,
-        wethGateway: l2Network.tokenBridge.l2WethGateway,
+        customGateway: l2Network!.tokenBridge!.childCustomGateway,
+        multicall: l2Network!.tokenBridge!.childMultiCall,
+        proxyAdmin: l2Network!.tokenBridge!.childProxyAdmin,
+        router: l2Network!.tokenBridge!.childGatewayRouter,
+        standardGateway: l2Network!.tokenBridge!.childErc20Gateway,
+        weth: l2Network!.tokenBridge!.childWeth,
+        wethGateway: l2Network!.tokenBridge!.childWethGateway,
       },
     },
   }

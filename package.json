@@ -2,12 +2,12 @@
   "name": "orbit-setup-script",
   "dependencies": {
     "@arbitrum/nitro-contracts": "^1.1.1",
-    "@arbitrum/orbit-sdk": "^0.8.0",
+    "@arbitrum/orbit-sdk": "^0.17.1",
     "@arbitrum/token-bridge-contracts": "^1.2.1",
     "viem": "^1.20.0"
   },
   "devDependencies": {
-    "@arbitrum/sdk": "^3.2.0",
+    "@arbitrum/sdk": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^5.14.0",
     "@typescript-eslint/eslint-plugin-tslint": "^5.27.1",
     "@typescript-eslint/parser": "^5.14.0",
