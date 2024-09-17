@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   backend:
-    image: blockscout/${DOCKER_REPO:-blockscout}:${DOCKER_TAG:-6.0.0}
+    image: blockscout/${DOCKER_REPO:-blockscout-arbitrum}:${DOCKER_TAG:-6.5.0}
     pull_policy: always
     restart: always
     stop_grace_period: 5m

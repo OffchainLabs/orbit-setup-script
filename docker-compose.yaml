@@ -28,6 +28,7 @@ services:
     links:
       - db:database
     environment:
+        CHAIN_TYPE: "arbitrum"
         ETHEREUM_JSONRPC_HTTP_URL: http://nitro:8449/
         ETHEREUM_JSONRPC_TRACE_URL: http://nitro:8449/
         INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: "true"
