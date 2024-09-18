@@ -1,5 +1,8 @@
 # orbit-setup-script
 
+> [!CAUTION]
+> **This repository and the scripts within are not meant for production use!**
+ 
 These scripts will help you fund newly generated batch-poster and validator addresses, configure an Orbit chain, and deploy bridge contracts on both L2 and L3 chains.
 
 ## Instructions
