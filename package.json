@@ -25,6 +25,7 @@
   "scripts": {
     "setup": "ts-node scripts/setup.ts",
     "deposit": "ts-node scripts/chargeEthOrErc20.ts",
+    "refund": "ts-node scripts/refundWallets.ts",
     "format": "prettier './**/*.{js,json,md,ts,yml}' '!./src/lib/abi' --write && yarn run lint --fix",
     "lint": "eslint ."
   }
