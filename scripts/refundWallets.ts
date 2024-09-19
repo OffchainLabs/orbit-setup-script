@@ -33,7 +33,7 @@ async function refundWallets(targetAddress: string) {
   ]
 
   for (const wallet of wallets) {
-    if (wallet.address === targetAddress) {
+    if (wallet.address.toLowerCase() === targetAddress.toLowerCase()) {
       console.log(`Skipping ${wallet.address} as it's the refund target`)
       continue
     }
