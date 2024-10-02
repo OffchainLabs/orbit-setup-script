@@ -86,7 +86,7 @@ services:
       service: proxy
 
   nitro:
-    image: offchainlabs/nitro-node:v3.1.2-309340a
+    image: offchainlabs/nitro-node:v3.2.1-d81324d
     ports:
       - "127.0.0.1:8449:8449"
     volumes:
@@ -94,7 +94,7 @@ services:
     command: --conf.file /home/user/.arbitrum/nodeConfig.json
 
   das-server:
-    image: offchainlabs/nitro-node:v3.1.2-309340a
+    image: offchainlabs/nitro-node:v3.2.1-d81324d
     entrypoint: [ "/bin/bash", "/das-server.sh" ]
     volumes:
       - "./config:/home/user/.arbitrum"
