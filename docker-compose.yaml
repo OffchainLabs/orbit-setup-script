@@ -93,6 +93,13 @@ services:
       - "./config:/home/user/.arbitrum"
     command: --conf.file /home/user/.arbitrum/nodeConfig.json
 
+  smart-contract-verifier:
+    extends:
+      file: ./docker-compose/services/smart-contract-verifier.yml
+      service: smart-contract-verifier
+    ports:
+      - "127.0.0.1:8050:8050"
+
   das-server:
     image: offchainlabs/nitro-node:v3.2.1-d81324d
     entrypoint: [ "/bin/bash", "/das-server.sh" ]
