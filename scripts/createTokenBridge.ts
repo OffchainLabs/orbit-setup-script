@@ -91,30 +91,32 @@ async function getNativeToken({
  * @returns
  */
 export const createNewTokenBridge = async (
-  baseChainRpc: string,
-  baseChainDeployerKey: string,
-  childChainRpc: string,
+  parentChainRpc: string,
+  parentChainDeployerKey: string,
+  orbitChainRpc: string,
   rollupAddress: string
 ) => {
-  const l1Provider = new JsonRpcProvider(baseChainRpc)
+  const l1Provider = new JsonRpcProvider(parentChainRpc)
   const l1NetworkInfo = await l1Provider.getNetwork()
 
-  const l2Provider = new JsonRpcProvider(childChainRpc)
+  const l2Provider = new JsonRpcProvider(orbitChainRpc)
   const l2NetworkInfo = await l2Provider.getNetwork()
 
-  const deployer = privateKeyToAccount(sanitizePrivateKey(baseChainDeployerKey))
+  const deployer = privateKeyToAccount(
+    sanitizePrivateKey(parentChainDeployerKey)
+  )
   const rollup = RollupAdminLogic__factory.connect(rollupAddress, l1Provider)
 
   const parentChainPublicClient = createPublicClientFromChainInfo({
     id: l1NetworkInfo.chainId,
     name: l1NetworkInfo.name,
-    rpcUrl: baseChainRpc,
+    rpcUrl: parentChainRpc,
   })
 
   const orbitChainPublicClient = createPublicClientFromChainInfo({
     id: l2NetworkInfo.chainId,
     name: l2NetworkInfo.name,
-    rpcUrl: childChainRpc,
+    rpcUrl: orbitChainRpc,
   })
 
   const nativeToken = await getNativeToken({
@@ -323,17 +325,17 @@ export const createNewTokenBridge = async (
 }
 
 export const createERC20Bridge = async (
-  baseChainRpc: string,
-  baseChainDeployerKey: string,
-  childChainRpc: string,
+  parentChainRpc: string,
+  parentChainDeployerKey: string,
+  orbitChainRpc: string,
   rollupAddress: string
 ) => {
   console.log('Creating token bridge for rollup', rollupAddress)
 
   const { l1Network, l2Network } = await createNewTokenBridge(
-    baseChainRpc,
-    baseChainDeployerKey,
-    childChainRpc,
+    parentChainRpc,
+    parentChainDeployerKey,
+    orbitChainRpc,
     rollupAddress
   )
   const NETWORK_FILE = 'network.json'

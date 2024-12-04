@@ -167,7 +167,7 @@ async function main() {
       console.log(
         'Running l3Configuration script to configure your Orbit chain 📝📝📝📝📝'
       )
-      await l3Configuration(privateKey, L2_RPC_URL, L3_RPC_URL)
+      await l3Configuration(privateKey, L3_RPC_URL)
       rs.l3config = true
     }
     ////////////////////////////////
@@ -177,8 +177,9 @@ async function main() {
       console.log(
         'Transferring ownership on L3, from rollup owner to upgrade executor 🔃🔃🔃'
       )
-      await transferOwner(privateKey, L2Provider, L3Provider)
+      await transferOwner(privateKey, L2Provider, L3Provider, L3_RPC_URL)
       rs.transferOwnership = true
+      console.log('All things done! Enjoy your Orbit chain. LFG 🚀🚀🚀🚀')
     }
   } catch (error) {
     console.error('Error occurred:', error)
@@ -189,7 +190,6 @@ async function main() {
     )
   }
 }
-
 // Run the script
 main().catch(error => {
   console.error(error)
