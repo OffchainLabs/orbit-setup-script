@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 import { ERC20__factory } from '@arbitrum/sdk/dist/lib/abi/factories/ERC20__factory'
 import fs from 'fs'
 
@@ -58,14 +58,13 @@ async function main() {
       depositEthInterface,
       l2Signer
     )
-    // deposit 0.4 ETH
     const tx = await contract.depositEth({
-      value: ethers.utils.parseEther('0.4'),
+      value: ethers.BigNumber.from(ethers.utils.parseEther(amount)),
     })
     console.log('Transaction hash on parent chain: ', tx.hash)
     await tx.wait()
     console.log('Transaction has been mined')
-    console.log('0.4 ETHs are deposited to your account')
+    console.log(amount + ' ETHs are deposited to your account')
   } else {
     const nativeTokenContract = ERC20__factory.connect(nativeToken, l2Provider)
     const decimals = await nativeTokenContract.decimals()
