@@ -171,7 +171,7 @@ async function main() {
       rs.l3config = true
     }
     ////////////////////////////////
-    /// Transfering ownership /////
+    /// Transferring ownership /////
     //////////////////////////////
     if (!rs.transferOwnership) {
       console.log(
