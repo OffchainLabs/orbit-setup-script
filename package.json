@@ -2,7 +2,7 @@
   "name": "orbit-setup-script",
   "dependencies": {
     "@arbitrum/nitro-contracts": "^1.1.1",
-    "@arbitrum/orbit-sdk": "^0.8.0",
+    "@arbitrum/orbit-sdk": "^0.9.0",
     "@arbitrum/token-bridge-contracts": "^1.2.1",
     "viem": "^1.20.0"
   },
